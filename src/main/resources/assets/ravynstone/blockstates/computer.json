@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "ravynstone:block/computer", "uvlock": true },
+    "facing=east":  { "model": "ravynstone:block/computer", "y":  90, "uvlock": true },
+    "facing=south": { "model": "ravynstone:block/computer", "y": 180, "uvlock": true },
+    "facing=west":  { "model": "ravynstone:block/computer", "y": 270, "uvlock": true }
+  }
+}
