@@ -85,6 +85,7 @@ public class Processor {
                 Impl.ora(peekM(pc1()));
                 break;
             case 0x06: // *asl zp
+                Impl.asl(peekM(pc1()));
                 break;
             case 0x08: // php
                 push1(packFlags());
@@ -925,5 +926,12 @@ public class Processor {
         void sep(int data) {setFlags(packFlags() | data);}
         void rep(int data) {setFlags(packFlags() & (~data));}
 
+        int asl(int s) {
+            int i = s;
+            FlagC = ((i & negM()) > 0);
+            i = (i << 1) & maskM();
+            sNZ(i);
+            return i;
+        }
     }
 }
