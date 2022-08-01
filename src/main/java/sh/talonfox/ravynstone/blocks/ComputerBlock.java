@@ -11,6 +11,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 
+import javax.annotation.Nullable;
+
 public class ComputerBlock extends BlockWithEntity implements BlockEntityProvider {
     public ComputerBlock(Settings settings) {
         super(settings);
@@ -38,7 +40,8 @@ public class ComputerBlock extends BlockWithEntity implements BlockEntityProvide
     }
 
     @Override
+    @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return checkType(type, BlockRegister.RAVYN_COMPUTER_ENTITY, ComputerBlockEntity::tick);
+        return world.isClient() ? null : checkType(type, BlockRegister.RAVYN_COMPUTER_ENTITY, ComputerBlockEntity::tick);
     }
 }
