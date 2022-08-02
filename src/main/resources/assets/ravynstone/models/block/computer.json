@@ -4,7 +4,7 @@
     "particle": "ravynstone:block/ravyn_computer_side",
     "top": "ravynstone:block/ravyn_computer_side",
     "bottom": "ravynstone:block/ravyn_computer_bottom",
-    "front": "ravynstone:block/ravyn_computer_front",
+    "front": "ravynstone:block/ravyn_computer_front_a",
     "back": "ravynstone:block/ravyn_computer_side",
     "side": "ravynstone:block/ravyn_computer_side"
   }
