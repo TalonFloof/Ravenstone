@@ -13,7 +13,7 @@ public class Processor {
     public short I = 0;
     public short X = 0;
     public short Y = 0;
-    public short PC = 0x400;
+    public short PC = 0x0;
     public short SP = 0x1ff;
     public short RP = 0x2ff;
     public Boolean FlagC = false;
@@ -56,7 +56,15 @@ public class Processor {
         FlagE = true;
         SP = 0x1ff;
         RP = 0x2ff;
-        PC = 0x400;
+        //PC = 0x400;
+        PC = 0;
+        ResetAddr = 0x400;
+        BrkAddr = 0x2000;
+        Stop = true;
+        Wait = false;
+        Error = false;
+        BusEnabled = false;
+        BusOffset = 0;
     }
     public void next() {
         Stop = false;

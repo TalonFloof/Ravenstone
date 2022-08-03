@@ -25,9 +25,16 @@ public class ComputerUI extends Screen {
     private static final Identifier TEXTURE = new Identifier("ravynstone", "textures/gui/ravyn_computer.png");
     private ComputerBlockEntity BlockEntity;
     private short SwitchInput = 0;
+    private Boolean Reset = false;
+    private Boolean SingleStep = false;
+    private Boolean Advance = false;
+    private Boolean Examine = false;
+    private Boolean Deposit = false;
+    private byte RAMValue = 0;
     public ComputerUI(MutableText title, ComputerBlockEntity blockEntity) {
         super(title);
         BlockEntity = blockEntity;
+        RAMValue = BlockEntity.memRead(BlockEntity.CPU.PC);
     }
 
     public void drawBackground(MatrixStack matrices, float delta) {
@@ -42,27 +49,56 @@ public class ComputerUI extends Screen {
         int valLedX = (width - 96) / 2;
         int y = Math.round((height + 217.0F) / 2.0F)-36-16;
         int pc = Short.toUnsignedInt(BlockEntity.CPU.PC);
-        int val = Byte.toUnsignedInt(BlockEntity.PCMemoryValue);
+        int val = Byte.toUnsignedInt(RAMValue);
         for(int i = 0; i < 16; i++) {
             drawTexture(matrices,ledX + ((15 - i) * 12),y-20,12,10,0.0F,163.0F,12,10,256,256);
             if(i < 8)
                 drawTexture(matrices,valLedX + ((7 - i) * 12),y-35,12,10,0.0F,163.0F,12,10,256,256);
-            if((pc&(1<<i))!=0&&BlockEntity.Powered)
+            if((((pc&(1<<i))!=0)||Reset)&&BlockEntity.Powered)
                 drawTexture(matrices,ledX + ((15 - i) * 12) + 2,y-19,8,8,12.0F,163.0F,8,8,256,256);
             if(i < 8)
-                if((val&(1<<i))!=0&&BlockEntity.Powered)
+                if((((val&(1<<i))!=0)||Reset)&&BlockEntity.Powered)
                     drawTexture(matrices,valLedX + ((7 - i) * 12) + 2,y-34,8,8,12.0F,163.0F,8,8,256,256);
             drawTexture(matrices,x + ((15 - i) * 16), y, 16, 36, (((i % 6) < 3)?0.0F:16.0F)+((SwitchInput&(1<<i))!=0?8F:0F), 145.0F, 8, 18, 256, 256);
         }
     }
     public void renderTopSwitches(MatrixStack matrices, float delta) {
-
+        int x = (width - 340) / 2;
+        int y = (height - 217) / 2;
+        drawTexture(matrices,x+16,y+16,16,36,48F+(!BlockEntity.CPU.Stop?8F:0F),145.0F,8,18,256,256);
+        drawTexture(matrices,x+16+(16),y+16,16,36,32F+(SingleStep?8F:0F),145.0F,8,18,256,256);
+        drawTexture(matrices,x+16+(16*2),y+16,16,36,Reset?8F:0F,145.0F,8,18,256,256);
+        drawTexture(matrices,x+16+(16*3),y+16,16,36,16+(Advance?8F:0F),145.0F,8,18,256,256);
+        drawTexture(matrices,x+16+(16*4),y+16,16,36,16+(Examine?8F:0F),145.0F,8,18,256,256);
+        drawTexture(matrices,x+16+(16*5),y+16,16,36,16+(Deposit?8F:0F),145.0F,8,18,256,256);
     }
     public void drawTooltip(MatrixStack matrices, float delta, int mouseX, int mouseY) {
+        int x = (width - 340) / 2;
+        int y = (height - 217) / 2;
         int addrX = (width - 256) / 2;
-        int addrY = Math.round((height + 217.0F) / 2.0F)-36-16;
-        if(mouseX >= addrX && mouseX <= addrX+(16*16) && mouseY >= addrY && mouseY <= addrY+36) {
-            renderTooltip(matrices, List.of(Text.of(Integer.toString(Short.toUnsignedInt(SwitchInput))),Text.of("0x"+Integer.toHexString(Short.toUnsignedInt(SwitchInput))),Text.of("0o"+Integer.toOctalString(Short.toUnsignedInt(SwitchInput)))),mouseX,mouseY);
+        int addrY = Math.round((height + 217.0F) / 2.0F) - 36 - 16;
+        int ledX = (width - 192) / 2;
+        int valLedX = (width - 96) / 2;
+        if (mouseX >= addrX && mouseX <= addrX + (16 * 16) && mouseY >= addrY && mouseY <= addrY + 36) {
+            renderTooltip(matrices, List.of(Text.of(Integer.toString(Short.toUnsignedInt(SwitchInput))), Text.of("0x" + Integer.toHexString(Short.toUnsignedInt(SwitchInput))), Text.of("0o" + Integer.toOctalString(Short.toUnsignedInt(SwitchInput)))), mouseX, mouseY);
+        } else if (mouseX >= ledX && mouseX <= ledX + (16 * 12) && mouseY >= addrY - 20 && mouseY <= addrY - 10 && BlockEntity.Powered) {
+            renderTooltip(matrices, List.of(Text.of("Program Counter"), Text.of(Integer.toString(Short.toUnsignedInt(BlockEntity.CPU.PC))), Text.of("0x" + Integer.toHexString(Short.toUnsignedInt(BlockEntity.CPU.PC))), Text.of("0o" + Integer.toOctalString(Short.toUnsignedInt(BlockEntity.CPU.PC)))), mouseX, mouseY);
+        } else if (mouseX >= valLedX && mouseX <= valLedX + (8 * 12) && mouseY >= addrY - 35 && mouseY <= addrY - 25 && BlockEntity.Powered) {
+            renderTooltip(matrices, List.of(Text.of("Data"), Text.of(Integer.toString(Byte.toUnsignedInt(RAMValue))), Text.of("0x" + Integer.toHexString(Byte.toUnsignedInt(RAMValue))), Text.of("0o" + Integer.toOctalString(Byte.toUnsignedInt(RAMValue)))), mouseX, mouseY);
+        } else if (mouseX >= x + 340 - 32 && mouseX <= x + 340 - 16 && mouseY >= y + 64 && mouseY <= y + 64 + 36) {
+            renderTooltip(matrices, Text.of("Power"), mouseX, mouseY);
+        } else if (mouseX >= x + 16 && mouseX <= x + 16 + 16 && mouseY >= y + 16 && mouseY <= y + 16 + 36) {
+            renderTooltip(matrices, Text.of("Run/Stop"), mouseX, mouseY);
+        } else if(mouseX >= x+16+16 && mouseX <= x+16+16+16 && mouseY >= y+16 && mouseY <= y+16+36) {
+            renderTooltip(matrices, Text.of("Step"),mouseX,mouseY);
+        } else if(mouseX >= x+16+(16*2) && mouseX <= x+16+(16*2)+16 && mouseY >= y+16 && mouseY <= y+16+36) {
+            renderTooltip(matrices, Text.of("Reset"),mouseX,mouseY);
+        } else if(mouseX >= x+16+(16*3) && mouseX <= x+16+(16*3)+16 && mouseY >= y+16 && mouseY <= y+16+36) {
+            renderTooltip(matrices, List.of(Text.of("Increment PC after"),Text.of("Deposit/Examine")),mouseX,mouseY);
+        } else if(mouseX >= x+16+(16*4) && mouseX <= x+16+(16*4)+16 && mouseY >= y+16 && mouseY <= y+16+36) {
+            renderTooltip(matrices, Text.of("Examine"),mouseX,mouseY);
+        } else if(mouseX >= x+16+(16*5) && mouseX <= x+16+(16*5)+16 && mouseY >= y+16 && mouseY <= y+16+36) {
+            renderTooltip(matrices, Text.of("Deposit"),mouseX,mouseY);
         }
     }
 
@@ -80,6 +116,7 @@ public class ComputerUI extends Screen {
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
         drawBackground(matrices,delta);
         renderAddress(matrices);
+        renderTopSwitches(matrices,delta);
         //////////////////////////////////////////////////
         drawTooltip(matrices, delta, mouseX, mouseY);
     }
@@ -100,7 +137,6 @@ public class ComputerUI extends Screen {
                 }
             }
         } else if(mouseX >= (bgrX+340-32) && mouseX <= (bgrX+340-32)+16 && mouseY >= bgrY+64 && mouseY <= bgrY+64+36) {
-            var state = BlockEntity.getCachedState();
             BlockEntity.Powered = !BlockEntity.Powered;
             if(BlockEntity.Powered) {
                 var rand = new Random();
@@ -125,14 +161,79 @@ public class ComputerUI extends Screen {
                 BlockEntity.CPU.FlagE = rand.nextBoolean();
                 BlockEntity.CPU.ResetAddr = (short)rand.nextInt();
                 BlockEntity.CPU.BrkAddr = (short)rand.nextInt();
-                BlockEntity.CPU.BusOffset = rand.nextInt() & 0xFFFF;
+                BlockEntity.CPU.BusOffset = rand.nextInt() & 0xFF;
                 BlockEntity.CPU.BusEnabled = rand.nextBoolean();
                 BlockEntity.CPU.Error = rand.nextBoolean();
+                RAMValue = (byte)rand.nextInt();
+                rand.nextBytes(BlockEntity.RAM);
             }
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeBlockPos(BlockEntity.getPos());
             buf.writeNbt(BlockEntity.createNbt());
             ClientPlayNetworking.send(ComputerPackets.COMPUTER_C2S_SYNC_ID,buf);
+        } else if(mouseX >= bgrX+16+(16) && mouseX <= bgrX+16+(16)+16 && mouseY >= bgrY+16 && mouseY <= bgrY+16+36) {
+            SingleStep = true;
+        } else if(mouseX >= bgrX+16+(16*2) && mouseX <= bgrX+16+(16*2)+16 && mouseY >= bgrY+16 && mouseY <= bgrY+16+36) {
+            Reset = true;
+        } else if(mouseX >= bgrX+16+(16*3) && mouseX <= bgrX+16+(16*3)+16 && mouseY >= bgrY+16 && mouseY <= bgrY+16+36) {
+            Advance = !Advance;
+        } else if(mouseX >= bgrX+16+(16*4) && mouseX <= bgrX+16+(16*4)+16 && mouseY >= bgrY+16 && mouseY <= bgrY+16+36) {
+            Examine = true;
+        } else if(mouseX >= bgrX+16+(16*5) && mouseX <= bgrX+16+(16*5)+16 && mouseY >= bgrY+16 && mouseY <= bgrY+16+36) {
+            Deposit = true;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        if(Reset) {
+            if(BlockEntity.Powered) {
+                BlockEntity.CPU.reset();
+                RAMValue = BlockEntity.memRead(BlockEntity.CPU.PC);
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeBlockPos(BlockEntity.getPos());
+                buf.writeNbt(BlockEntity.createNbt());
+                ClientPlayNetworking.send(ComputerPackets.COMPUTER_C2S_SYNC_ID, buf);
+            }
+            Reset = false;
+        }
+        if(Examine) {
+            if(BlockEntity.Powered) {
+                if (Advance) {
+                    BlockEntity.CPU.PC += 1;
+                } else {
+                    BlockEntity.CPU.PC = SwitchInput;
+                }
+                RAMValue = BlockEntity.memRead(BlockEntity.CPU.PC);
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeBlockPos(BlockEntity.getPos());
+                buf.writeNbt(BlockEntity.createNbt());
+                ClientPlayNetworking.send(ComputerPackets.COMPUTER_C2S_SYNC_ID, buf);
+            }
+            Examine = false;
+        }
+        if(Deposit) {
+            if(BlockEntity.Powered) {
+                BlockEntity.memStore(BlockEntity.CPU.PC, (byte) SwitchInput);
+                RAMValue = BlockEntity.memRead(BlockEntity.CPU.PC);
+                if (Advance) {
+                    BlockEntity.CPU.PC += 1;
+                }
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeBlockPos(BlockEntity.getPos());
+                buf.writeNbt(BlockEntity.createNbt());
+                ClientPlayNetworking.send(ComputerPackets.COMPUTER_C2S_SYNC_ID, buf);
+            }
+            Deposit = false;
+        }
+        if(SingleStep) {
+            if(BlockEntity.Powered) {
+                PacketByteBuf buf = PacketByteBufs.create();
+                buf.writeBlockPos(BlockEntity.getPos());
+                ClientPlayNetworking.send(ComputerPackets.COMPUTER_STEP_ID, buf);
+            }
+            SingleStep = false;
         }
         return true;
     }

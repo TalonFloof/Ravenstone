@@ -12,6 +12,7 @@ import sh.talonfox.ravynstone.blocks.ComputerBlockEntity;
 
 public class ComputerPackets {
     public static final Identifier COMPUTER_C2S_SYNC_ID = new Identifier("ravynstone", "computer_c2s_sync");
+    public static final Identifier COMPUTER_STEP_ID = new Identifier("ravynstone", "computer_step");
     public static void ComputerC2SSyncReceiver(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         BlockPos target = buf.readBlockPos();
         NbtCompound new_data = buf.readNbt();
@@ -20,6 +21,16 @@ public class ComputerPackets {
             assert new_data != null;
             assert blockEntity != null;
             blockEntity.readNbt(new_data);
+            blockEntity.markDirty();
+        });
+    }
+    public static void ComputerStepReceiver(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+        BlockPos target = buf.readBlockPos();
+        server.execute(() -> {
+            ComputerBlockEntity blockEntity = (ComputerBlockEntity)(player.getWorld().getBlockEntity(target));
+            assert blockEntity != null;
+            blockEntity.CPU.next();
+            blockEntity.readNbt(blockEntity.createNbt());
             blockEntity.markDirty();
         });
     }

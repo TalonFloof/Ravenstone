@@ -11,13 +11,15 @@ import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import sh.talonfox.ravynstone.Ravynstone;
 import sh.talonfox.ravynstone.processor.Processor;
 import sh.talonfox.ravynstone.processor.ProcessorHost;
 
+import java.util.Objects;
+
 public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     public Processor CPU = new Processor(this);
-    byte[] RAM = new byte[16384];
-    public byte PCMemoryValue = 0; // For Client
+    public byte[] RAM = new byte[16384];
     public Boolean Powered = false;
 
     public ComputerBlockEntity(BlockPos pos, BlockState state) {
@@ -34,7 +36,8 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         if(Short.toUnsignedInt(at) < RAM.length) {
             return RAM[Short.toUnsignedInt(at)];
         } else {
-            return 0;
+            CPU.Error = true;
+            return (byte)0xFF;
         }
     }
 
@@ -80,7 +83,8 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         processor.putBoolean("FlagE",CPU.FlagE);
 
         tag.put("Processor",processor);
-        tag.putByte("PCMemoryValue",memRead(CPU.PC));
+        tag.putByteArray("RAM", RAM);
+        tag.putBoolean("Powered",Powered);
 
         super.writeNbt(tag);
     }
@@ -113,7 +117,10 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         CPU.FlagV = processor.getBoolean("FlagV");
         CPU.FlagN = processor.getBoolean("FlagN");
         CPU.FlagE = processor.getBoolean("FlagE");
-        PCMemoryValue = tag.getByte("PCMemoryValue");
+        Powered = tag.getBoolean("Powered");
+        if(tag.getByteArray("RAM").length == RAM.length) {
+            RAM = tag.getByteArray("RAM");
+        }
     }
 
     @Nullable
