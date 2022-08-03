@@ -31,12 +31,18 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
 
     @Override
     public byte memRead(short at) {
-        return RAM[Short.toUnsignedInt(at)];
+        if(Short.toUnsignedInt(at) < RAM.length) {
+            return RAM[Short.toUnsignedInt(at)];
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public void memStore(short at, byte data) {
-        RAM[Short.toUnsignedInt(at)] = data;
+        if(Short.toUnsignedInt(at) < RAM.length) {
+            RAM[Short.toUnsignedInt(at)] = data;
+        }
     }
     public static void tick(World world, BlockPos pos, BlockState state, ComputerBlockEntity blockEntity) {
         if(blockEntity.Powered&&!blockEntity.CPU.Stop) {
@@ -82,7 +88,31 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     @Override
     public void readNbt(NbtCompound tag) {
         var processor = tag.getCompound("Processor");
+        CPU.A = processor.getShort("A");
+        CPU.B = processor.getShort("B");
+        CPU.D = processor.getShort("D");
+        CPU.I = processor.getShort("I");
+        CPU.X = processor.getShort("X");
+        CPU.Y = processor.getShort("Y");
         CPU.PC = processor.getShort("PC");
+        CPU.SP = processor.getShort("SP");
+        CPU.RP = processor.getShort("RP");
+        CPU.BrkAddr = processor.getShort("BrkAddr");
+        CPU.ResetAddr = processor.getShort("ResetAddr");
+        CPU.BusOffset = processor.getInt("BusOffset");
+        CPU.Error = processor.getBoolean("Error");
+        CPU.Stop = processor.getBoolean("Stop");
+        CPU.Wait = processor.getBoolean("Wait");
+        CPU.BusEnabled = processor.getBoolean("BusEnabled");
+        CPU.FlagC = processor.getBoolean("FlagC");
+        CPU.FlagZ = processor.getBoolean("FlagZ");
+        CPU.FlagI = processor.getBoolean("FlagI");
+        CPU.FlagD = processor.getBoolean("FlagD");
+        CPU.FlagX = processor.getBoolean("FlagX");
+        CPU.FlagM = processor.getBoolean("FlagM");
+        CPU.FlagV = processor.getBoolean("FlagV");
+        CPU.FlagN = processor.getBoolean("FlagN");
+        CPU.FlagE = processor.getBoolean("FlagE");
         PCMemoryValue = tag.getByte("PCMemoryValue");
     }
 

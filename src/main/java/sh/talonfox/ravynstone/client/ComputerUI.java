@@ -1,16 +1,24 @@
 package sh.talonfox.ravynstone.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.block.Block;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.opengl.GL11;
 import sh.talonfox.ravynstone.blocks.ComputerBlockEntity;
+import sh.talonfox.ravynstone.network.ComputerPackets;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 public class ComputerUI extends Screen {
@@ -22,7 +30,7 @@ public class ComputerUI extends Screen {
         BlockEntity = blockEntity;
     }
 
-    public void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
+    public void drawBackground(MatrixStack matrices, float delta) {
         int x = (width - 340) / 2;
         int y = (height - 217) / 2;
         drawTexture(matrices,x,y,340,217,0.0F,0.0F,227,145,256,256);
@@ -31,13 +39,30 @@ public class ComputerUI extends Screen {
     public void renderAddress(MatrixStack matrices) {
         int x = (width - 256) / 2;
         int ledX = (width - 192) / 2;
+        int valLedX = (width - 96) / 2;
         int y = Math.round((height + 217.0F) / 2.0F)-36-16;
         int pc = Short.toUnsignedInt(BlockEntity.CPU.PC);
+        int val = Byte.toUnsignedInt(BlockEntity.PCMemoryValue);
         for(int i = 0; i < 16; i++) {
             drawTexture(matrices,ledX + ((15 - i) * 12),y-20,12,10,0.0F,163.0F,12,10,256,256);
+            if(i < 8)
+                drawTexture(matrices,valLedX + ((7 - i) * 12),y-35,12,10,0.0F,163.0F,12,10,256,256);
             if((pc&(1<<i))!=0&&BlockEntity.Powered)
                 drawTexture(matrices,ledX + ((15 - i) * 12) + 2,y-19,8,8,12.0F,163.0F,8,8,256,256);
+            if(i < 8)
+                if((val&(1<<i))!=0&&BlockEntity.Powered)
+                    drawTexture(matrices,valLedX + ((7 - i) * 12) + 2,y-34,8,8,12.0F,163.0F,8,8,256,256);
             drawTexture(matrices,x + ((15 - i) * 16), y, 16, 36, (((i % 6) < 3)?0.0F:16.0F)+((SwitchInput&(1<<i))!=0?8F:0F), 145.0F, 8, 18, 256, 256);
+        }
+    }
+    public void renderTopSwitches(MatrixStack matrices, float delta) {
+
+    }
+    public void drawTooltip(MatrixStack matrices, float delta, int mouseX, int mouseY) {
+        int addrX = (width - 256) / 2;
+        int addrY = Math.round((height + 217.0F) / 2.0F)-36-16;
+        if(mouseX >= addrX && mouseX <= addrX+(16*16) && mouseY >= addrY && mouseY <= addrY+36) {
+            renderTooltip(matrices, List.of(Text.of(Integer.toString(Short.toUnsignedInt(SwitchInput))),Text.of("0x"+Integer.toHexString(Short.toUnsignedInt(SwitchInput))),Text.of("0o"+Integer.toOctalString(Short.toUnsignedInt(SwitchInput)))),mouseX,mouseY);
         }
     }
 
@@ -53,9 +78,10 @@ public class ComputerUI extends Screen {
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL11.GL_REPEAT);
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL11.GL_REPEAT);
-        drawBackground(matrices,delta,mouseX,mouseY);
+        drawBackground(matrices,delta);
         renderAddress(matrices);
         //////////////////////////////////////////////////
+        drawTooltip(matrices, delta, mouseX, mouseY);
     }
 
     @Override
@@ -103,8 +129,10 @@ public class ComputerUI extends Screen {
                 BlockEntity.CPU.BusEnabled = rand.nextBoolean();
                 BlockEntity.CPU.Error = rand.nextBoolean();
             }
-            BlockEntity.markDirty();
-            BlockEntity.getWorld().updateListeners(BlockEntity.getPos(), state, BlockEntity.getCachedState(), Block.NOTIFY_LISTENERS);
+            PacketByteBuf buf = PacketByteBufs.create();
+            buf.writeBlockPos(BlockEntity.getPos());
+            buf.writeNbt(BlockEntity.createNbt());
+            ClientPlayNetworking.send(ComputerPackets.COMPUTER_C2S_SYNC_ID,buf);
         }
         return true;
     }
