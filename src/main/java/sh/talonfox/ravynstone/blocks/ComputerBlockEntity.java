@@ -2,6 +2,7 @@ package sh.talonfox.ravynstone.blocks;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.NbtCompound;
@@ -10,17 +11,19 @@ import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.explosion.Explosion;
+import net.minecraft.world.explosion.ExplosionBehavior;
 import org.jetbrains.annotations.Nullable;
-import sh.talonfox.ravynstone.Ravynstone;
 import sh.talonfox.ravynstone.processor.Processor;
 import sh.talonfox.ravynstone.processor.ProcessorHost;
 
 import java.util.Objects;
 
+import static sh.talonfox.ravynstone.blocks.ComputerBlock.RUNNING;
+
 public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     public Processor CPU = new Processor(this);
     public byte[] RAM = new byte[16384];
-    public Boolean Powered = false;
 
     public ComputerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockRegister.RAVYN_COMPUTER_ENTITY, pos, state);
@@ -47,9 +50,20 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
             RAM[Short.toUnsignedInt(at)] = data;
         }
     }
+    public void explode() {
+        BlockPos pos = this.getPos();
+        Objects.requireNonNull(this.getWorld()).createExplosion(null, DamageSource.GENERIC.setExplosive(), null,(double)pos.getX()+0.5,(double)pos.getY()+0.5,(double)pos.getZ()+0.5,2F,false, Explosion.DestructionType.NONE);
+    }
     public static void tick(World world, BlockPos pos, BlockState state, ComputerBlockEntity blockEntity) {
-        if(blockEntity.Powered&&!blockEntity.CPU.Stop) {
-
+        if(!blockEntity.CPU.Stop) {
+            for(int i=0; i < (100000/20); i++) {
+                blockEntity.CPU.next();
+                if(blockEntity.CPU.Stop) {
+                    world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
+                    blockEntity.markDirty();
+                    break;
+                }
+            }
         }
     }
 
@@ -84,7 +98,6 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
 
         tag.put("Processor",processor);
         tag.putByteArray("RAM", RAM);
-        tag.putBoolean("Powered",Powered);
 
         super.writeNbt(tag);
     }
@@ -117,7 +130,6 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         CPU.FlagV = processor.getBoolean("FlagV");
         CPU.FlagN = processor.getBoolean("FlagN");
         CPU.FlagE = processor.getBoolean("FlagE");
-        Powered = tag.getBoolean("Powered");
         if(tag.getByteArray("RAM").length == RAM.length) {
             RAM = tag.getByteArray("RAM");
         }

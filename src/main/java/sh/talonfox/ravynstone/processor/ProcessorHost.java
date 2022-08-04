@@ -14,4 +14,6 @@ public interface ProcessorHost {
     void resetBusState();
     byte memRead(short at);
     void memStore(short at, byte data);
+
+    void explode();
 }

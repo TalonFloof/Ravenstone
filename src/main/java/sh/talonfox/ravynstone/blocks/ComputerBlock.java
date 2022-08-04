@@ -7,6 +7,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -19,9 +20,12 @@ import sh.talonfox.ravynstone.network.ClientProxy;
 import javax.annotation.Nullable;
 
 public class ComputerBlock extends BlockWithEntity implements BlockEntityProvider {
+    public static final BooleanProperty RUNNING = BooleanProperty.of("running");
+
     public ComputerBlock(Settings settings) {
         super(settings);
         setDefaultState(this.stateManager.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.NORTH));
+        setDefaultState(this.stateManager.getDefaultState().with(RUNNING,false));
     }
 
     @Override
@@ -32,6 +36,7 @@ public class ComputerBlock extends BlockWithEntity implements BlockEntityProvide
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
         stateManager.add(Properties.HORIZONTAL_FACING);
+        stateManager.add(RUNNING);
     }
 
     @Override
@@ -52,9 +57,14 @@ public class ComputerBlock extends BlockWithEntity implements BlockEntityProvide
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world.isClient) {
-            BlockEntity blockEntity = world.getBlockEntity(pos);
-            ClientProxy.OpenComputerUI((ComputerBlockEntity)blockEntity);
+        ComputerBlockEntity blockEntity = (ComputerBlockEntity)world.getBlockEntity(pos);
+        if(!world.isClient()) {
+            assert blockEntity != null;
+            if (!blockEntity.CPU.Stop)
+                blockEntity.CPU.reset();
+            world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
+            blockEntity.CPU.Stop = state.get(RUNNING);
+            blockEntity.markDirty();
         }
         return ActionResult.SUCCESS;
     }

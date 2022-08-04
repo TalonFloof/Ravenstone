@@ -56,11 +56,9 @@ public class Processor {
         FlagE = true;
         SP = 0x1ff;
         RP = 0x2ff;
-        //PC = 0x400;
-        PC = 0;
+        PC = 0x400;
         ResetAddr = 0x400;
         BrkAddr = 0x2000;
-        Stop = true;
         Wait = false;
         Error = false;
         BusEnabled = false;
@@ -542,6 +540,7 @@ public class Processor {
                 break;
             case 0xdb: // stp
                 Stop = true;
+                Host.explode(); // Why not?
                 break;
             case 0xdc: // tix
                 X = I;
