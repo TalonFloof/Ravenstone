@@ -71,14 +71,10 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     public void writeNbt(NbtCompound tag) {
         var processor = new NbtCompound();
         processor.putShort("A",CPU.A);
-        processor.putShort("B",CPU.B);
-        processor.putShort("D",CPU.D);
-        processor.putShort("I",CPU.I);
         processor.putShort("X",CPU.X);
         processor.putShort("Y",CPU.Y);
         processor.putShort("PC",CPU.PC);
         processor.putShort("SP",CPU.SP);
-        processor.putShort("RP",CPU.RP);
         processor.putShort("BrkAddr",CPU.BrkAddr);
         processor.putShort("ResetAddr",CPU.ResetAddr);
         processor.putInt("BusOffset",CPU.BusOffset);
@@ -90,11 +86,8 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         processor.putBoolean("FlagZ",CPU.FlagZ);
         processor.putBoolean("FlagI",CPU.FlagI);
         processor.putBoolean("FlagD",CPU.FlagD);
-        processor.putBoolean("FlagX",CPU.FlagX);
-        processor.putBoolean("FlagM",CPU.FlagM);
         processor.putBoolean("FlagV",CPU.FlagV);
         processor.putBoolean("FlagN",CPU.FlagN);
-        processor.putBoolean("FlagE",CPU.FlagE);
 
         tag.put("Processor",processor);
         tag.putByteArray("RAM", RAM);
@@ -106,14 +99,10 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     public void readNbt(NbtCompound tag) {
         var processor = tag.getCompound("Processor");
         CPU.A = processor.getShort("A");
-        CPU.B = processor.getShort("B");
-        CPU.D = processor.getShort("D");
-        CPU.I = processor.getShort("I");
         CPU.X = processor.getShort("X");
         CPU.Y = processor.getShort("Y");
         CPU.PC = processor.getShort("PC");
         CPU.SP = processor.getShort("SP");
-        CPU.RP = processor.getShort("RP");
         CPU.BrkAddr = processor.getShort("BrkAddr");
         CPU.ResetAddr = processor.getShort("ResetAddr");
         CPU.BusOffset = processor.getInt("BusOffset");
@@ -125,11 +114,8 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         CPU.FlagZ = processor.getBoolean("FlagZ");
         CPU.FlagI = processor.getBoolean("FlagI");
         CPU.FlagD = processor.getBoolean("FlagD");
-        CPU.FlagX = processor.getBoolean("FlagX");
-        CPU.FlagM = processor.getBoolean("FlagM");
         CPU.FlagV = processor.getBoolean("FlagV");
         CPU.FlagN = processor.getBoolean("FlagN");
-        CPU.FlagE = processor.getBoolean("FlagE");
         if(tag.getByteArray("RAM").length == RAM.length) {
             RAM = tag.getByteArray("RAM");
         }

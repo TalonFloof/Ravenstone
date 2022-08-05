@@ -11,5 +11,6 @@ public class ItemGroupRegister {
             new Identifier("ravynstone", "item_group"))
             .icon(() -> new ItemStack(BlockRegister.RAVYN_COMPUTER_BLOCK)).appendItems(stacks -> {
                 stacks.add(new ItemStack(BlockRegister.RAVYN_COMPUTER_BLOCK));
+                stacks.add(new ItemStack(BlockRegister.RAVYN_TERMINAL_BLOCK));
             }).build();
 }
