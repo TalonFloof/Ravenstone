@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "G##",
+    "GA#",
+    "GR#"
+  ],
+  "key": {
+    "#": {"tag": "minecraft:planks"},
+    "R": {"item": "minecraft:redstone"},
+    "A": {"item": "minecraft:amethyst_shard"},
+    "G": {"item": "minecraft:glass"}
+  },
+  "result": {
+    "item": "ravenstone:terminal",
+    "count": 1
+  }
+}

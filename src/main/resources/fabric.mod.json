@@ -1,30 +1,30 @@
 {
   "schemaVersion": 1,
-  "id": "ravynstone",
+  "id": "ravenstone",
   "version": "${version}",
-  "name": "Ravynstone",
+  "name": "Ravenstone",
   "description": "Programmable Computers in Minecraft",
   "authors": [
     "TalonFox"
   ],
   "contact": {},
   "license": "Apache-2.0",
-  "icon": "assets/ravynstone/icon.png",
+  "icon": "assets/ravenstone/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
-      "sh.talonfox.ravynstone.client.RavynstoneClient"
+      "sh.talonfox.ravenstone.client.RavenstoneClient"
     ],
     "main": [
-      "sh.talonfox.ravynstone.Ravynstone"
+      "sh.talonfox.ravenstone.Ravenstone"
     ]
   },
   "mixins": [
-    "ravynstone.mixins.json"
+    "ravenstone.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.14.8",
     "fabric": "*",
-    "minecraft": "1.19.1"
+    "minecraft": "1.19.x"
   }
 }

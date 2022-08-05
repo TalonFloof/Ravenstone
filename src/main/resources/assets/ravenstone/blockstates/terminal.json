@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "ravenstone:block/terminal", "uvlock": true },
+    "facing=east":  { "model": "ravenstone:block/terminal", "y":  90, "uvlock": true },
+    "facing=south": { "model": "ravenstone:block/terminal", "y": 180, "uvlock": true },
+    "facing=west":  { "model": "ravenstone:block/terminal", "y": 270, "uvlock": true }
+  }
+}

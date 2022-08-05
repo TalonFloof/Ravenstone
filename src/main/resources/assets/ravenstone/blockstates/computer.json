@@ -1,0 +1,12 @@
+{
+  "variants": {
+    "facing=north,running=false": { "model": "ravenstone:block/computer", "uvlock": true },
+    "facing=east,running=false":  { "model": "ravenstone:block/computer", "y":  90, "uvlock": true },
+    "facing=south,running=false": { "model": "ravenstone:block/computer", "y": 180, "uvlock": true },
+    "facing=west,running=false":  { "model": "ravenstone:block/computer", "y": 270, "uvlock": true },
+    "facing=north,running=true": { "model": "ravenstone:block/computer_on", "uvlock": true },
+    "facing=east,running=true":  { "model": "ravenstone:block/computer_on", "y":  90, "uvlock": true },
+    "facing=south,running=true": { "model": "ravenstone:block/computer_on", "y": 180, "uvlock": true },
+    "facing=west,running=true":  { "model": "ravenstone:block/computer_on", "y": 270, "uvlock": true }
+  }
+}

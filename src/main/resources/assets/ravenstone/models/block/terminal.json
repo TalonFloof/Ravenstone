@@ -1,0 +1,11 @@
+{
+  "parent": "ravenstone:block/block_directional",
+  "textures": {
+    "particle": "ravenstone:block/raven_terminal_side",
+    "top": "ravenstone:block/raven_terminal_side",
+    "bottom": "ravenstone:block/raven_terminal_bottom",
+    "front": "ravenstone:block/raven_terminal_front",
+    "back": "ravenstone:block/raven_terminal_side",
+    "side": "ravenstone:block/raven_terminal_side"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#C#",
+    "TDT",
+    "#R#"
+  ],
+  "key": {
+    "#": {"tag": "minecraft:planks"},
+    "D": {"item": "minecraft:diamond_block"},
+    "C": {"item": "minecraft:copper_ingot"},
+    "R": {"item": "minecraft:redstone"},
+    "T": {"item": "minecraft:redstone_block"}
+  },
+  "result": {
+    "item": "ravenstone:computer",
+    "count": 1
+  }
+}
