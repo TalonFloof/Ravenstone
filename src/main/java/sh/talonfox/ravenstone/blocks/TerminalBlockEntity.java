@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
-public class TerminalBlockEntity extends BlockEntity {
+public class TerminalBlockEntity extends PeripheralBlockEntity {
     public byte[] ScreenBuffer = new byte[80*50];
     public byte[] KeyboardBuffer = new byte[16];
     public int CursorX = 0;
@@ -20,6 +20,8 @@ public class TerminalBlockEntity extends BlockEntity {
         super(BlockRegister.RAVEN_TERMINAL_ENTITY, pos, state);
         Arrays.fill(ScreenBuffer,(byte)0x20);
     }
+
+    public String getIdentifier() {return "MonoTTY\0";}
 
     @Override
     public void writeNbt(NbtCompound tag) {
