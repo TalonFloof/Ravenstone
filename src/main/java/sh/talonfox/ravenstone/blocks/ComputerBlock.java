@@ -45,7 +45,7 @@ public class ComputerBlock extends BlockWithEntity implements BlockEntityProvide
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return (BlockState)this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite());
+        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite());
     }
 
     @Override
@@ -59,8 +59,7 @@ public class ComputerBlock extends BlockWithEntity implements BlockEntityProvide
         ComputerBlockEntity blockEntity = (ComputerBlockEntity)world.getBlockEntity(pos);
         if(!world.isClient()) {
             assert blockEntity != null;
-            if (!blockEntity.CPU.Stop)
-                blockEntity.CPU.reset();
+            blockEntity.CPU.reset();
             world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
             blockEntity.CPU.Stop = state.get(RUNNING);
             blockEntity.markDirty();

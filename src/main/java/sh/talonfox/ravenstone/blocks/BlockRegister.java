@@ -16,7 +16,7 @@ public class BlockRegister {
     public static BlockEntityType<ComputerBlockEntity> RAVEN_COMPUTER_ENTITY;
     public static BlockEntityType<TerminalBlockEntity> RAVEN_TERMINAL_ENTITY;
 
-    public static void Initalize() {
+    public static void Initialize() {
         Registry.register(Registry.BLOCK, new Identifier("ravenstone", "computer"), RAVEN_COMPUTER_BLOCK);
         Registry.register(Registry.BLOCK, new Identifier("ravenstone", "terminal"), RAVEN_TERMINAL_BLOCK);
         Registry.register(Registry.ITEM, new Identifier("ravenstone", "computer"), new BlockItem(RAVEN_COMPUTER_BLOCK, new Item.Settings().group(ItemGroupRegister.ITEM_GROUP)));

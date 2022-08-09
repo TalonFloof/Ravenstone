@@ -2,6 +2,8 @@ package sh.talonfox.ravenstone.blocks;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
@@ -13,8 +15,6 @@ import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import sh.talonfox.ravenstone.client.TerminalScreen;
 
-import java.util.Arrays;
-
 public class TerminalBlock extends PeripheralBlock {
 
     protected TerminalBlock(Settings settings) {
@@ -23,8 +23,12 @@ public class TerminalBlock extends PeripheralBlock {
 
     @Nullable
     @Override
-    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new TerminalBlockEntity(pos, state);
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {return new TerminalBlockEntity(pos, state);}
+
+    @Override
+    @Nullable
+    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
+        return world.isClient() ? null : checkType(type, BlockRegister.RAVEN_TERMINAL_ENTITY, TerminalBlockEntity::tick);
     }
 
     @Override

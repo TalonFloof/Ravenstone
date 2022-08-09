@@ -9,7 +9,7 @@ import sh.talonfox.ravenstone.ItemGroupRegister;
 public class ItemRegister {
     public static final Item RAVENSTONE_CUSTOM_ICON = new Item(new FabricItemSettings().group(ItemGroupRegister.ITEM_GROUP));
 
-    public static void Initalize() {
+    public static void Initialize() {
         Registry.register(Registry.ITEM, new Identifier("ravenstone", "ravenstone"), RAVENSTONE_CUSTOM_ICON);
     }
 }

@@ -18,10 +18,6 @@ import java.util.Objects;
 
 import static sh.talonfox.ravenstone.blocks.ComputerBlock.RUNNING;
 
-/*
-
-*/
-
 public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     public Processor CPU = new Processor(this);
     public byte[] RAM = new byte[16384];
@@ -30,25 +26,77 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         super(BlockRegister.RAVEN_COMPUTER_ENTITY, pos, state);
     }
 
-    @Override
-    public void resetBusState() {
-
-    }
+    /*
+        Bus IDs:
+        0: Nothing
+        1: North from the Computer
+        2: South from the Computer
+        3: East from the Computer
+        4: West from the Computer
+        5: Above the Computer
+        6: Below the Computer
+        7-255: Free for use
+     */
 
     @Override
     public byte memRead(short at) {
-        if(Short.toUnsignedInt(at) < RAM.length) {
-            return RAM[Short.toUnsignedInt(at)];
-        } else {
-            CPU.Error = true;
-            return (byte)0xFF;
+        if(Short.toUnsignedInt(at) >= 0xf000) {
+            return Processor.MONITOR[(Short.toUnsignedInt(at) - 0xf000)];
+        } else if(Short.toUnsignedInt(at) < RAM.length) {
+            if(at >= 0x200 && at <= 0x2FF) { // Bus Read
+                BlockPos pos = switch (CPU.BusOffset) {
+                    case 0x01 -> this.getPos().north();
+                    case 0x02 -> this.getPos().south();
+                    case 0x03 -> this.getPos().east();
+                    case 0x04 -> this.getPos().west();
+                    case 0x05 -> this.getPos().up();
+                    case 0x06 -> this.getPos().down();
+                    default -> null;
+                };
+                if (pos != null) {
+                    assert this.world != null;
+                    if (!this.world.getBlockState(pos).isAir()) {
+                        BlockEntity peripheral = this.world.getBlockEntity(pos);
+                        if (peripheral != null)
+                            if (peripheral instanceof PeripheralBlockEntity) {
+                                return ((PeripheralBlockEntity) peripheral).readData((byte)(at - 0x200));
+                            }
+                    }
+                }
+            } else {
+                return RAM[Short.toUnsignedInt(at)];
+            }
         }
+        CPU.Error = true;
+        return (byte)0xFF;
     }
 
     @Override
     public void memStore(short at, byte data) {
         if(Short.toUnsignedInt(at) < RAM.length) {
-            RAM[Short.toUnsignedInt(at)] = data;
+            if(at >= 0x200 && at <= 0x2FF) { // Bus Page
+                BlockPos pos = switch (CPU.BusOffset) {
+                    case 0x01 -> this.getPos().north();
+                    case 0x02 -> this.getPos().south();
+                    case 0x03 -> this.getPos().east();
+                    case 0x04 -> this.getPos().west();
+                    case 0x05 -> this.getPos().up();
+                    case 0x06 -> this.getPos().down();
+                    default -> null;
+                };
+                if (pos != null) {
+                    assert this.world != null;
+                    if (!this.world.getBlockState(pos).isAir()) {
+                        BlockEntity peripheral = this.world.getBlockEntity(pos);
+                        if (peripheral != null)
+                            if (peripheral instanceof PeripheralBlockEntity) {
+                                ((PeripheralBlockEntity) peripheral).storeData((byte) (at - 0x200), data);
+                            }
+                    }
+                }
+            } else if(Short.toUnsignedInt(at) < 0xFF00) {
+                RAM[Short.toUnsignedInt(at)] = data;
+            }
         }
     }
     public void explode() {
@@ -56,16 +104,17 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         Objects.requireNonNull(this.getWorld()).createExplosion(null, DamageSource.GENERIC.setExplosive(), null,(double)pos.getX()+0.5,(double)pos.getY()+0.5,(double)pos.getZ()+0.5,2F,false, Explosion.DestructionType.NONE);
     }
     public static void tick(World world, BlockPos pos, BlockState state, ComputerBlockEntity blockEntity) {
-        if(!blockEntity.CPU.Stop) {
-            for(int i=0; i < (100000/20); i++) {
-                blockEntity.CPU.next();
-                if(blockEntity.CPU.Stop) {
-                    world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
-                    blockEntity.markDirty();
-                    break;
+        if(!world.isClient())
+            if (!blockEntity.CPU.Stop) {
+                for (int i = 0; i < (100000 / 20); i++) {
+                    blockEntity.CPU.next();
+                    if (blockEntity.CPU.Stop) {
+                        world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
+                        blockEntity.markDirty();
+                        break;
+                    }
                 }
             }
-        }
     }
 
     @Override

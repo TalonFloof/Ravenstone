@@ -20,11 +20,13 @@ public class Ravenstone implements ModInitializer {
         LOGGER.info("        \\/     \\/           \\/     \\/     \\/                  \\/     \\/ ");
         LOGGER.info("Copyright (C) 2022 TalonFox (Sorry for the bad ASCII logo...)");
         LOGGER.info("Registering Blocks...");
-        BlockRegister.Initalize();
+        BlockRegister.Initialize();
         LOGGER.info("Registering Items...");
-        ItemRegister.Initalize();
+        ItemRegister.Initialize();
         LOGGER.info("Registering Packets...");
         PacketRegister.Initalize();
+        LOGGER.info("Registering Resource Reload Handlers...");
+        ResourceRegister.Initialize();
         LOGGER.info("Initialization successful!");
     }
 }

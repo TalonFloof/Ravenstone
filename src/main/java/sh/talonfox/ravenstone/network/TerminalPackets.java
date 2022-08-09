@@ -9,11 +9,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import sh.talonfox.ravenstone.blocks.TerminalBlockEntity;
 
-import java.util.Arrays;
-
 public class TerminalPackets {
     public static final Identifier TERMINAL_KEY = new Identifier("ravenstone", "terminal_key");
-    public static void TerminalKeyReceiver(MinecraftServer minecraftServer, ServerPlayerEntity serverPlayerEntity, ServerPlayNetworkHandler serverPlayNetworkHandler, PacketByteBuf packetByteBuf, PacketSender packetSender) {
+    public static void TerminalKeyReceiver(MinecraftServer minecraftServer, ServerPlayerEntity serverPlayerEntity, ServerPlayNetworkHandler ignored, PacketByteBuf packetByteBuf, PacketSender ignored2) {
         BlockPos pos = packetByteBuf.readBlockPos();
         byte key = packetByteBuf.readByte();
         minecraftServer.execute(() -> {
@@ -22,6 +20,7 @@ public class TerminalPackets {
             for(int i=0;i < 16; i++) {
                 if(terminal.KeyboardBuffer[i] == 0) {
                     terminal.KeyboardBuffer[i] = key;
+
                     return;
                 }
             }
