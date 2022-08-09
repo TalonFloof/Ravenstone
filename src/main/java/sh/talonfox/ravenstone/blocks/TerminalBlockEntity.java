@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
 
 public class TerminalBlockEntity extends PeripheralBlockEntity {
     public byte[] ScreenBuffer = new byte[80*50];
@@ -124,7 +126,7 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
                 }
             }
         }
-        if((at >= 1 && at <= 3) || (at >= 0x10 && at <= 0x5F)) {
+        if((at >= 0 && at <= 3) || (at >= 0x10 && at <= 0x5F)) {
             // Sync Data to Client(s)
             assert this.world != null;
             this.world.updateListeners(getPos(), this.getCachedState(), this.getCachedState(), 3);
@@ -133,7 +135,33 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, TerminalBlockEntity blockEntity) {
-
+        if(blockEntity.Command != 0) {
+            switch(blockEntity.Command) {
+                case 0x01 -> { // Blit
+                    for(int y=blockEntity.BlitYOffset; y < blockEntity.BlitYOffset+blockEntity.BlitHeight; y++) {
+                        for(int x=blockEntity.BlitXOffset; x < blockEntity.BlitXOffset+blockEntity.BlitWidth; x++) {
+                            blockEntity.ScreenBuffer[y*80+x] = (byte)blockEntity.BlitXStart;
+                        }
+                    }
+                }
+                case 0x02 -> { // Invert
+                    for(int y=blockEntity.BlitYOffset; y < blockEntity.BlitYOffset+blockEntity.BlitHeight; y++) {
+                        for(int x=blockEntity.BlitXOffset; x < blockEntity.BlitXOffset+blockEntity.BlitWidth; x++) {
+                            blockEntity.ScreenBuffer[y*80+x] = (byte)(Byte.toUnsignedInt(blockEntity.ScreenBuffer[y*80+x]) ^ 0x80);
+                        }
+                    }
+                }
+                case 0x03 -> { // Shift (Copy)
+                    for(int y=0; y < blockEntity.BlitHeight; y++) {
+                        for(int x=0; x < blockEntity.BlitWidth; x++) {
+                            blockEntity.ScreenBuffer[(y+blockEntity.BlitYOffset)*80+(x+blockEntity.BlitXOffset)] = blockEntity.ScreenBuffer[(y+blockEntity.BlitYStart)*80+(x+blockEntity.BlitXStart)];
+                        }
+                    }
+                }
+            }
+            world.updateListeners(pos, state, state, 3);
+            blockEntity.Command = 0;
+        }
     }
 
     @Override

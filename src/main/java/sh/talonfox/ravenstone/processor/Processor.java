@@ -230,7 +230,7 @@ public class Processor {
 
             }
             case 0x4c -> { // jmp abs
-                PC = (short) pc2();
+                PC = (short)pc2();
 
             /*
                 =====NOTICE=====
@@ -242,18 +242,15 @@ public class Processor {
              */
             }
             case 0x6c -> { // jmp ind
-                PC = (short) peek2(pc2());
-
+                PC = (short)peek2(pc2());
             }
             case 0x20 -> { // jsr abs
                 int subAddr = pc2();
                 push2(Short.toUnsignedInt(PC) - 1);
-                PC = (short) subAddr;
-
+                PC = (short)subAddr;
             }
             case 0x60 -> { // rts
-                PC = (short) (pop2() + 1);
-
+                PC = (short)(pop2() + 1);
                 ///// LOGICAL OPERATIONS /////
                 ///// AND /////
             }
@@ -497,57 +494,65 @@ public class Processor {
                 if (FlagZ) {
                     byte offset = (byte) pc1();
                     PC += offset;
+                } else {
+                    pc1();
                 }
-
             }
             case 0xd0 -> { // bne
                 if (!FlagZ) {
-                    byte offset = (byte) pc1();
+                    byte offset = (byte)pc1();
                     PC += offset;
+                } else {
+                    pc1();
                 }
-
             }
             case 0xb0 -> { // bcs
                 if (FlagC) {
                     byte offset = (byte) pc1();
                     PC += offset;
+                } else {
+                    pc1();
                 }
-
             }
             case 0x90 -> { // bcc
                 if (!FlagC) {
                     byte offset = (byte) pc1();
                     PC += offset;
+                } else {
+                    pc1();
                 }
-
             }
             case 0x30 -> { // bmi
                 if (FlagN) {
                     byte offset = (byte) pc1();
                     PC += offset;
+                } else {
+                    pc1();
                 }
-
             }
             case 0x10 -> { // bpl
                 if (!FlagN) {
                     byte offset = (byte) pc1();
                     PC += offset;
+                } else {
+                    pc1();
                 }
-
             }
             case 0x50 -> { // bvc
                 if (!FlagV) {
                     byte offset = (byte) pc1();
                     PC += offset;
+                } else {
+                    pc1();
                 }
-
             }
             case 0x70 -> { // bvs
                 if (FlagV) {
                     byte offset = (byte) pc1();
                     PC += offset;
+                } else {
+                    pc1();
                 }
-
                 ///// FLAG MODIFIERS /////
             }
             case 0x18 -> { // clc
@@ -802,7 +807,7 @@ public class Processor {
                         poke1(Byte.toUnsignedInt(A) + 1, ((BrkAddr & 0xFF00) >>> 8));
                     }
                     default -> {
-                        Error = true;
+                        Ravenstone.LOGGER.error("MMU Error!");
                     }
                 }
                 break;
@@ -818,12 +823,15 @@ public class Processor {
                 SP &= 0x00FF;
                 SP |= (short) ((Byte.toUnsignedInt(A) << 8));
             }
-            default -> Error = true;
+            default -> {
+                Stop = true;
+                Ravenstone.LOGGER.error("Invalid Opcode: 0x{}: 0x{}", Integer.toHexString(Short.toUnsignedInt(PC)), Integer.toHexString(insn));
+            }
         }
     }
 
     private int pc1() {PC += 1; return peek1(Short.toUnsignedInt(PC) - 1);}
-    private int pc2() {return pc1() | (pc1() << 8);}
+    private int pc2() {PC += 2; return peek1(Short.toUnsignedInt(PC) - 2) | (peek1(Short.toUnsignedInt(PC) - 1) << 8);}
 
     private int peek1(int addr) {
         var uaddr = addr & 0xFFFF;
@@ -856,7 +864,7 @@ public class Processor {
         try {
             return Byte.toUnsignedInt((byte)Integer.parseInt(Integer.toString(s,16)));
         } catch(NumberFormatException e) {
-            Error = true;
+            Ravenstone.LOGGER.error("Number Format Exception!");
             return 0;
         }
     }

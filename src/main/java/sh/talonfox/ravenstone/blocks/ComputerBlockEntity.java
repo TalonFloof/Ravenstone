@@ -11,6 +11,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
+import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.processor.Processor;
 import sh.talonfox.ravenstone.processor.ProcessorHost;
 
@@ -55,19 +56,18 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
                 };
                 if (pos != null) {
                     assert this.world != null;
-                    if (!this.world.getBlockState(pos).isAir()) {
-                        BlockEntity peripheral = this.world.getBlockEntity(pos);
-                        if (peripheral != null)
-                            if (peripheral instanceof PeripheralBlockEntity) {
-                                return ((PeripheralBlockEntity) peripheral).readData((byte)(at - 0x200));
-                            }
-                    }
+                    BlockEntity peripheral = this.world.getBlockEntity(pos);
+                    if (peripheral != null)
+                        if (peripheral instanceof PeripheralBlockEntity) {
+                            return ((PeripheralBlockEntity) peripheral).readData((byte)(at - 0x200));
+                        }
                 }
             } else {
                 return RAM[Short.toUnsignedInt(at)];
             }
         }
-        CPU.Error = true;
+        Ravenstone.LOGGER.error("Memory Error!");
+        //CPU.Error = true;
         return (byte)0xFF;
     }
 
@@ -106,11 +106,14 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     public static void tick(World world, BlockPos pos, BlockState state, ComputerBlockEntity blockEntity) {
         if(!world.isClient())
             if (!blockEntity.CPU.Stop) {
+                blockEntity.CPU.Wait = false;
                 for (int i = 0; i < (100000 / 20); i++) {
                     blockEntity.CPU.next();
                     if (blockEntity.CPU.Stop) {
                         world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
                         blockEntity.markDirty();
+                        break;
+                    } else if(blockEntity.CPU.Wait) {
                         break;
                     }
                 }

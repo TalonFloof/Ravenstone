@@ -1,15 +1,19 @@
 package sh.talonfox.ravenstone.client;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import sh.talonfox.ravenstone.blocks.TerminalBlockEntity;
+import sh.talonfox.ravenstone.network.TerminalPackets;
 
 import java.util.Objects;
 
@@ -120,7 +124,10 @@ public class TerminalScreen extends Screen {
     }
 
     private void pushKey(byte c) {
-
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeBlockPos(BlockEntity.getPos());
+        buf.writeByte(c);
+        ClientPlayNetworking.send(TerminalPackets.TERMINAL_KEY, buf);
     }
 
     @Override
