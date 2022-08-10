@@ -2,14 +2,15 @@
   "type": "minecraft:crafting_shaped",
   "pattern": [
     "G##",
-    "GA#",
+    "GAT",
     "GR#"
   ],
   "key": {
-    "#": {"tag": "minecraft:planks"},
+    "#": {"item": "minecraft:iron_ingot"},
     "R": {"item": "minecraft:redstone"},
     "A": {"item": "minecraft:amethyst_shard"},
-    "G": {"item": "minecraft:glass"}
+    "G": {"item": "minecraft:glass"},
+    "T": {"item": "ravenstone:transistor"}
   },
   "result": {
     "item": "ravenstone:terminal",

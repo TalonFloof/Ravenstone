@@ -1,0 +1,41 @@
+{
+    "diskette_insert": {
+        "sounds": [
+            "ravenstone:diskette_insert"
+        ]
+    },
+    "diskette_eject": {
+        "sounds": [
+            "ravenstone:diskette_eject"
+        ]
+    },
+    "diskette_drive_start": {
+        "sounds": [
+            "ravenstone:drive_begin0",
+            "ravenstone:drive_begin1",
+            "ravenstone:drive_begin2",
+            "ravenstone:drive_begin3"
+        ]
+    },
+    "diskette_drive_seek_tiny": {
+        "sounds": [
+            "ravenstone:drive_skip_tiny0",
+            "ravenstone:drive_skip_tiny1",
+            "ravenstone:drive_skip_tiny2",
+            "ravenstone:drive_skip_tiny3"
+        ]
+    },
+    "diskette_drive_seek_large": {
+        "sounds": [
+            "ravenstone:drive_skip_large0",
+            "ravenstone:drive_skip_large1",
+            "ravenstone:drive_skip_large2",
+            "ravenstone:drive_skip_large3"
+        ]
+    },
+    "diskette_drive_spin": {
+        "sounds": [
+            "ravenstone:drive_spin0"
+        ]
+    }
+}

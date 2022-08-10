@@ -20,6 +20,18 @@
 ;See the License for the specific language governing permissions and
 ;limitations under the License.
 
+; ZEROPAGE MEMORY MAP
+; $00 TTY Bus ID
+; $01 Disk Drive ID
+;;;;;;;;; REGISTER DUMP;;;;;;;;;
+; $02-$03 PC
+; $04 Flags
+; $05 A Register
+; $06 X Register
+; $07 Y Register
+; $08-$09 SP Register
+; $10-$11 String Address
+
     .org $F000
 
 ; These Macros implement opcodes which are exclusive to Ravenstone
@@ -44,6 +56,15 @@ cold_boot: ; This function is called when the Raven-8t first starts up
     ldx #$00
     ldy #$00
     sta $00
+    sta $01
+    sta $02
+    sta $03
+    sta $04
+    sta $05
+    sta $06
+    sta $07
+    sta $08
+    sta $09
     ; Search for a Teletype that we can use
     lda #$06
 cold_boot.tty_search:
@@ -87,8 +108,12 @@ cold_boot.tty_hit:
     lda #(coldboot_banner >> 8)
     sta $11
     jsr print_line
-stop:
-    jmp stop
+    jsr register_dump
+    jmp monitor_prompt
+    nop ; Padding
+    nop
+    nop
+    stp
 
 ; Pass pointer to address $10
 print_line:
@@ -115,8 +140,43 @@ print_line.end:
     plp
     rts
 
+register_dump:
+    lda #(registerdump_header & 0xFF)
+    sta $10
+    lda #(registerdump_header >> 8)
+    sta $11
+    jsr print_line
+    lda $202
+    sta $200
+    lda #';'
+    sta $210
+    inc $200
+    inc $202
+    rts
+
+monitor_prompt:
+    lda #'>'
+    sta $210
+    lda #1
+    sta $201
+    jmp stop
+
+stop:
+    jmp stop
+
     .byte 0xdb
 
 coldboot_banner: .asciiz "Raven-8t Monitor, Copyright (C) 2022 TalonFox"
+registerdump_header: .asciiz "   PC  SR .A .X .Y  SP"
 
+    .fill (0xFC00-*), 0xdb
+    .org 0xFC00
+floppy_rom_boot:
+    cld
+    jmp stop
+    .fill (0xFE00-*), 0xdb
+    .org 0xFE00
+hard_drive_rom_boot:
+    cld
+    jmp stop
     .fill (65536-*), 0xdb

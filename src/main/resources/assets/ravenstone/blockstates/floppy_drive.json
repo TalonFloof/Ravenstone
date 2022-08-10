@@ -1,0 +1,20 @@
+{
+    "variants": {
+        "facing=north,has_disk=false,light=false": { "model": "ravenstone:block/floppy_drive", "uvlock": false },
+        "facing=east,has_disk=false,light=false":  { "model": "ravenstone:block/floppy_drive", "y":  90, "uvlock": false },
+        "facing=south,has_disk=false,light=false": { "model": "ravenstone:block/floppy_drive", "y": 180, "uvlock": false },
+        "facing=west,has_disk=false,light=false":  { "model": "ravenstone:block/floppy_drive", "y": 270, "uvlock": false },
+        "facing=north,has_disk=true,light=false": { "model": "ravenstone:block/floppy_drive_disk", "uvlock": false },
+        "facing=east,has_disk=true,light=false":  { "model": "ravenstone:block/floppy_drive_disk", "y":  90, "uvlock": false },
+        "facing=south,has_disk=true,light=false": { "model": "ravenstone:block/floppy_drive_disk", "y": 180, "uvlock": false },
+        "facing=west,has_disk=true,light=false":  { "model": "ravenstone:block/floppy_drive_disk", "y": 270, "uvlock": false },
+        "facing=north,has_disk=false,light=true": { "model": "ravenstone:block/floppy_drive_light", "uvlock": false },
+        "facing=east,has_disk=false,light=true":  { "model": "ravenstone:block/floppy_drive_light", "y":  90, "uvlock": false },
+        "facing=south,has_disk=false,light=true": { "model": "ravenstone:block/floppy_drive_light", "y": 180, "uvlock": false },
+        "facing=west,has_disk=false,light=true":  { "model": "ravenstone:block/floppy_drive_light", "y": 270, "uvlock": false },
+        "facing=north,has_disk=true,light=true": { "model": "ravenstone:block/floppy_drive_disk_light", "uvlock": false },
+        "facing=east,has_disk=true,light=true":  { "model": "ravenstone:block/floppy_drive_disk_light", "y":  90, "uvlock": false },
+        "facing=south,has_disk=true,light=true": { "model": "ravenstone:block/floppy_drive_disk_light", "y": 180, "uvlock": false },
+        "facing=west,has_disk=true,light=true":  { "model": "ravenstone:block/floppy_drive_disk_light", "y": 270, "uvlock": false }
+    }
+}

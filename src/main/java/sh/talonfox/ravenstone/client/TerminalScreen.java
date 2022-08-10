@@ -21,6 +21,7 @@ public class TerminalScreen extends Screen {
     private static final Identifier CHARSET = new Identifier("ravenstone", "textures/gui/raven_terminal_font.png");
     private TerminalBlockEntity BlockEntity;
     private long Ticks = 0;
+    private long LastTick = -1;
     public TerminalScreen(Text title, TerminalBlockEntity blockEntity) {
         super(title);
         BlockEntity = blockEntity;
@@ -59,15 +60,18 @@ public class TerminalScreen extends Screen {
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.render(matrices, mouseX, mouseY, delta);
-        renderBackground(matrices);
-        matrices.push();
-        matrices.scale(0.5F,0.5F,1F);
-        matrices.translate(((width*2) - 640) / 2, ((height*2) - 400) / 2,0);
-        drawBackground(matrices, mouseX, mouseY, delta);
-        drawScreen(matrices, mouseX, mouseY, delta);
-        drawCursor(matrices, mouseX, mouseY, delta);
-        matrices.pop();
+        if(LastTick != Ticks) {
+            super.render(matrices, mouseX, mouseY, delta);
+            renderBackground(matrices);
+            matrices.push();
+            matrices.scale(0.5F, 0.5F, 1F);
+            matrices.translate(((width * 2) - 640) / 2, ((height * 2) - 400) / 2, 0);
+            drawBackground(matrices, mouseX, mouseY, delta);
+            drawScreen(matrices, mouseX, mouseY, delta);
+            drawCursor(matrices, mouseX, mouseY, delta);
+            matrices.pop();
+            LastTick = Ticks;
+        }
     }
 
     @Override

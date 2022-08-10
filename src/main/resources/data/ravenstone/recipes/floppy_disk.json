@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "PIP",
+        "I I",
+        "PIP"
+    ],
+    "key": {
+        "I": {"item": "minecraft:iron_nugget"},
+        "P": {"item": "minecraft:paper"}
+    },
+    "result": {
+        "item": "ravenstone:floppy_disk",
+        "count": 1
+    }
+}

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sh.talonfox.ravenstone.items.ItemRegister;
 import sh.talonfox.ravenstone.network.PacketRegister;
+import sh.talonfox.ravenstone.sounds.SoundEventRegister;
 
 public class Ravenstone implements ModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger("ravenstone");
@@ -27,6 +28,8 @@ public class Ravenstone implements ModInitializer {
         PacketRegister.Initalize();
         LOGGER.info("Registering Resource Reload Handlers...");
         ResourceRegister.Initialize();
+        LOGGER.info("Registering Sound Events...");
+        SoundEventRegister.Initialize();
         LOGGER.info("Initialization successful!");
     }
 }

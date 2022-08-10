@@ -1,5 +1,8 @@
 {
-  "itemGroup.ravenstone.item_group": "§r§k!!!!!§r§lRavenstone§r§k!!!!!§r",
-  "block.ravenstone.computer": "Raven-8t Computer",
-  "block.ravenstone.terminal": "Terminal"
+    "itemGroup.ravenstone.item_group": "§r§k!!!!!§r§lRavenstone§r§k!!!!!§r",
+    "block.ravenstone.computer": "Raven-8t Computer",
+    "block.ravenstone.terminal": "Terminal",
+    "block.ravenstone.floppy_drive": "Floppy Disk Drive",
+    "item.ravenstone.transistor": "Transistor",
+    "item.ravenstone.floppy_disk": "5¼\" Floppy Disk"
 }
