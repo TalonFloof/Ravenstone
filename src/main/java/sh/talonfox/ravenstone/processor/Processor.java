@@ -429,63 +429,62 @@ public class Processor {
             case 0xca -> { // dex
                 X--;
                 setZNFlags(X);
-
             }
             case 0xc6 -> { // dec zp
                 int addr = pc1();
                 byte value = (byte) peek1(addr);
                 value--;
                 poke1(addr, Byte.toUnsignedInt(value));
-
+                setZNFlags(value);
             }
             case 0xd6 -> { // dec zp, x
                 int addr = pc1() + Byte.toUnsignedInt(X);
                 byte value = (byte) peek1(addr);
                 value--;
                 poke1(addr, Byte.toUnsignedInt(value));
-
+                setZNFlags(value);
             }
             case 0xce -> { // dec abs
                 int addr = pc2();
                 byte value = (byte) peek1(addr);
                 value--;
                 poke1(addr, Byte.toUnsignedInt(value));
-
+                setZNFlags(value);
             }
             case 0xde -> { // dec abs, x
                 int addr = pc2() + Byte.toUnsignedInt(X);
                 byte value = (byte) peek1(addr);
                 value--;
                 poke1(addr, Byte.toUnsignedInt(value));
-
+                setZNFlags(value);
             }
             case 0xe6 -> { // inc zp
                 int addr = pc1();
                 byte value = (byte) peek1(addr);
                 value++;
                 poke1(addr, Byte.toUnsignedInt(value));
-
+                setZNFlags(value);
             }
             case 0xf6 -> { // inc zp, x
                 int addr = pc1() + Byte.toUnsignedInt(X);
                 byte value = (byte) peek1(addr);
                 value++;
                 poke1(addr, Byte.toUnsignedInt(value));
-
+                setZNFlags(value);
             }
             case 0xee -> { // inc abs
                 int addr = pc2();
                 byte value = (byte) peek1(addr);
                 value++;
                 poke1(addr, Byte.toUnsignedInt(value));
-
+                setZNFlags(value);
             }
             case 0xfe -> { // inc abs, x
                 int addr = pc2() + Byte.toUnsignedInt(X);
                 byte value = (byte) peek1(addr);
                 value++;
                 poke1(addr, Byte.toUnsignedInt(value));
-
+                setZNFlags(value);
                 ///// BRANCH /////
             }
             case 0xf0 -> { // beq
@@ -823,7 +822,7 @@ public class Processor {
             }
             default -> {
                 Stop = true;
-                Ravenstone.LOGGER.error("Invalid Opcode: 0x{}: 0x{}", Integer.toHexString(Short.toUnsignedInt(PC)), Integer.toHexString(insn));
+                Ravenstone.LOGGER.error("Invalid Opcode: 0x{}: 0x{}", Integer.toHexString(Short.toUnsignedInt(PC)-1), Integer.toHexString(insn));
             }
         }
     }
@@ -889,7 +888,7 @@ public class Processor {
         int sum = (FlagD?fromBCD(Byte.toUnsignedInt(A)):Byte.toUnsignedInt(A));
         sum += (FlagD?fromBCD(Byte.toUnsignedInt(op)):Byte.toUnsignedInt(op));
         sum += (FlagC?1:0);
-        A = (FlagD?((byte)toBCD(sum & 0xFF)):((byte)sum));
+        A = (FlagD?((byte)toBCD(sum & 0xFF)):((byte)(sum & 0xFF)));
         setZNFlags(A);
         FlagC = (sum > 0xFF);
         FlagV = (areSignBitsSame && (((A ^ op) & 0x80) != 0));
@@ -898,9 +897,9 @@ public class Processor {
         ADC((byte)(~op));
     }
     private void CMP(byte a, byte b) {
-        FlagN = ((byte)(b - a) < 0);
-        FlagZ = (b == a);
-        FlagC = (b >= a);
+        FlagN = ((byte)(a - b) < 0);
+        FlagZ = (a == b);
+        FlagC = (a >= b);
     }
     private byte ASL(byte a) {
         FlagC = (a < 0);

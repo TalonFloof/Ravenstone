@@ -95,9 +95,6 @@ cold_boot.flpy_search:
     pla
     pha
     sta $1 ; Store Floppy Drive Bus ID in Zero Page
-    ; Engage Head
-    lda #$21
-    sta $200
 cold_boot.miss:
     pla
     sec
@@ -160,8 +157,8 @@ print_line.end:
 
 newline:
     pha
-    lda #49
-    cmp $202
+    lda $202
+    cmp #49
     bcs .scroll
     inc $200
     inc $202
@@ -204,8 +201,9 @@ print_nibble:
     and #$f
     clc
     adc #'0'
-    cmp #$ba
+    cmp #$3a
     bcc .print
+    clc
     adc #7
 print_nibble.print:
     sta $210, x
@@ -235,6 +233,43 @@ print_word:
     lda $11
     jsr print_byte
     pla
+    rts
+
+; INPUT: X=String, OUTPUT: A=Parsed Value
+parse_nibble:
+    lda $00, x
+    cmp #'A'
+    bcs .upper
+    sec
+    sbc #'0'
+    jmp .after
+parse_nibble.upper:
+    sec
+    sbc #'7'
+parse_nibble.after:
+    clc
+    rts
+parse_byte:
+    jsr parse_nibble
+    asl
+    asl
+    asl
+    asl
+    sta $FF
+    inx
+    jsr parse_nibble
+    dex
+    ora $FF
+    rts
+parse_word:
+    jsr parse_byte
+    sta $11
+    inx
+    inx
+    jsr parse_byte
+    sta $10
+    dex
+    dex
     rts
 
 register_dump:
@@ -297,8 +332,8 @@ monitor_prompt.input_loop:
     lda #8
     cmp $FF
     beq .backspace
-    lda #64
-    cmp $7F
+    lda $7F
+    cmp #64
     bcs .input_loop ; Buffer is full!
     lda $FF
     jmp .after
@@ -326,6 +361,109 @@ monitor_prompt.after_loop:
     sta $80, x
     jsr newline
     ; Figure out what command the user just put
+    lda #0
+    cmp $81
+    bne .next1
+    lda #'R'
+    cmp $80
+    bne .next1
+    jsr register_dump
+    jmp monitor_prompt
+monitor_prompt.next1:
+    lda $7F
+    cmp #5
+    bcc .next2
+    lda $84
+    cmp #'G'
+    bne .next2
+    ldx #$80
+    jsr parse_word
+    ldx #$FF
+    txs
+    jmp ($10)
+    nop
+    nop
+    nop
+    brk
+monitor_prompt.next2:
+    lda $7F
+    cmp #7
+    bcc .next3
+    lda $84
+    cmp #':'
+    bne .next3
+    ldx #$80
+    jsr parse_word
+    ldx #$85
+    ldy #0
+monitor_prompt.write_loop:
+    jsr parse_byte
+    sta ($10), y
+    inc $10
+    bne .write_after_inc
+    inc $11
+monitor_prompt.write_after_inc:
+    inx
+    inx
+    inx
+    lda $7F
+    clc
+    adc #$80
+    sta $FF
+    cpx $FF
+    bcc .write_loop
+    jmp monitor_prompt
+monitor_prompt.next3:
+    lda $7F
+    cmp #9
+    bne .unknown
+    lda $84
+    cmp #'.'
+    bne .unknown
+    ;;;;;
+    ldx #$85
+    jsr parse_word
+    lda $10
+    sta $c0
+    lda $11
+    sta $c1
+    ldx #$80
+    jsr parse_word
+    ;;;;; Dump Memory
+monitor_prompt.memdump_loop_begin:
+    jsr newline
+    ldx #0
+    jsr print_word
+    lda #':'
+    sta $214
+    ldx #$6
+    ldy #0
+monitor_prompt.memdump_loop:
+    lda ($10), y
+    jsr print_byte
+    lda $10
+    cmp $c0
+    bne .memdump_inc
+    lda $11
+    cmp $c1
+    bne .memdump_inc
+    jmp .memdump_loop_final
+monitor_prompt.memdump_inc:
+    inc $10
+    bne .memdump_after_inc
+    inc $11
+monitor_prompt.memdump_after_inc:
+    inx
+    inx
+    inx
+    cpx #54
+    bcc .memdump_loop
+    jmp .memdump_loop_begin
+monitor_prompt.memdump_loop_final:
+    jsr newline
+    jmp monitor_prompt
+
+monitor_prompt.unknown:
     lda #(unknown_command & 0xFF)
     sta $10
     lda #(unknown_command >> 8)
@@ -346,6 +484,11 @@ unknown_command: .asciiz "?"
     .org 0xFC00
 floppy_rom_boot:
     cld
+    lda $1
+    mmu $0
+    ; Engage Head
+    lda #$21
+    sta $200
     jmp stop
     .fill (0xFE00-*), 0xdb
     .org 0xFE00

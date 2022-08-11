@@ -20,9 +20,7 @@
     "diskette_drive_seek_tiny": {
         "sounds": [
             "ravenstone:drive_skip_tiny0",
-            "ravenstone:drive_skip_tiny1",
-            "ravenstone:drive_skip_tiny2",
-            "ravenstone:drive_skip_tiny3"
+            "ravenstone:drive_skip_tiny1"
         ]
     },
     "diskette_drive_seek_large": {

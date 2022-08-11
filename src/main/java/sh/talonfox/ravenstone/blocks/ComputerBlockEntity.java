@@ -99,7 +99,7 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     }
     public void explode() {
         BlockPos pos = this.getPos();
-        Objects.requireNonNull(this.getWorld()).createExplosion(null, DamageSource.GENERIC.setExplosive(), null,(double)pos.getX()+0.5,(double)pos.getY()+0.5,(double)pos.getZ()+0.5,2F,false, Explosion.DestructionType.NONE);
+        Objects.requireNonNull(this.getWorld()).createExplosion(null, /*DamageSource.GENERIC.setExplosive()*/null, null,(double)pos.getX()+0.5,(double)pos.getY()+0.5,(double)pos.getZ()+0.5,2F,false, Explosion.DestructionType.NONE);
     }
     public static void tick(World world, BlockPos pos, BlockState state, ComputerBlockEntity blockEntity) {
         if(!world.isClient())

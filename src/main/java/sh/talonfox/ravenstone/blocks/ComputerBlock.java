@@ -6,6 +6,8 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
@@ -59,6 +61,7 @@ public class ComputerBlock extends BlockWithEntity implements BlockEntityProvide
         ComputerBlockEntity blockEntity = (ComputerBlockEntity)world.getBlockEntity(pos);
         if(!world.isClient()) {
             assert blockEntity != null;
+            world.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK, SoundCategory.BLOCKS, 0.5F, 2.0F);
             blockEntity.CPU.reset();
             world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
             blockEntity.CPU.Stop = state.get(RUNNING);
