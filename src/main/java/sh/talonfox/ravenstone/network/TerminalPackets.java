@@ -18,9 +18,8 @@ public class TerminalPackets {
             TerminalBlockEntity terminal = (TerminalBlockEntity)serverPlayerEntity.getWorld().getBlockEntity(pos);
             assert terminal != null;
             for(int i=0;i < 16; i++) {
-                if(terminal.KeyboardBuffer[i] == 0) {
-                    terminal.KeyboardBuffer[i] = key;
-
+                if(terminal.KeyboardBuffer[(15-i)] == 0) {
+                    terminal.KeyboardBuffer[(15-i)] = key;
                     return;
                 }
             }

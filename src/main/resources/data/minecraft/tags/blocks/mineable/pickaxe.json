@@ -1,0 +1,8 @@
+{
+    "replace": false,
+    "values": [
+        "ravenstone:computer",
+        "ravenstone:terminal",
+        "ravenstone:floppy_drive"
+    ]
+}

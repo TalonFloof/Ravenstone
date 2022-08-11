@@ -30,7 +30,10 @@
 ; $06 X Register
 ; $07 Y Register
 ; $08-$09 SP Register
-; $10-$11 String Address
+; $10-$11 16-bit Address Subroutine Input
+; $12 Zero
+; $7F Console Input Position
+; $80-$BF Console Input
 
     .org $F000
 
@@ -65,6 +68,8 @@ cold_boot: ; This function is called when the Raven-8t first starts up
     sta $07
     sta $08
     sta $09
+    sta $12
+    sta $7F
     ; Search for a Teletype that we can use
     lda #$06
 cold_boot.tty_search:
@@ -72,20 +77,38 @@ cold_boot.tty_search:
     pha
     lda #'M'
     cmp $2f8
-    bne .tty_miss
+    bne .flpy_search
     lda #'T'
     cmp $2fc
-    bne .tty_miss
+    bne .flpy_search
     pla
-    jmp .tty_hit
-cold_boot.tty_miss:
+    pha
+    sta $0 ; Store Teletype Bus ID in Zero Page
+    jmp .miss
+cold_boot.flpy_search:
+    lda #'F'
+    cmp $2f8
+    bne .miss
+    lda #'D'
+    cmp $2fc
+    bne .miss
+    pla
+    pha
+    sta $1 ; Store Floppy Drive Bus ID in Zero Page
+    ; Engage Head
+    lda #$21
+    sta $200
+cold_boot.miss:
     pla
     sec
     sbc #1
     bne .tty_search
+    cmp $0
+    bne cold_boot.tty_hit
     jmp stop
 cold_boot.tty_hit:
-    sta 0 ; Store Teletype Bus ID in Zero Page
+    lda $0
+    mmu $0
     ; Clear Display
     lda #0
     sta $200
@@ -117,13 +140,9 @@ cold_boot.tty_hit:
 
 ; Pass pointer to address $10
 print_line:
-    php
     pha
     tya
     pha
-
-    lda $202
-    sta $200
 
     ldy #0
 print_line.loop:
@@ -133,11 +152,89 @@ print_line.loop:
     iny
     jmp .loop
 print_line.end:
-    inc $202
+    jsr newline
     pla
     tay
     pla
-    plp
+    rts
+
+newline:
+    pha
+    lda #49
+    cmp $202
+    bcs .scroll
+    inc $200
+    inc $202
+    jmp .after
+newline.scroll:
+    lda #0
+    sta $20a ; BlitXOffset
+    sta $20b ; BlitYOffset
+    sta $208 ; BlitXStart
+    lda #1
+    sta $209 ; BlitYStart
+    lda #80
+    sta $20c ; BlitWidth
+    lda #49
+    sta $20d ; BlitHeight
+    lda #3
+    sta $207
+    wai
+    ;;;;;
+    lda #' '
+    sta $208
+    lda #49
+    sta $20b
+    lda #80
+    sta $20c
+    lda #1
+    sta $20d
+    lda #0
+    sta $20a
+    lda #1
+    sta $207
+    wai
+newline.after:
+    pla
+    rts
+
+; A=Number X=Screen Line Offset
+print_nibble:
+    pha
+    and #$f
+    clc
+    adc #'0'
+    cmp #$ba
+    bcc .print
+    adc #7
+print_nibble.print:
+    sta $210, x
+    pla
+    rts
+print_byte:
+    pha
+    inx
+    jsr print_nibble
+    dex
+    lsr ; Shift Right 4 bits
+    lsr
+    lsr
+    lsr
+    jsr print_nibble
+    pla
+    rts
+
+print_word:
+    pha
+    lda $10
+    inx
+    inx
+    jsr print_byte
+    dex
+    dex
+    lda $11
+    jsr print_byte
+    pla
     rts
 
 register_dump:
@@ -146,12 +243,40 @@ register_dump:
     lda #(registerdump_header >> 8)
     sta $11
     jsr print_line
-    lda $202
-    sta $200
     lda #';'
     sta $210
-    inc $200
-    inc $202
+
+    ldx #2 ; PC
+    lda $2
+    sta $10
+    lda $3
+    sta $11
+    jsr print_word
+
+    ldx #7 ; Flags
+    lda $4
+    jsr print_byte
+
+    ldx #10 ; .A
+    lda $5
+    jsr print_byte
+
+    ldx #13 ; .X
+    lda $6
+    jsr print_byte
+
+    ldx #16 ; .Y
+    lda $7
+    jsr print_byte
+
+    ldx #19 ; SP
+    lda #1
+    jsr print_byte
+    ldx #21
+    lda $8
+    jsr print_byte
+
+    jsr newline
     rts
 
 monitor_prompt:
@@ -159,7 +284,54 @@ monitor_prompt:
     sta $210
     lda #1
     sta $201
-    jmp stop
+    lda #0
+    sta $7F
+monitor_prompt.input_loop:
+    lda $204
+    beq monitor_prompt.input_loop
+    ; Check if backspace or enter was pressed
+    sta $FF
+    lda #$D
+    cmp $FF
+    beq .after_loop
+    lda #8
+    cmp $FF
+    beq .backspace
+    lda #64
+    cmp $7F
+    bcs .input_loop ; Buffer is full!
+    lda $FF
+    jmp .after
+monitor_prompt.backspace:
+    ldx $7F
+    cpx $12
+    beq monitor_prompt.input_loop
+    dex
+    dec $201
+    lda #' '
+    sta $211, x
+    stx $7F
+    jmp monitor_prompt.input_loop
+monitor_prompt.after:
+    ldx $7F
+    sta $211, x
+    inc $201
+    sta $80, x
+    inx
+    stx $7F
+    jmp monitor_prompt.input_loop
+monitor_prompt.after_loop:
+    ldx $7F
+    lda #0
+    sta $80, x
+    jsr newline
+    ; Figure out what command the user just put
+    lda #(unknown_command & 0xFF)
+    sta $10
+    lda #(unknown_command >> 8)
+    sta $11
+    jsr print_line
+    jmp monitor_prompt
 
 stop:
     jmp stop
@@ -168,6 +340,7 @@ stop:
 
 coldboot_banner: .asciiz "Raven-8t Monitor, Copyright (C) 2022 TalonFox"
 registerdump_header: .asciiz "   PC  SR .A .X .Y  SP"
+unknown_command: .asciiz "?"
 
     .fill (0xFC00-*), 0xdb
     .org 0xFC00

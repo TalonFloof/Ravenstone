@@ -15,6 +15,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
+
 public class FloppyDriveBlock extends PeripheralBlock {
     public static final BooleanProperty HAS_DISK = BooleanProperty.of("has_disk");
     public static final BooleanProperty LIGHT = BooleanProperty.of("light");
@@ -40,6 +42,16 @@ public class FloppyDriveBlock extends PeripheralBlock {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         return world.isClient() ? null : checkType(type, BlockRegister.RAVEN_FLOPPY_DRIVE_ENTITY, FloppyDriveBlockEntity::tick);
+    }
+
+    @Override
+    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean a) {
+        if (state.getBlock() != newState.getBlock()) {
+            if(world != null) {
+                ((FloppyDriveBlockEntity)Objects.requireNonNull(world.getBlockEntity(pos))).ejectDisk(true);
+            }
+        }
+        super.onStateReplaced(state, world, pos, newState, a);
     }
 
     @Override

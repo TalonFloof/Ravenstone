@@ -66,8 +66,6 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
                 return RAM[Short.toUnsignedInt(at)];
             }
         }
-        Ravenstone.LOGGER.error("Memory Error!");
-        //CPU.Error = true;
         return (byte)0xFF;
     }
 
@@ -134,7 +132,6 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         processor.putBoolean("Error",CPU.Error);
         processor.putBoolean("Stop",CPU.Stop);
         processor.putBoolean("Wait",CPU.Wait);
-        processor.putBoolean("BusEnabled",CPU.BusEnabled);
         processor.putBoolean("FlagC",CPU.FlagC);
         processor.putBoolean("FlagZ",CPU.FlagZ);
         processor.putBoolean("FlagI",CPU.FlagI);
@@ -162,7 +159,6 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
         CPU.Error = processor.getBoolean("Error");
         CPU.Stop = processor.getBoolean("Stop");
         CPU.Wait = processor.getBoolean("Wait");
-        CPU.BusEnabled = processor.getBoolean("BusEnabled");
         CPU.FlagC = processor.getBoolean("FlagC");
         CPU.FlagZ = processor.getBoolean("FlagZ");
         CPU.FlagI = processor.getBoolean("FlagI");

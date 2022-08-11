@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#B#",
+        "#TD",
+        "#R#"
+    ],
+    "key": {
+        "#": {"item": "minecraft:iron_ingot"},
+        "R": {"item": "minecraft:redstone"},
+        "T": {"item": "ravenstone:transistor"},
+        "D": {"item": "minecraft:dropper"},
+        "B": {"tag": "minecraft:buttons"}
+    },
+    "result": {
+        "item": "ravenstone:floppy_drive",
+        "count": 1
+    }
+}

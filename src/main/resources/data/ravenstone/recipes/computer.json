@@ -7,7 +7,7 @@
   ],
   "key": {
     "#": {"item": "minecraft:iron_ingot"},
-    "D": {"item": "minecraft:diamond_block"},
+    "D": {"item": "minecraft:diamond"},
     "R": {"item": "minecraft:redstone"},
     "T": {"item": "ravenstone:transistor"}
   },

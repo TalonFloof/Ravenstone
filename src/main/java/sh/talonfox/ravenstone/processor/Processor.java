@@ -20,7 +20,6 @@ public class Processor {
     public Boolean Wait = false;
     public Boolean Stop = true;
     public int BusOffset = 0;
-    public Boolean BusEnabled = false;
     public Boolean Error = false;
     public static byte[] MONITOR = null;
 
@@ -44,7 +43,6 @@ public class Processor {
         BrkAddr = (short)0xf000;
         Wait = false;
         Error = false;
-        BusEnabled = false;
         BusOffset = 0;
     }
     public void next() {
@@ -835,22 +833,13 @@ public class Processor {
 
     private int peek1(int addr) {
         var uaddr = addr & 0xFFFF;
-        if(BusEnabled && uaddr >= BusOffset && uaddr <= BusOffset+0xFF) {
-            Ravenstone.LOGGER.warn("Bus Read is currently unimplemented");
-            return 0;
-        } else {
-            return Byte.toUnsignedInt(Host.memRead((short)uaddr));
-        }
+        return Byte.toUnsignedInt(Host.memRead((short)uaddr));
     }
     private int peek2(int addr) {return peek1(addr) | (peek1(addr + 1) << 8);}
 
     private void poke1(int addr, int b) {
         var uaddr = addr & 0xFFFF;
-        if(BusEnabled && uaddr >= BusOffset && uaddr <= BusOffset+0xFF) {
-            Ravenstone.LOGGER.warn("Bus Write is currently unimplemented");
-        } else {
-            Host.memStore((short)uaddr, (byte)(b & 0xFF));
-        }
+        Host.memStore((short)uaddr, (byte)(b & 0xFF));
     }
     //private void poke2(int addr, int s) {poke1(addr, s); poke1(addr + 1, s >>> 8);}
 

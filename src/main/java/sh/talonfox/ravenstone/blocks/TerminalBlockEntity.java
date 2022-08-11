@@ -11,8 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class TerminalBlockEntity extends PeripheralBlockEntity {
     public byte[] ScreenBuffer = new byte[80*50];
