@@ -34,6 +34,8 @@
 ; $12 Zero
 ; $7F Console Input Position
 ; $80-$BF Console Input
+; $C0-$C1 Reserved
+; $FE-$FF Reserved
 
     .org $F000
 
@@ -55,6 +57,36 @@ stp .macro
 
 cold_boot: ; This function is called when the Raven-8t first starts up
     cld      ; Disable BCD Mode
+    ; Save Registers
+    sta $05
+    stx $06
+    sty $07
+    lda #0
+    sta $FE
+    tsx
+    cpx #$ff
+    beq .cold
+    inc $FE
+    pla
+    sta $4
+    pla
+    sta $2
+    pla
+    sta $3
+    tsx
+    txa
+    sta $08
+    lda #$1
+    sta $09
+
+    lda #$00 ; Clear Registers
+    ldx #$00
+    ldy #$00
+    sta $12
+    sta $7F
+    lda #$06
+    jmp .tty_search
+.cold:
     lda #$00 ; Clear Registers
     ldx #$00
     ldy #$00
@@ -95,6 +127,9 @@ cold_boot.flpy_search:
     pla
     pha
     sta $1 ; Store Floppy Drive Bus ID in Zero Page
+    ; Retract Head
+    lda #$20
+    sta $280
 cold_boot.miss:
     pla
     sec
@@ -108,6 +143,8 @@ cold_boot.tty_hit:
     mmu $0
     ; Clear Display
     lda #0
+    cmp $FE
+    bne .after_clear
     sta $200
     sta $201
     sta $202
@@ -122,12 +159,25 @@ cold_boot.tty_hit:
     lda #1
     sta $207
     wai
+.after_clear:
     ; Print Banner
+    lda #0
+    cmp $FE
+    beq .cold_banner
+    jsr newline
+    lda #(break_banner & 0xFF)
+    sta $10
+    lda #(break_banner >> 8)
+    sta $11
+    jsr print_line
+    jmp cold_boot.after_banner
+cold_boot.cold_banner:
     lda #(coldboot_banner & 0xFF)
     sta $10
     lda #(coldboot_banner >> 8)
     sta $11
     jsr print_line
+cold_boot.after_banner:
     jsr register_dump
     jmp monitor_prompt
     nop ; Padding
@@ -157,6 +207,8 @@ print_line.end:
 
 newline:
     pha
+    lda #0
+    sta $201
     lda $202
     cmp #49
     bcs .scroll
@@ -380,6 +432,9 @@ monitor_prompt.next1:
     jsr parse_word
     ldx #$FF
     txs
+    lda #$00
+    ldx #$00
+    ldy #$00
     jmp ($10)
     nop
     nop
@@ -477,10 +532,10 @@ stop:
     .byte 0xdb
 
 coldboot_banner: .asciiz "Raven-8t Monitor, Copyright (C) 2022 TalonFox"
+break_banner: .asciiz "Break"
 registerdump_header: .asciiz "   PC  SR .A .X .Y  SP"
 unknown_command: .asciiz "?"
-
-    .fill (0xFC00-*), 0xdb
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     .org 0xFC00
 floppy_rom_boot:
     cld
@@ -488,11 +543,87 @@ floppy_rom_boot:
     mmu $0
     ; Engage Head
     lda #$21
-    sta $200
-    jmp stop
-    .fill (0xFE00-*), 0xdb
-    .org 0xFE00
+    jsr floppy_command
+    ; Seek To Track 0
+    lda #$01
+    jsr floppy_command
+    cmp #0
+    bne floppy_no_disk
+    ; Clear Buffer
+    lda #$F4
+    sta $280
+    ; Read all of the sectors in the first track
+    lda #0
+    sta $F0
+    sta $281
+    sta $282
+    sta $20 ; 0x0300
+    lda #3
+    sta $21
+load_sector:
+    ldy #0
+    lda $F0
+    sta $282
+    lda #$80
+    jsr floppy_command
+memcpy:
+    lda $200, y
+    sta ($20), y
+    iny
+    cpy #128
+    bne memcpy
+    lda $20
+    clc
+    adc #128
+    sta $20
+    lda $21
+    adc #0
+    sta $21
+    clc
+    inc $F0
+    lda $F0
+    cmp #32
+    bcs .after
+    jmp load_sector
+.after:
+    ; Retract Head
+    lda #$20
+    jsr floppy_command
+    ; Execute the Bootloader
+    lda #0
+    ldx #0
+    ldy #0
+    pha
+    plp
+    jmp $300
+    nop
+    nop
+    nop
+    brk
+floppy_command:
+    sta $280
+floppy_command.wait:
+    wai
+    lda $280
+    sta $2
+    and #1
+    cmp #1
+    beq .wait
+    lda $2
+    rts
+floppy_no_disk:
+    lda $0
+    mmu $0
+    lda #(floppy_no_disk_msg & 0xFF)
+    sta $10
+    lda #(floppy_no_disk_msg >> 8)
+    sta $11
+    jsr print_line
+    brk
+floppy_no_disk_msg: .asciiz "No disk?"
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    .org 0xFD00
 hard_drive_rom_boot:
-    cld
-    jmp stop
-    .fill (65536-*), 0xdb
+    brk
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    .fill (65536-*), 0

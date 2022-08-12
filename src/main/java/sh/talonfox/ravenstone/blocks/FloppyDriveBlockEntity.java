@@ -5,16 +5,19 @@ import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.items.FloppyDisk;
 import sh.talonfox.ravenstone.sounds.SoundEventRegister;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 /*
 Some code used in this file is adapted from 2xsaiko's Retrocomputers mod.
@@ -32,9 +35,9 @@ Commands:
 0x60: Step Out
 0x80: Read
 0xA0: Write
-0xC4: Stop & Clear Data Buffer
-0xE4: Read Label
-0xF4: Write Label
+0xC4: Read Label
+0xE4: Write Label
+0xF4: Stop & Clear Data Buffer
  */
 
 public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
@@ -44,7 +47,9 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
     private int Flags = 0;
     private int SectorNumber = 0;
     private int TrackNumber = 0;
-    private int CurrentTrack = 0;
+    private int CurrentTrack = 63;
+    private int FinishDelay = -1;
+    private byte[] Buffer = new byte[128];
 
     public FloppyDriveBlockEntity(BlockPos pos, BlockState state) {
         super(BlockRegister.RAVEN_FLOPPY_DRIVE_ENTITY, pos, state);
@@ -61,6 +66,7 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
         if(!world.isClient()) {
             world.playSound(null, getPos(), SoundEventRegister.DISKETTE_INSERT_SOUND_EVENT, SoundCategory.BLOCKS, 0.25f, 1f);
         }
+        CurrentTrack = 63;
         return true;
     }
 
@@ -78,12 +84,46 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
             world.spawnEntity(item);
             world.setBlockState(getPos(), this.getCachedState().with(FloppyDriveBlock.HAS_DISK, false));
             world.setBlockState(getPos(), this.getCachedState().with(FloppyDriveBlock.LIGHT, false));
+            CurrentTrack = 63;
             world.playSound(null, getPos(), SoundEventRegister.DISKETTE_EJECT_SOUND_EVENT, SoundCategory.BLOCKS, 0.25f, 1f);
         } else {
             ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), stack);
         }
         stack = Items.AIR.getDefaultStack();
         return true;
+    }
+
+    public void Seek(int track, BlockState state) {
+        if(!state.get(FloppyDriveBlock.LIGHT)) {
+            Flags |= 0x10;
+            Flags &= ~1;
+        }
+        int distance = Math.abs(CurrentTrack-track);
+        switch(distance) {
+            case 4 -> {
+                world.playSound(null, getPos(), SoundEventRegister.DISKETTE_SEEK_TINY3_EVENT, SoundCategory.BLOCKS, 1f, 1f);
+                FinishDelay = 1;
+            }
+            case 3 -> {
+                world.playSound(null, getPos(), SoundEventRegister.DISKETTE_SEEK_TINY2_EVENT, SoundCategory.BLOCKS, 1f, 1f);
+                FinishDelay = 1;
+            }
+            case 2 -> {
+                world.playSound(null, getPos(), SoundEventRegister.DISKETTE_SEEK_TINY1_EVENT, SoundCategory.BLOCKS, 1f, 1f);
+                Flags &= ~1;
+            }
+            case 1 -> {
+                world.playSound(null, getPos(), SoundEventRegister.DISKETTE_SEEK_TINY0_EVENT, SoundCategory.BLOCKS, 1f, 1f);
+                Flags &= ~1;
+            }
+            default -> {
+                if(distance >= 5) {
+                    world.playSound(null, getPos(), SoundEventRegister.DISKETTE_SEEK_LARGE_EVENT, SoundCategory.BLOCKS, 1f, 1f);
+                    FinishDelay = 9;
+                }
+            }
+        }
+        CurrentTrack = track;
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, FloppyDriveBlockEntity blockEntity) {
@@ -101,19 +141,68 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
         } else {
             blockEntity.spinTicks = 0;
         }
-        if(blockEntity.Command != 0) {
-            if(blockEntity.Command == 0x20) {
-                if(state.get(FloppyDriveBlock.LIGHT)) {
-                    world.setBlockState(pos, state.with(FloppyDriveBlock.LIGHT, false));
-                }
-                blockEntity.Flags &= 0x20; blockEntity.Flags |= (state.get(FloppyDriveBlock.LIGHT)?0x20:0);
-            } else if(blockEntity.Command == 0x21) {
-                if(!state.get(FloppyDriveBlock.LIGHT)) {
-                    world.setBlockState(pos, state.with(FloppyDriveBlock.LIGHT, true));
-                }
-                blockEntity.Flags &= 0x20; blockEntity.Flags |= (state.get(FloppyDriveBlock.LIGHT)?0x20:0);
+        if(blockEntity.FinishDelay != -1) {
+            blockEntity.FinishDelay -= 1;
+            if(blockEntity.FinishDelay == -1) {
+                blockEntity.Flags &= ~1;
             }
-            blockEntity.Flags &= ~1;
+        }
+        if(blockEntity.Command != 0) {
+            if(blockEntity.stack.isEmpty()) {
+                blockEntity.Flags &= ~9;
+                blockEntity.Flags |= 8;
+            } else {
+                if (blockEntity.Command == 0x01) { // Seek to Track 0
+                    blockEntity.Seek(0, state);
+                    blockEntity.FinishDelay = 9;
+                } else if (blockEntity.Command == 0x10) { // Seek
+                    if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
+                        blockEntity.Flags |= 0x10;
+                        blockEntity.Flags &= ~1;
+                    } else {
+                        blockEntity.Seek(blockEntity.SectorNumber, state);
+                    }
+                } else if (blockEntity.Command == 0x20) { // Retract Head
+                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                        world.setBlockState(pos, state.with(FloppyDriveBlock.LIGHT, false));
+                    }
+                    blockEntity.Flags &= ~0x20;
+                    blockEntity.Flags |= (state.get(FloppyDriveBlock.LIGHT) ? 0x20 : 0);
+                    blockEntity.Flags &= ~1;
+                } else if (blockEntity.Command == 0x21) { // Engage Head
+                    if (!state.get(FloppyDriveBlock.LIGHT)) {
+                        world.setBlockState(pos, state.with(FloppyDriveBlock.LIGHT, true));
+                        blockEntity.FinishDelay = 9;
+                    } else {
+                        blockEntity.Flags &= ~1;
+                    }
+                    blockEntity.Flags &= ~0x20;
+                    blockEntity.Flags |= (state.get(FloppyDriveBlock.LIGHT) ? 0x20 : 0);
+                } else if(blockEntity.Command == 0x80) { // Read
+                    if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
+                        blockEntity.Flags |= 0x10;
+                    } else {
+                        var sec = ((FloppyDisk) blockEntity.stack.getItem()).readSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber*32)+blockEntity.SectorNumber);
+                        blockEntity.Buffer = Arrays.copyOf(sec,128);
+                    }
+                    blockEntity.Flags &= ~1;
+                } else if(blockEntity.Command == 0xA0) { // Write
+                    if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
+                        blockEntity.Flags |= 0x10;
+                    } else {
+                        ((FloppyDisk)blockEntity.stack.getItem()).writeSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber*32)+blockEntity.SectorNumber,blockEntity.Buffer);
+                    }
+                    blockEntity.Flags &= ~1;
+                } else if(blockEntity.Command == 0xC4) { // Read Label
+                    String name = ((FloppyDisk)blockEntity.stack.getItem()).getLabel(blockEntity.stack);
+                    blockEntity.Buffer = Arrays.copyOf(name.getBytes(StandardCharsets.US_ASCII),128);
+                } else if(blockEntity.Command == 0xE4) { // Write Label
+                    var length = 128;
+                    for(int i=0;i < 128;i++) {if(blockEntity.Buffer[i] == 0){length = i; break;}}
+                    var label = new String(blockEntity.Buffer,0,length,StandardCharsets.US_ASCII);
+                    ((FloppyDisk) blockEntity.stack.getItem()).setLabel(blockEntity.stack,label);
+                }
+            }
             blockEntity.Command = 0;
         }
     }
@@ -123,16 +212,19 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
     @Override
     public byte readData(byte at) {
         switch(Byte.toUnsignedInt(at)) {
-            case 0x0 -> { // Flags
+            case 0x80 -> { // Flags
                 return (byte)Flags;
             }
-            case 0x1 -> { // Track Number
+            case 0x81 -> { // Track Number
                 return (byte)TrackNumber;
             }
-            case 0x2 -> { // Sector Number
+            case 0x82 -> { // Sector Number
                 return (byte)SectorNumber;
             }
             default -> {
+                if(Byte.toUnsignedInt(at) < 0x80) {
+                    return Buffer[Byte.toUnsignedInt(at)];
+                }
                 if(Byte.toUnsignedInt(at) >= 0xF8) {
                     return (getIdentifier().getBytes(StandardCharsets.US_ASCII)[Byte.toUnsignedInt(at)-0xF8]);
                 }
@@ -143,17 +235,26 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
     @Override
     public void storeData(byte at, byte data) {
         switch(Byte.toUnsignedInt(at)) {
-            case 0x0 -> { // Command
-                if((Flags & 1) == 0) {
+            case 0x80 -> { // Command
+                if(Byte.toUnsignedInt(data) == 0xF4) {
+                    Command = 0;
+                    Flags = 0xfe;
+                    Arrays.fill(Buffer, (byte)0);
+                } else if((Flags & 1) == 0) {
                     Command = Byte.toUnsignedInt(data);
                     Flags = 1;
                 }
             }
-            case 0x1 -> { // Track Number
+            case 0x81 -> { // Track Number
                 TrackNumber = Byte.toUnsignedInt(data);
             }
-            case 0x2 -> { // Track Number
+            case 0x82 -> { // Sector Number
                 SectorNumber = Byte.toUnsignedInt(data);
+            }
+            default -> {
+                if(Byte.toUnsignedInt(at) < 0x80) {
+                    Buffer[Byte.toUnsignedInt(at)] = data;
+                }
             }
         }
     }

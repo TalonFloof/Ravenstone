@@ -1,9 +1,13 @@
 package sh.talonfox.ravenstone.items;
 
+import com.google.common.collect.Lists;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtByteArray;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -37,9 +41,9 @@ public class FloppyDiskUser extends Item implements FloppyDisk {
     }
 
     private void initializeSectorNbtData(ItemStack stack) {
-        NbtCompound sectors = new NbtCompound();
+        var sectors = new NbtList();
         for(int i=0;i < 2048;i++) {
-            sectors.putByteArray(Integer.toString(i),new byte[0]);
+            sectors.add(new NbtByteArray(new byte[0]));
         }
         stack.getOrCreateNbt().put("Sectors",sectors);
     }
@@ -47,14 +51,19 @@ public class FloppyDiskUser extends Item implements FloppyDisk {
     @Override
     public byte[] readSector(ItemStack stack, ServerWorld world, int index) {
         if(stack.getOrCreateNbt().contains("Sectors")) {
-            return stack.getOrCreateNbt().getCompound("Sectors").getByteArray(Integer.toString(index));
+            return ((NbtByteArray)stack.getOrCreateNbt().getList("Sectors", NbtElement.BYTE_ARRAY_TYPE).get(index)).getByteArray();
         } else {
             initializeSectorNbtData(stack);
-            return stack.getOrCreateNbt().getCompound("Sectors").getByteArray(Integer.toString(index));
+            return  ((NbtByteArray)stack.getOrCreateNbt().getList("Sectors", NbtElement.BYTE_ARRAY_TYPE).get(index)).getByteArray();
         }
     }
     @Override
     public void writeSector(ItemStack stack, ServerWorld world, int index, byte[] data) {
-
+        if(stack.getOrCreateNbt().contains("Sectors")) {
+            stack.getOrCreateNbt().getList("Sectors", NbtElement.BYTE_ARRAY_TYPE).set(index,new NbtByteArray(data));
+        } else {
+            initializeSectorNbtData(stack);
+            stack.getOrCreateNbt().getList("Sectors", NbtElement.BYTE_ARRAY_TYPE).set(index,new NbtByteArray(data));
+        }
     }
 }

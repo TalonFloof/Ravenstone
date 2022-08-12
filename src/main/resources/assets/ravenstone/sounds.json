@@ -17,10 +17,24 @@
             "ravenstone:drive_begin3"
         ]
     },
-    "diskette_drive_seek_tiny": {
+    "diskette_drive_seek_tiny0": {
         "sounds": [
-            "ravenstone:drive_skip_tiny0",
+            "ravenstone:drive_skip_tiny0"
+        ]
+    },
+    "diskette_drive_seek_tiny1": {
+        "sounds": [
             "ravenstone:drive_skip_tiny1"
+        ]
+    },
+    "diskette_drive_seek_tiny2": {
+        "sounds": [
+            "ravenstone:drive_skip_tiny2"
+        ]
+    },
+    "diskette_drive_seek_tiny3": {
+        "sounds": [
+            "ravenstone:drive_skip_tiny3"
         ]
     },
     "diskette_drive_seek_large": {
