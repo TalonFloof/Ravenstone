@@ -4,5 +4,6 @@
     "block.ravenstone.terminal": "Terminal",
     "block.ravenstone.floppy_drive": "Floppy Disk Drive",
     "item.ravenstone.transistor": "Transistor",
-    "item.ravenstone.floppy_disk": "Floppy Disk"
+    "item.ravenstone.floppy_disk": "Floppy Disk",
+    "item.ravenstone.floppy_disk_magpie": "Floppy Disk"
 }

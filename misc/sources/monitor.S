@@ -23,7 +23,6 @@
 ; ZEROPAGE MEMORY MAP
 ; $00 TTY Bus ID
 ; $01 Disk Drive ID
-;;;;;;;;; REGISTER DUMP;;;;;;;;;
 ; $02-$03 PC
 ; $04 Flags
 ; $05 A Register
@@ -31,7 +30,6 @@
 ; $07 Y Register
 ; $08-$09 SP Register
 ; $10-$11 16-bit Address Subroutine Input
-; $12 Zero
 ; $7F Console Input Position
 ; $80-$BF Console Input
 ; $C0-$C1 Reserved
@@ -82,7 +80,6 @@ cold_boot: ; This function is called when the Raven-8t first starts up
     lda #$00 ; Clear Registers
     ldx #$00
     ldy #$00
-    sta $12
     sta $7F
     lda #$06
     jmp .tty_search
@@ -100,7 +97,6 @@ cold_boot: ; This function is called when the Raven-8t first starts up
     sta $07
     sta $08
     sta $09
-    sta $12
     sta $7F
     ; Search for a Teletype that we can use
     lda #$06
@@ -205,10 +201,43 @@ print_line.end:
     pla
     rts
 
-newline:
+;;;;;;;;;;;;;;;;;;;;;;;
+; INPUT: A=Char
+print_char:
     pha
+    cmp #$D
+    beq .return
+    cmp #$A
+    beq .line
+    cmp #$8
+    beq .back
+    ;;;;;
+    ldx $201
+    sta $210, x
+    inx
+    stx $201
+    jmp .after
+print_char.return:
     lda #0
     sta $201
+    jmp .after
+print_char.line:
+    jsr newline
+    jmp .after
+print_char.back:
+    ldx $201
+    dex
+    stx $201
+print_char.after:
+    pla
+    rts
+read_char:
+    lda $204
+    beq read_char
+    rts
+
+newline:
+    pha
     lda $202
     cmp #49
     bcs .scroll
@@ -391,7 +420,7 @@ monitor_prompt.input_loop:
     jmp .after
 monitor_prompt.backspace:
     ldx $7F
-    cpx $12
+    cpx #0
     beq monitor_prompt.input_loop
     dex
     dec $201
@@ -410,6 +439,7 @@ monitor_prompt.after:
 monitor_prompt.after_loop:
     ldx $7F
     lda #0
+    sta $201
     sta $80, x
     jsr newline
     ; Figure out what command the user just put
@@ -626,4 +656,7 @@ floppy_no_disk_msg: .asciiz "No disk?"
 hard_drive_rom_boot:
     brk
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    .fill (65536-*), 0
+    .org $FFF7
+    jmp read_char       ; $FFF7
+    jmp print_char      ; $FFFA
+    jmp floppy_command  ; $FFFD
