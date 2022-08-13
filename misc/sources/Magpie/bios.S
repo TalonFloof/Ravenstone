@@ -62,11 +62,15 @@ magpie_home:
     rts
 magpie_track:
     sta $282
+    pha
     lda #$10
     jsr $FFFD
-    nop
+    pla
+    sta $281
+    rts
 magpie_sector:
-    nop
+    sta $281
+    rts
 magpie_read:
     nop
 magpie_write:
