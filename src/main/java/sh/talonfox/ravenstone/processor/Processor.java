@@ -21,7 +21,7 @@ public class Processor {
     public Boolean Stop = true;
     public int BusOffset = 0;
     public Boolean Error = false;
-    public static byte[] MONITOR = null;
+    public static byte[] ROM = null;
 
     public Processor(ProcessorHost host) {
         Host = host;
@@ -792,6 +792,7 @@ public class Processor {
                 switch (data) {
                     case 0x00 -> { // Switch Bus ID
                         BusOffset = Byte.toUnsignedInt(A);
+                        Host.invalidatePeripheral();
                     }
                     case 0x80 -> { // Get Bus ID
                         A = (byte) BusOffset;

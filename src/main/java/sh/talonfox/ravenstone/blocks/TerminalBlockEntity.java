@@ -164,6 +164,7 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
 
     @Override
     public void writeNbt(NbtCompound tag) {
+        super.writeNbt(tag);
         tag.putByteArray("ScreenBuffer", ScreenBuffer);
         tag.putByteArray("KeyboardBuffer", KeyboardBuffer);
         tag.putInt("CursorX", CursorX);
@@ -171,19 +172,10 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
     }
     @Override
     public void readNbt(NbtCompound tag) {
+        super.readNbt(tag);
         ScreenBuffer = tag.getByteArray("ScreenBuffer");
         KeyboardBuffer = tag.getByteArray("KeyboardBuffer");
         CursorX = tag.getInt("CursorX");
         CursorY = tag.getInt("CursorY");
-    }
-
-    @Nullable
-    @Override
-    public Packet<ClientPlayPacketListener> toUpdatePacket() {
-        return BlockEntityUpdateS2CPacket.create(this);
-    }
-    @Override
-    public NbtCompound toInitialChunkDataNbt() {
-        return createNbt();
     }
 }

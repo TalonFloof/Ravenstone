@@ -1,0 +1,31 @@
+{
+    "multipart": [
+        {
+            "apply": { "model": "ravenstone:block/ribbon_cable_core" }
+        },
+        {
+            "when": { "north": "true" },
+            "apply": { "model": "ravenstone:block/ribbon_cable", "uvlock": false }
+        },
+        {
+            "when": { "south": "true" },
+            "apply": { "model": "ravenstone:block/ribbon_cable", "y": 180, "uvlock": false }
+        },
+        {
+            "when": { "east": "true" },
+            "apply": { "model": "ravenstone:block/ribbon_cable", "y": 90, "uvlock": false }
+        },
+        {
+            "when": { "west": "true" },
+            "apply": { "model": "ravenstone:block/ribbon_cable", "y": 270, "uvlock": false }
+        },
+        {
+            "when": { "up": "true" },
+            "apply": { "model": "ravenstone:block/ribbon_cable", "x": 270, "uvlock": false }
+        },
+        {
+            "when": { "down": "true" },
+            "apply": { "model": "ravenstone:block/ribbon_cable", "x": 90, "uvlock": false }
+        }
+    ]
+}

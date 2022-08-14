@@ -56,6 +56,9 @@ public class FloppyDriveBlock extends PeripheralBlock {
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        var result = super.onUse(state,world,pos,player,hand,hit);
+        if(result != ActionResult.PASS)
+            return result;
         if(world == null)
             return ActionResult.FAIL;
         var blockEntity = world.getBlockEntity(pos);

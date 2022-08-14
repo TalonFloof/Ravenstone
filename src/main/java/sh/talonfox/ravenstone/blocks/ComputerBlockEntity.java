@@ -11,7 +11,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
-import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.processor.Processor;
 import sh.talonfox.ravenstone.processor.ProcessorHost;
 
@@ -22,6 +21,7 @@ import static sh.talonfox.ravenstone.blocks.ComputerBlock.RUNNING;
 public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     public Processor CPU = new Processor(this);
     public byte[] RAM = new byte[16384];
+    private PeripheralBlockEntity CachedPeripheral = null;
 
     public ComputerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockRegister.RAVEN_COMPUTER_ENTITY, pos, state);
@@ -42,25 +42,14 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     @Override
     public byte memRead(short at) {
         if(Short.toUnsignedInt(at) >= 0xf000) {
-            return Processor.MONITOR[(Short.toUnsignedInt(at) - 0xf000)];
+            return Processor.ROM[(Short.toUnsignedInt(at) - 0xf000)];
         } else if(Short.toUnsignedInt(at) < RAM.length) {
             if(at >= 0x200 && at <= 0x2FF) { // Bus Read
-                BlockPos pos = switch (CPU.BusOffset) {
-                    case 0x01 -> this.getPos().north();
-                    case 0x02 -> this.getPos().south();
-                    case 0x03 -> this.getPos().east();
-                    case 0x04 -> this.getPos().west();
-                    case 0x05 -> this.getPos().up();
-                    case 0x06 -> this.getPos().down();
-                    default -> null;
-                };
-                if (pos != null) {
-                    assert this.world != null;
-                    BlockEntity peripheral = this.world.getBlockEntity(pos);
-                    if (peripheral != null)
-                        if (peripheral instanceof PeripheralBlockEntity) {
-                            return ((PeripheralBlockEntity) peripheral).readData((byte)(at - 0x200));
-                        }
+                var peripheral = CachedPeripheral==null?PeripheralBlockEntity.findPeripheral(this.getWorld(),this.getPos(),CPU.BusOffset):CachedPeripheral;
+                if(peripheral != null) {
+                    if(CachedPeripheral == null)
+                        CachedPeripheral = peripheral;
+                    return peripheral.readData((byte) (at - 0x200));
                 }
             } else {
                 return RAM[Short.toUnsignedInt(at)];
@@ -73,24 +62,11 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     public void memStore(short at, byte data) {
         if(Short.toUnsignedInt(at) < RAM.length) {
             if(at >= 0x200 && at <= 0x2FF) { // Bus Page
-                BlockPos pos = switch (CPU.BusOffset) {
-                    case 0x01 -> this.getPos().north();
-                    case 0x02 -> this.getPos().south();
-                    case 0x03 -> this.getPos().east();
-                    case 0x04 -> this.getPos().west();
-                    case 0x05 -> this.getPos().up();
-                    case 0x06 -> this.getPos().down();
-                    default -> null;
-                };
-                if (pos != null) {
-                    assert this.world != null;
-                    if (!this.world.getBlockState(pos).isAir()) {
-                        BlockEntity peripheral = this.world.getBlockEntity(pos);
-                        if (peripheral != null)
-                            if (peripheral instanceof PeripheralBlockEntity) {
-                                ((PeripheralBlockEntity) peripheral).storeData((byte) (at - 0x200), data);
-                            }
-                    }
+                var peripheral = CachedPeripheral==null?PeripheralBlockEntity.findPeripheral(this.getWorld(),this.getPos(),CPU.BusOffset):CachedPeripheral;
+                if(peripheral != null) {
+                    if(CachedPeripheral == null)
+                        CachedPeripheral = peripheral;
+                    peripheral.storeData((byte) (at - 0x200), data);
                 }
             } else if(Short.toUnsignedInt(at) < 0xFF00) {
                 RAM[Short.toUnsignedInt(at)] = data;
@@ -99,7 +75,10 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
     }
     public void explode() {
         BlockPos pos = this.getPos();
-        Objects.requireNonNull(this.getWorld()).createExplosion(null, /*DamageSource.GENERIC.setExplosive()*/null, null,(double)pos.getX()+0.5,(double)pos.getY()+0.5,(double)pos.getZ()+0.5,2F,false, Explosion.DestructionType.NONE);
+        Objects.requireNonNull(this.getWorld()).createExplosion(null, DamageSource.GENERIC.setExplosive(), null,(double)pos.getX()+0.5,(double)pos.getY()+0.5,(double)pos.getZ()+0.5,2F,false, Explosion.DestructionType.NONE);
+    }
+    public void invalidatePeripheral() {
+        CachedPeripheral = null;
     }
     public static void tick(World world, BlockPos pos, BlockState state, ComputerBlockEntity blockEntity) {
         if(!world.isClient())

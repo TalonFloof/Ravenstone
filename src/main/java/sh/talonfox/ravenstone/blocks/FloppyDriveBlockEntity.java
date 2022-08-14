@@ -153,14 +153,24 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                 blockEntity.Flags |= 8;
             } else {
                 if (blockEntity.Command == 0x01) { // Seek to Track 0
-                    blockEntity.Seek(0, state);
-                    blockEntity.FinishDelay = 9;
-                } else if (blockEntity.Command == 0x10) { // Seek
-                    if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
+                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                        blockEntity.Seek(0, state);
+                        blockEntity.FinishDelay = 9;
+                    } else {
                         blockEntity.Flags |= 0x10;
                         blockEntity.Flags &= ~1;
+                    }
+                } else if (blockEntity.Command == 0x10) { // Seek
+                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                        if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
+                            blockEntity.Flags |= 0x10;
+                            blockEntity.Flags &= ~1;
+                        } else {
+                            blockEntity.Seek(blockEntity.SectorNumber, state);
+                        }
                     } else {
-                        blockEntity.Seek(blockEntity.SectorNumber, state);
+                        blockEntity.Flags |= 0x10;
+                        blockEntity.Flags &= ~1;
                     }
                 } else if (blockEntity.Command == 0x20) { // Retract Head
                     if (state.get(FloppyDriveBlock.LIGHT)) {
@@ -172,35 +182,50 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                 } else if (blockEntity.Command == 0x21) { // Engage Head
                     if (!state.get(FloppyDriveBlock.LIGHT)) {
                         world.setBlockState(pos, state.with(FloppyDriveBlock.LIGHT, true));
-                        blockEntity.FinishDelay = 9;
+                        blockEntity.FinishDelay = 2;
                     } else {
                         blockEntity.Flags &= ~1;
                     }
                     blockEntity.Flags &= ~0x20;
                     blockEntity.Flags |= (state.get(FloppyDriveBlock.LIGHT) ? 0x20 : 0);
                 } else if(blockEntity.Command == 0x80) { // Read
-                    if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
-                        blockEntity.Flags |= 0x10;
-                    } else {
-                        var sec = ((FloppyDisk) blockEntity.stack.getItem()).readSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber*32)+blockEntity.SectorNumber);
-                        blockEntity.Buffer = Arrays.copyOf(sec,128);
+                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                        if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
+                            blockEntity.Flags |= 0x10;
+                        } else {
+                            var sec = ((FloppyDisk) blockEntity.stack.getItem()).readSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber * 32) + blockEntity.SectorNumber);
+                            blockEntity.Buffer = Arrays.copyOf(sec, 128);
+                        }
                     }
                     blockEntity.Flags &= ~1;
                 } else if(blockEntity.Command == 0xA0) { // Write
-                    if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
-                        blockEntity.Flags |= 0x10;
-                    } else {
-                        ((FloppyDisk)blockEntity.stack.getItem()).writeSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber*32)+blockEntity.SectorNumber,blockEntity.Buffer);
+                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                        if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
+                            blockEntity.Flags |= 0x10;
+                        } else {
+                            ((FloppyDisk) blockEntity.stack.getItem()).writeSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber * 32) + blockEntity.SectorNumber, blockEntity.Buffer);
+                        }
                     }
                     blockEntity.Flags &= ~1;
                 } else if(blockEntity.Command == 0xC4) { // Read Label
-                    String name = ((FloppyDisk)blockEntity.stack.getItem()).getLabel(blockEntity.stack);
-                    blockEntity.Buffer = Arrays.copyOf(name.getBytes(StandardCharsets.US_ASCII),128);
+                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                        String name = ((FloppyDisk) blockEntity.stack.getItem()).getLabel(blockEntity.stack);
+                        blockEntity.Buffer = Arrays.copyOf(name.getBytes(StandardCharsets.US_ASCII), 128);
+                    }
+                    blockEntity.Flags &= ~1;
                 } else if(blockEntity.Command == 0xE4) { // Write Label
-                    var length = 128;
-                    for(int i=0;i < 128;i++) {if(blockEntity.Buffer[i] == 0){length = i; break;}}
-                    var label = new String(blockEntity.Buffer,0,length,StandardCharsets.US_ASCII);
-                    ((FloppyDisk) blockEntity.stack.getItem()).setLabel(blockEntity.stack,label);
+                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                        var length = 128;
+                        for (int i = 0; i < 128; i++) {
+                            if (blockEntity.Buffer[i] == 0) {
+                                length = i;
+                                break;
+                            }
+                        }
+                        var label = new String(blockEntity.Buffer, 0, length, StandardCharsets.US_ASCII);
+                        ((FloppyDisk) blockEntity.stack.getItem()).setLabel(blockEntity.stack, label);
+                    }
+                    blockEntity.Flags &= ~1;
                 }
             }
             blockEntity.Command = 0;

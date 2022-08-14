@@ -33,6 +33,9 @@ public class TerminalBlock extends PeripheralBlock {
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        var result = super.onUse(state,world,pos,player,hand,hit);
+        if(result != ActionResult.PASS)
+            return result;
         if(world.isClient()) {
             var mc = MinecraftClient.getInstance();
             mc.setScreen(new TerminalScreen(Text.translatable("block.ravenstone.terminal"),(TerminalBlockEntity)world.getBlockEntity(pos)));

@@ -20,7 +20,7 @@ public class ResourceRegister {
             @Override
             public void reload(ResourceManager manager) {
                 Ravenstone.LOGGER.info("Reloading Data!");
-                Processor.MONITOR = loadImage(manager, "monitor.bin");
+                Processor.ROM = loadImage(manager, "bootstrap.bin");
                 IMAGES.put("Magpie",loadImage(manager,"disks/magpie.bin"));
             }
 
