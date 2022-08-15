@@ -1,1 +1,1 @@
-![](https://github.com/Talon396/Ravenstone/)
+![](https://raw.githubusercontent.com/Talon396/Ravenstone/main/doc/Ravenstone%20(Full%20Logo).svg)
