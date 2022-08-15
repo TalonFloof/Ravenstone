@@ -11,7 +11,7 @@
     "sources": "https://github.com/Talon396/Ravenstone",
     "issues": "https://github.com/Talon396/Ravenstone/issues"
   },
-  "license": "Apache 2.0",
+  "license": "MIT",
   "icon": "assets/ravenstone/icon.png",
   "environment": "*",
   "entrypoints": {

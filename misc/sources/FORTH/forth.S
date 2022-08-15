@@ -1,6 +1,6 @@
     .org $0400
 
-.macro defcode
+.macro dcode
 
 .endmacro
 

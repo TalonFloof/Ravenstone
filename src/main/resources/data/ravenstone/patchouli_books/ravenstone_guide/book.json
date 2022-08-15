@@ -1,6 +1,6 @@
 {
     "name": "Raven-8t Handbook",
-    "subtitle": "From Ravenstone Inc.",
+    "subtext": "From Ravenstone Inc.",
     "landing_text": "This Handbook describes the Raven-8t, one of the latest computers in the Raven Minicomputer family from Ravenstone. This powerful, low-cost machine is packaged in only 1 cubic meter, and is designed to fit a broad range of applications from controlling farms to hosting multi-user systems.",
     "version": 1,
     "show_progress": false,
