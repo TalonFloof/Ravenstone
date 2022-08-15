@@ -3,13 +3,9 @@ package sh.talonfox.ravenstone.items;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtByteArray;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.World;
 import sh.talonfox.ravenstone.ResourceRegister;
 

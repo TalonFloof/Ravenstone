@@ -1,0 +1,20 @@
+{
+    "name": "First Steps",
+    "icon": "minecraft:textures/mob_effect/jump_boost.png",
+    "category": "ravenstone:quick_start",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Prerequisites",
+            "text": "First things first, you're going to need to craft the Raven-8t computer, plus some peripherals. If you haven't done that, here a list of things you'll need."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "ravenstone:textures/book/prerequisites.png"
+            ],
+            "border": true,
+            "text": "$(li)1x $(l:b_computer)Raven-8t Computer$()$(li)1x $(l:b_terminal)Terminal$()$(li)1x $(l:b_floppy_disk_drive)Floppy Disk Drive$()"
+        }
+    ]
+}

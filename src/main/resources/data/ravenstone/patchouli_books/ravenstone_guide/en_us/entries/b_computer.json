@@ -1,0 +1,18 @@
+{
+    "name": "Raven-8t Computer",
+    "icon": "ravenstone:computer",
+    "category": "ravenstone:blocks",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "title": "Raven-8t Computer",
+            "item": "ravenstone:computer",
+            "text": "The Raven-8t Computer is the heart of your computer setup. It's capable of doing thousands of computations and comparisons every second. Your setup cannot function without this block."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "ravenstone:computer",
+            "title": "Recipe"
+        }
+    ]
+}

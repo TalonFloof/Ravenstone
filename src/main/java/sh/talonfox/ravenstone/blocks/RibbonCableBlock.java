@@ -6,7 +6,6 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
@@ -55,7 +54,7 @@ public class RibbonCableBlock extends Block {
         if(blockState.isAir())
             return false;
         var block = blockState.getBlock();
-        return ((block instanceof ComputerBlock) || (block instanceof PeripheralBlock) || (block instanceof RibbonCableBlock));
+        return ((block instanceof PeripheralBlock) || (block instanceof RibbonCableBlock));
     }
 
     @Override

@@ -1,0 +1,18 @@
+{
+    "name": "Floppy Disk",
+    "icon": "ravenstone:floppy_disk",
+    "category": "ravenstone:items",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "title": "Floppy Disk",
+            "item": "ravenstone:floppy_disk",
+            "text": "Floppy Disks are a removable storage medium that can hold up to 256 KiB of data. Floppy Disks are needed to use a $(l:b_floppy_disk_drive)Floppy Disk Drive$()"
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "ravenstone:floppy_disk",
+            "title": "Recipe"
+        }
+    ]
+}

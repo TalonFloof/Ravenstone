@@ -1,0 +1,18 @@
+{
+    "name": "Floppy Disk Drive",
+    "icon": "ravenstone:floppy_drive",
+    "category": "ravenstone:blocks",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "title": "Floppy Disk Drive",
+            "item": "ravenstone:floppy_drive",
+            "text": "A Floppy Disk Drive is a peripheral for the $(l:b_computer)Raven-8t Computer$() that allows the computer to store/retrieve information from $(l:i_floppy_disk)Floppy Disks$()."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "ravenstone:floppy_drive",
+            "title": "Recipe"
+        }
+    ]
+}

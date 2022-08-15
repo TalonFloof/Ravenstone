@@ -60,7 +60,7 @@ public class BusIDScreen extends Screen {
                 buf.writeInt(busID);
                 ClientPlayNetworking.send(PeripheralPackets.SET_BUS_ID, buf);
                 assert MinecraftClient.getInstance().player != null;
-                MinecraftClient.getInstance().player.playSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 1.0F, 2.0F);
+                MinecraftClient.getInstance().player.playSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 0.25F, 2.0F);
             }
         }
         return true;

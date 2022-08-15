@@ -1,0 +1,18 @@
+{
+    "name": "Ribbon Cable",
+    "icon": "ravenstone:ribbon_cable",
+    "category": "ravenstone:blocks",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "title": "Ribbon Cable",
+            "item": "ravenstone:ribbon_cable",
+            "text": "Ribbon Cables allow you to connect peripherals to a computer. Ribbon Cables only need to be used if a peripheral isn't directly next to the computer."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "ravenstone:ribbon_cable",
+            "title": "Recipe"
+        }
+    ]
+}

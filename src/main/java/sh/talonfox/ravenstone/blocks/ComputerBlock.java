@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 
-public class ComputerBlock extends BlockWithEntity implements BlockEntityProvider {
+public class ComputerBlock extends PeripheralBlock implements BlockEntityProvider {
     public static final BooleanProperty RUNNING = BooleanProperty.of("running");
 
     public ComputerBlock(Settings settings) {
@@ -58,6 +58,9 @@ public class ComputerBlock extends BlockWithEntity implements BlockEntityProvide
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        var result = super.onUse(state,world,pos,player,hand,hit);
+        if(result != ActionResult.PASS)
+            return result;
         ComputerBlockEntity blockEntity = (ComputerBlockEntity)world.getBlockEntity(pos);
         if(!world.isClient()) {
             assert blockEntity != null;

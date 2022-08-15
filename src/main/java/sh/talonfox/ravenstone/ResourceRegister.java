@@ -1,13 +1,10 @@
 package sh.talonfox.ravenstone;
 
-import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
-import sh.talonfox.ravenstone.items.FloppyDiskSystem;
-import sh.talonfox.ravenstone.items.ItemRegister;
 import sh.talonfox.ravenstone.processor.Processor;
 
 import java.io.InputStream;
@@ -21,7 +18,8 @@ public class ResourceRegister {
             public void reload(ResourceManager manager) {
                 Ravenstone.LOGGER.info("Reloading Data!");
                 Processor.ROM = loadImage(manager, "bootstrap.bin");
-                IMAGES.put("Magpie",loadImage(manager,"disks/magpie.bin"));
+                IMAGES.put("FORTH",loadImage(manager,"disks/forth.bin"));
+                IMAGES.put("Magpie (WIP)",loadImage(manager,"disks/magpie.bin"));
             }
 
             @Override

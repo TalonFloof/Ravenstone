@@ -1,34 +1,23 @@
 ;This program is located on Track 0 on the Floppy Disk containing the operating system
 ;This contains a BIOS (Basic Input/Output System) and it also loads the kernel containing the full OS
 
-; These Macros implement opcodes which are exclusive to Ravenstone
 mmu .macro
     .byte $ef
     .byte \0
 .endmacro
-mas .macro
-    .byte $df
-.endmacro
-; These Macros implement opcodes which are available on the WDC 65C02
-wai .macro
-    .byte $cb
-.endmacro
-stp .macro
-    .byte $db
-.endmacro
 
     .org $0300
-    jmp magpie_cold_boot ; COLDBOOT $300
-    jmp $FFF7            ; TTYIN    $303
-    jmp $FFFA            ; TTYOUT   $306
-    jmp magpie_select    ; DSKSEL   $309
-    jmp magpie_home      ; DSKHOME  $30c
-    jmp magpie_track     ; DSKTRACK $30f
-    jmp magpie_sector    ; DSKSECT  $312
-    jmp magpie_read      ; DSKREAD  $315
-    jmp magpie_write     ; DSKWRITE $315
-    jmp $0               ; DSKLBLRD $318 (Optional)
-    jmp $0               ; DSKLBLWR $31b (Optional)
+    jmp magpie_cold_boot  ; COLDBOOT $300
+    jmp magpie_read_char  ; TTYIN    $303
+    jmp magpie_print_char ; TTYOUT   $306
+    jmp magpie_select     ; DSKSEL   $309
+    jmp magpie_home       ; DSKHOME  $30c
+    jmp magpie_track      ; DSKTRACK $30f
+    jmp magpie_sector     ; DSKSECT  $312
+    jmp magpie_read       ; DSKREAD  $315
+    jmp magpie_write      ; DSKWRITE $315
+    jmp $0                ; DSKLBLRD $318 (Optional)
+    jmp $0                ; DSKLBLWR $31b (Optional)
 magpie_cold_boot:
     lda $00
     sta magpie_tty_id
@@ -38,12 +27,11 @@ magpie_cold_boot:
     ; Clear Terminal
     lda #$20
     sta $208
-    lda #0
-    sta $200
-    sta $201
-    sta $202
-    sta $20A
-    sta $20B
+    stz $200
+    stz $201
+    stz $202
+    stz $20A
+    stz $20B
     lda #80
     sta $20C
     lda #50
@@ -134,6 +122,78 @@ magpie_bios_write_string.loop:
     iny
     jmp .loop
 magpie_bios_write_string.after:
+    rts
+
+;;;;;;;;;;;;;;;;;;;;;;;
+; INPUT: A=Char
+magpie_print_char:
+    pha
+    phx
+    cmp #$D
+    beq .return
+    cmp #$A
+    beq .line
+    cmp #$8
+    beq .back
+    ;;;;;
+    ldx $201
+    sta $210, x
+    inx
+    stx $201
+    bra .after
+magpie_print_char.return:
+    stz $201
+    bra .after
+magpie_print_char.line:
+    jsr newline
+    bra .after
+magpie_print_char.back:
+    dec $201
+magpie_print_char.after:
+    pla
+    plx
+    rts
+
+magpie_read_char:
+    lda $204
+    beq magpie_read_char
+    rts
+
+newline:
+    pha
+    lda $202
+    cmp #49
+    bcs .scroll
+    inc $200
+    inc $202
+    bra .after
+newline.scroll:
+    stz $20a ; BlitXOffset
+    stz $20b ; BlitYOffset
+    stz $208 ; BlitXStart
+    lda #1
+    sta $209 ; BlitYStart
+    lda #80
+    sta $20c ; BlitWidth
+    lda #49
+    sta $20d ; BlitHeight
+    lda #3
+    sta $207
+    wai
+    ;;;;;
+    lda #' '
+    sta $208
+    lda #49
+    sta $20b
+    lda #80
+    sta $20c
+    lda #1
+    sta $20d
+    stz $20a
+    sta $207
+    wai
+newline.after:
+    pla
     rts
 
 magpie_floppy_id: .byte 0

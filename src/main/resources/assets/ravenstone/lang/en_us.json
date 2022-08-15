@@ -1,10 +1,12 @@
 {
     "itemGroup.ravenstone.item_group": "§r§k!!!!!§r§lRavenstone§r§k!!!!!§r",
+    "item.ravenstone.ravenstone": "It's a secret to everybody.",
     "block.ravenstone.computer": "Raven-8t Computer",
     "block.ravenstone.terminal": "Terminal",
     "block.ravenstone.floppy_drive": "Floppy Disk Drive",
     "block.ravenstone.ribbon_cable": "Ribbon Cable",
     "item.ravenstone.transistor": "Transistor",
     "item.ravenstone.floppy_disk": "Floppy Disk",
+    "item.ravenstone.floppy_disk_forth": "Floppy Disk",
     "item.ravenstone.floppy_disk_magpie": "Floppy Disk"
 }

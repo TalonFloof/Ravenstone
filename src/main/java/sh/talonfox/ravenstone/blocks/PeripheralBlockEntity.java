@@ -3,7 +3,6 @@ package sh.talonfox.ravenstone.blocks;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.ClientPlayPacketListener;
@@ -17,8 +16,9 @@ import java.util.LinkedList;
 
 public abstract class PeripheralBlockEntity extends BlockEntity {
     private int BusID = 0;
-    public PeripheralBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+    public PeripheralBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, int defaultBusID) {
         super(type, pos, state);
+        BusID = defaultBusID;
     }
 
     public String getIdentifier() {return "\0\0\0\0\0\0\0\0";}

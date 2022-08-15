@@ -2,12 +2,8 @@ package sh.talonfox.ravenstone.blocks;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.Packet;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -26,7 +22,7 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
     public int BlitWidth = 0;
     public int BlitHeight = 0;
     public TerminalBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockRegister.RAVEN_TERMINAL_ENTITY, pos, state);
+        super(BlockRegister.RAVEN_TERMINAL_ENTITY, pos, state, 1);
         Arrays.fill(ScreenBuffer,(byte)0x20);
     }
 

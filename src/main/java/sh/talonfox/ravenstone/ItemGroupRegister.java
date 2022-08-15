@@ -17,6 +17,7 @@ public class ItemGroupRegister {
                 stacks.add(new ItemStack(BlockRegister.RAVEN_RIBBON_CABLE_BLOCK));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_TRANSISTOR));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_FLOPPY_DISK_USER));
+                stacks.add(new ItemStack(ItemRegister.RAVENSTONE_FORTH_FLOPPY_DISK));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_MAGPIE_FLOPPY_DISK));
             }).build();
 }

@@ -7,7 +7,7 @@ public class Processor {
     public byte A = 0;
     public byte X = 0;
     public byte Y = 0;
-    public short PC = (short)0xf000;
+    public short PC = (short)0xff00;
     public short SP = 0x1ff;
     public Boolean FlagC = false;
     public Boolean FlagZ = false;
@@ -15,8 +15,8 @@ public class Processor {
     public Boolean FlagD = false;
     public Boolean FlagV = false;
     public Boolean FlagN = false;
-    public short ResetAddr = (short)0xf000;
-    public short BrkAddr = (short)0xf000;
+    public short ResetAddr = (short)0xff00;
+    public short BrkAddr = (short)0xff00;
     public Boolean Wait = false;
     public Boolean Stop = true;
     public int BusOffset = 0;
@@ -38,9 +38,9 @@ public class Processor {
         FlagV = false;
         FlagN = false;
         SP = 0x1ff;
-        PC = (short)0xf000;
-        ResetAddr = (short)0xf000;
-        BrkAddr = (short)0xf000;
+        PC = (short)0xff00;
+        ResetAddr = (short)0xff00;
+        BrkAddr = (short)0xff00;
         Wait = false;
         Error = false;
         BusOffset = 0;
@@ -90,6 +90,11 @@ public class Processor {
                 A = (byte) peek1(peek2(pc1()) + Byte.toUnsignedInt(Y));
                 setZNFlags(A);
 
+
+            }
+            case 0x2b -> { // *lda (ind)
+                A = (byte) peek1(peek2(pc1()));
+                setZNFlags(A);
                 ///// LDX /////
             }
             case 0xa2 -> { // ldx #
@@ -170,6 +175,9 @@ public class Processor {
             }
             case 0x91 -> { // sta (ind), y
                 poke1(peek2(pc1()) + Byte.toUnsignedInt(Y), Byte.toUnsignedInt(A));
+            }
+            case 0x92 -> { // *sta (ind)
+                poke1(peek2(pc1()), Byte.toUnsignedInt(A));
 
                 ///// STX /////
             }
@@ -197,8 +205,21 @@ public class Processor {
             case 0x8c -> { // sty abs
                 poke1(pc2(), Byte.toUnsignedInt(Y));
 
-                ///// MISC. /////
+                ///// *STZ /////
             }
+            case 0x9c -> { // *stz abs
+                poke1(pc2(), 0);
+            }
+            case 0x9e -> { // *stz abs, x
+                poke1(pc2()+Byte.toUnsignedInt(X), 0);
+            }
+            case 0x64 -> { // *stz zp
+                poke1(pc1(), 0);
+            }
+            case 0x74 -> { // *stz zp, x
+                poke1(pc1()+Byte.toUnsignedInt(X), 0);
+            }
+            ///// MISC. /////
             case 0xba -> { // tsx
                 X = (byte) (Short.toUnsignedInt(SP) & 0xff);
                 setZNFlags(X);
@@ -214,9 +235,27 @@ public class Processor {
                 push1(Byte.toUnsignedInt(A));
 
             }
+            case 0xda -> { // *phx
+                push1(Byte.toUnsignedInt(X));
+
+            }
+            case 0x5a -> { // *phy
+                push1(Byte.toUnsignedInt(Y));
+
+            }
             case 0x68 -> { // pla
                 A = (byte) pop1();
                 setZNFlags(A);
+
+            }
+            case 0xfa -> { // *plx
+                X = (byte) pop1();
+                setZNFlags(X);
+
+            }
+            case 0x7a -> { // *ply
+                Y = (byte) pop1();
+                setZNFlags(Y);
 
             }
             case 0x08 -> { // php
@@ -229,18 +268,12 @@ public class Processor {
             }
             case 0x4c -> { // jmp abs
                 PC = (short)pc2();
-
-            /*
-                =====NOTICE=====
-                NMOS 6502's have a hardware bug with indirect jumps where
-                jumps would wrap to the beginning of a page if it was in
-                the page boundary. ( e.g. $xxFF would jump to $xx00 instead of $xxFF+1 )
-                However, the Ravenstone emulator doesn't emulate this bug, similar to the
-                CMOS variations of the 6502 ( such as the 65C02 ).
-             */
             }
             case 0x6c -> { // jmp ind
                 PC = (short)peek2(pc2());
+            }
+            case 0x7c -> { // *jmp (ind, x)
+                PC = (short)peek2(pc2()+Byte.toUnsignedInt(X));
             }
             case 0x20 -> { // jsr abs
                 int subAddr = pc2();
@@ -291,6 +324,11 @@ public class Processor {
                 A &= peek1(peek2(pc1()) + Byte.toUnsignedInt(Y));
                 setZNFlags(A);
 
+            }
+            case 0x32 -> { // *and (ind)
+                A &= peek1(peek2(pc1()));
+                setZNFlags(A);
+
                 ///// OR /////
             }
             case 0x09 -> { // or #
@@ -331,7 +369,10 @@ public class Processor {
             case 0x11 -> { // or (ind), y
                 A |= peek1(peek2(pc1()) + Byte.toUnsignedInt(Y));
                 setZNFlags(A);
-
+            }
+            case 0x12 -> { // *or (ind)
+                A |= peek1(peek2(pc1()));
+                setZNFlags(A);
                 ///// EOR /////
             }
             case 0x49 -> { // eor #
@@ -372,6 +413,10 @@ public class Processor {
             case 0x51 -> { // eor (ind), y
                 A ^= peek1(peek2(pc1()) + Byte.toUnsignedInt(Y));
                 setZNFlags(A);
+            }
+            case 0x52 -> { // *eor (ind)
+                A ^= peek1(peek2(pc1()));
+                setZNFlags(A);
 
                 ///// BIT /////
             }
@@ -387,7 +432,18 @@ public class Processor {
                 FlagZ = ((Byte.toUnsignedInt(A) & val) == 0);
                 FlagN = ((val & 0x80) != 0);
                 FlagV = ((val & 0x40) != 0);
-
+            }
+            case 0x3c -> { // *bit abs, x
+                int val = peek1(pc2()+Byte.toUnsignedInt(X));
+                FlagZ = ((Byte.toUnsignedInt(A) & val) == 0);
+                FlagN = ((val & 0x80) != 0);
+                FlagV = ((val & 0x40) != 0);
+            }
+            case 0x34 -> { // *bit (ind, x)
+                int val = peek1(peek2(pc1()+Byte.toUnsignedInt(X)));
+                FlagZ = ((Byte.toUnsignedInt(A) & val) == 0);
+                FlagN = ((val & 0x80) != 0);
+                FlagV = ((val & 0x40) != 0);
                 ///// TRANSFER /////
             }
             case 0xaa -> { // tax
@@ -411,6 +467,11 @@ public class Processor {
 
                 ///// INCREMENT/DECREMENT /////
             }
+            case 0x1a -> { // *inc a
+                A++;
+                setZNFlags(A);
+
+            }
             case 0xe8 -> { // inx
                 X++;
                 setZNFlags(X);
@@ -419,6 +480,11 @@ public class Processor {
             case 0xc8 -> { // iny
                 Y++;
                 setZNFlags(Y);
+
+            }
+            case 0x3a -> { // *dec a
+                A--;
+                setZNFlags(A);
 
             }
             case 0x88 -> { // dey
@@ -550,6 +616,10 @@ public class Processor {
                 } else {
                     pc1();
                 }
+            }
+            case 0x80 -> { // *bra
+                byte offset = (byte) pc1();
+                PC += offset;
                 ///// FLAG MODIFIERS /////
             }
             case 0x18 -> { // clc
@@ -613,6 +683,9 @@ public class Processor {
                 ADC((byte) peek1(peek2(pc1()) + Byte.toUnsignedInt(Y)));
 
             }
+            case 0x72 -> { // *adc (ind)
+                ADC((byte) peek1(peek2(pc1())));
+            }
             case 0xe9 -> { // sbc #
                 SBC((byte) pc1());
 
@@ -643,7 +716,9 @@ public class Processor {
             }
             case 0xf1 -> { // sbc (ind), y
                 SBC((byte) peek1(peek2(pc1()) + Byte.toUnsignedInt(Y)));
-
+            }
+            case 0xf2 -> { // *sbc (ind)
+                SBC((byte) peek1(peek2(pc1())));
                 ///// COMPARISON /////
             }
             case 0xc9 -> { // cmp #
@@ -676,8 +751,9 @@ public class Processor {
             }
             case 0xd1 -> { // cmp (ind), y
                 CMP(A, (byte) peek1(peek2(pc1()) + Byte.toUnsignedInt(Y)));
-
-
+            }
+            case 0xd2 -> { // *cmp (ind)
+                CMP(A, (byte) peek1(peek2(pc1())));
             }
             case 0xe0 -> { // cpx #
                 CMP(X, (byte) pc1());
@@ -780,14 +856,7 @@ public class Processor {
                 setFlags(pop1());
                 PC = (short) pop2();
             }
-
-            /*
-                =====NOTICE=====
-                These instructions did not exist on the original 6502.
-                The wai & stp instructions come from the 65C02.
-                The mmu & mas instructions are for Ravenstone and never existed on any real 6502.
-             */
-            case 0xef -> { // *mmu
+            case 0xef -> { // ***mmu
                 var data = pc1();
                 switch (data) {
                     case 0x00 -> { // Switch Bus ID
@@ -813,13 +882,9 @@ public class Processor {
             case 0xcb -> { // *wai
                 Wait = true;
             }
-            case 0xdb -> { // *stp (Halts. Has unintended side-effects)
+            case 0xdb -> { // *stp
                 Stop = true;
                 Host.explode();
-            }
-            case 0xdf -> { // *mas (Move Accumulator to Upper 8-bits of Stack Pointer)
-                SP &= 0x00FF;
-                SP |= (short) ((Byte.toUnsignedInt(A) << 8));
             }
             default -> {
                 Stop = true;

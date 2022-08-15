@@ -12,7 +12,6 @@ import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.items.FloppyDisk;
 import sh.talonfox.ravenstone.sounds.SoundEventRegister;
 
@@ -52,7 +51,7 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
     private byte[] Buffer = new byte[128];
 
     public FloppyDriveBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockRegister.RAVEN_FLOPPY_DRIVE_ENTITY, pos, state);
+        super(BlockRegister.RAVEN_FLOPPY_DRIVE_ENTITY, pos, state, 2);
     }
 
     public boolean insertDisk(ItemStack stack) {

@@ -3,8 +3,6 @@ package sh.talonfox.ravenstone.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.renderer.v1.mesh.QuadEmitter;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;

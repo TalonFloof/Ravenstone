@@ -1,0 +1,18 @@
+{
+    "name": "Terminal",
+    "icon": "ravenstone:terminal",
+    "category": "ravenstone:blocks",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "title": "Terminal",
+            "item": "ravenstone:terminal",
+            "text": "Terminals are a peripheral for the $(l:b_computer)Raven-8t Computer$() that allows the computer to output information to the user and lets the user input information in to the computer."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "ravenstone:terminal",
+            "title": "Recipe"
+        }
+    ]
+}

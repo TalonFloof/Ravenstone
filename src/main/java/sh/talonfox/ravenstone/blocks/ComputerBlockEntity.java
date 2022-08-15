@@ -1,7 +1,6 @@
 package sh.talonfox.ravenstone.blocks;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
@@ -18,31 +17,19 @@ import java.util.Objects;
 
 import static sh.talonfox.ravenstone.blocks.ComputerBlock.RUNNING;
 
-public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
+public class ComputerBlockEntity extends PeripheralBlockEntity implements ProcessorHost {
     public Processor CPU = new Processor(this);
     public byte[] RAM = new byte[16384];
     private PeripheralBlockEntity CachedPeripheral = null;
 
     public ComputerBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockRegister.RAVEN_COMPUTER_ENTITY, pos, state);
+        super(BlockRegister.RAVEN_COMPUTER_ENTITY, pos, state, 0);
     }
-
-    /*
-        Bus IDs:
-        0: Nothing
-        1: North from the Computer
-        2: South from the Computer
-        3: East from the Computer
-        4: West from the Computer
-        5: Above the Computer
-        6: Below the Computer
-        7-255: Free for use
-     */
 
     @Override
     public byte memRead(short at) {
-        if(Short.toUnsignedInt(at) >= 0xf000) {
-            return Processor.ROM[(Short.toUnsignedInt(at) - 0xf000)];
+        if(Short.toUnsignedInt(at) >= 0xff00) {
+            return Processor.ROM[(Short.toUnsignedInt(at) - 0xff00)];
         } else if(Short.toUnsignedInt(at) < RAM.length) {
             if(at >= 0x200 && at <= 0x2FF) { // Bus Read
                 var peripheral = CachedPeripheral==null?PeripheralBlockEntity.findPeripheral(this.getWorld(),this.getPos(),CPU.BusOffset):CachedPeripheral;
@@ -99,6 +86,7 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
 
     @Override
     public void writeNbt(NbtCompound tag) {
+        super.writeNbt(tag);
         var processor = new NbtCompound();
         processor.putByte("A",CPU.A);
         processor.putByte("X",CPU.X);
@@ -120,12 +108,11 @@ public class ComputerBlockEntity extends BlockEntity implements ProcessorHost {
 
         tag.put("Processor",processor);
         tag.putByteArray("RAM", RAM);
-
-        super.writeNbt(tag);
     }
 
     @Override
     public void readNbt(NbtCompound tag) {
+        super.readNbt(tag);
         var processor = tag.getCompound("Processor");
         CPU.A = processor.getByte("A");
         CPU.X = processor.getByte("X");
