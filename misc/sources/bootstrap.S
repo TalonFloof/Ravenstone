@@ -18,31 +18,31 @@
 
     .org $FF00
 
-mmu .macro
+mmu .macro val
     .byte $ef
-    .byte \0
+    .byte \val
 .endmacro
 
 cold_boot: ; This function is called when the Raven-8t first starts up
     lda #1
-    sta $0
-    mmu $0
+    sta $00
+    mmu $00
     lda #2
-    sta $1
+    sta $01
     ; Clear Display
-    stz $200
-    stz $201
-    stz $202
-    stz $20a
-    stz $20b
+    stz $0200
+    stz $0201
+    stz $0202
+    stz $020a
+    stz $020b
     lda #$20
-    sta $208
+    sta $0208
     lda #80
-    sta $20C
+    sta $020C
     lda #50
-    sta $20D
+    sta $020D
     lda #1
-    sta $207
+    sta $0207
     wai
     lda #(floppy_boot_msg & 0xFF)
     sta $10
@@ -50,8 +50,8 @@ cold_boot: ; This function is called when the Raven-8t first starts up
     sta $11
     jsr print_line
     ;;;;;
-    lda $1
-    mmu $0
+    lda $01
+    mmu $00
     ; Engage Head
     lda #$21
     jsr floppy_command
@@ -62,22 +62,22 @@ cold_boot: ; This function is called when the Raven-8t first starts up
     bne floppy_no_disk
     ; Clear Buffer
     lda #$F4
-    sta $280
+    sta $0280
     ; Read all of the sectors in the first track
     stz $F0
-    stz $281
-    stz $282
+    stz $0281
+    stz $0282
     stz $20 ; 0x0300
     lda #3
     sta $21
 load_sector:
     ldy #0
     lda $F0
-    sta $282
+    sta $0282
     lda #$80
     jsr floppy_command
 memcpy:
-    lda $200, y
+    lda $0200, y
     sta ($20), y
     iny
     cpy #128
@@ -93,30 +93,32 @@ memcpy:
     inc $F0
     lda $F0
     cmp #32
-    bcs .after
+    bcs after
     jmp load_sector
-.after:
+after:
     ; Retract Head
     lda #$20
     jsr floppy_command
     ; Execute the Bootloader
     pha
     plp
-    jmp $300
+    jmp $0300
 floppy_command:
-    sta $280
+    sta $0280
+    pha
 floppy_command.wait:
+    pla
     wai
-    lda $280
-    sta $2
+    lda $0280
+    pha
     and #1
     cmp #1
     beq .wait
-    lda $2
+    pla
     rts
 floppy_no_disk:
-    lda $0
-    mmu $0
+    lda $00
+    mmu $00
     lda #(floppy_no_disk_msg & 0xFF)
     sta $10
     lda #(floppy_no_disk_msg >> 8)
@@ -132,12 +134,12 @@ print_line:
 print_line.loop:
     lda ($10), y
     beq .end
-    sta $210, y
+    sta $0210, y
     iny
     bra .loop
 print_line.end:
-    inc $202
-    inc $200
+    inc $0202
+    inc $0200
     ply
     pla
     rts

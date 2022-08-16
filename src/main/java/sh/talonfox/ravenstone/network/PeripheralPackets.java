@@ -8,7 +8,7 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import sh.talonfox.ravenstone.blocks.PeripheralBlockEntity;
+import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlockEntity;
 
 public class PeripheralPackets {
     public static final Identifier SET_BUS_ID = new Identifier("ravenstone", "set_bus_id");

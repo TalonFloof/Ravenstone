@@ -7,7 +7,7 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import sh.talonfox.ravenstone.blocks.TerminalBlockEntity;
+import sh.talonfox.ravenstone.blocks.peripherals.TerminalBlockEntity;
 
 public class TerminalPackets {
     public static final Identifier TERMINAL_KEY = new Identifier("ravenstone", "terminal_key");

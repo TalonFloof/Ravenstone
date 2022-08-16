@@ -1,9 +1,10 @@
-package sh.talonfox.ravenstone.blocks;
+package sh.talonfox.ravenstone.blocks.peripherals;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import sh.talonfox.ravenstone.blocks.BlockRegister;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;

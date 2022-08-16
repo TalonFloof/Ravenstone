@@ -6,10 +6,15 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
+import sh.talonfox.ravenstone.Ravenstone;
+import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlockEntity;
+import sh.talonfox.ravenstone.blocks.upgrades.RAMUpgradeBlock;
+import sh.talonfox.ravenstone.blocks.upgrades.RAMUpgradeBlockEntity;
 import sh.talonfox.ravenstone.processor.Processor;
 import sh.talonfox.ravenstone.processor.ProcessorHost;
 
@@ -19,8 +24,9 @@ import static sh.talonfox.ravenstone.blocks.ComputerBlock.RUNNING;
 
 public class ComputerBlockEntity extends PeripheralBlockEntity implements ProcessorHost {
     public Processor CPU = new Processor(this);
-    public byte[] RAM = new byte[16384];
+    public byte[] RAM = new byte[8192]; // Only 8 KiB can be accessed without an upgrade
     private PeripheralBlockEntity CachedPeripheral = null;
+    private RAMUpgradeBlockEntity CachedUpgrade = null;
 
     public ComputerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockRegister.RAVEN_COMPUTER_ENTITY, pos, state, 0);
@@ -30,7 +36,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     public byte memRead(short at) {
         if(Short.toUnsignedInt(at) >= 0xff00) {
             return Processor.ROM[(Short.toUnsignedInt(at) - 0xff00)];
-        } else if(Short.toUnsignedInt(at) < RAM.length) {
+        } else if(Short.toUnsignedInt(at) < 8192) {
             if(at >= 0x200 && at <= 0x2FF) { // Bus Read
                 var peripheral = CachedPeripheral==null?PeripheralBlockEntity.findPeripheral(this.getWorld(),this.getPos(),CPU.BusOffset):CachedPeripheral;
                 if(peripheral != null) {
@@ -41,13 +47,16 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
             } else {
                 return RAM[Short.toUnsignedInt(at)];
             }
+        } else {
+            if(CachedUpgrade != null)
+                return CachedUpgrade.readData((short)(Short.toUnsignedInt(at)-8192));
         }
         return (byte)0xFF;
     }
 
     @Override
     public void memStore(short at, byte data) {
-        if(Short.toUnsignedInt(at) < RAM.length) {
+        if(Short.toUnsignedInt(at) < 8192) {
             if(at >= 0x200 && at <= 0x2FF) { // Bus Page
                 var peripheral = CachedPeripheral==null?PeripheralBlockEntity.findPeripheral(this.getWorld(),this.getPos(),CPU.BusOffset):CachedPeripheral;
                 if(peripheral != null) {
@@ -58,6 +67,9 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
             } else if(Short.toUnsignedInt(at) < 0xFF00) {
                 RAM[Short.toUnsignedInt(at)] = data;
             }
+        } else if(Short.toUnsignedInt(at) < 0xFF00) {
+            if(CachedUpgrade != null)
+                CachedUpgrade.storeData((short)(Short.toUnsignedInt(at)-8192),data);
         }
     }
     public void explode() {
@@ -68,7 +80,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
         CachedPeripheral = null;
     }
     public static void tick(World world, BlockPos pos, BlockState state, ComputerBlockEntity blockEntity) {
-        if(!world.isClient())
+        if(!world.isClient()) {
             if (!blockEntity.CPU.Stop) {
                 blockEntity.CPU.Wait = false;
                 for (int i = 0; i < (100000 / 20); i++) {
@@ -77,11 +89,28 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
                         world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
                         blockEntity.markDirty();
                         break;
-                    } else if(blockEntity.CPU.Wait) {
+                    } else if (blockEntity.CPU.Wait) {
                         break;
                     }
                 }
+            } else {
+                BlockPos upgradePos = pos.add(state.get(Properties.HORIZONTAL_FACING).getOpposite().getVector());
+                BlockState upgradeState = world.getBlockState(upgradePos);
+                if (!upgradeState.isAir()) {
+                    boolean isUpgrade = upgradeState.getBlock() instanceof RAMUpgradeBlock;
+                    if (isUpgrade && blockEntity.CachedUpgrade == null) {
+                        Ravenstone.LOGGER.info("RAM Upgrade Attached!");
+                        blockEntity.CachedUpgrade = (RAMUpgradeBlockEntity)world.getBlockEntity(upgradePos);
+                    } else if(!isUpgrade && blockEntity.CachedUpgrade != null) {
+                        Ravenstone.LOGGER.info("RAM Upgrade Removed!");
+                        blockEntity.CachedUpgrade = null;
+                    }
+                } else if(blockEntity.CachedUpgrade != null){
+                    Ravenstone.LOGGER.info("RAM Upgrade Removed!");
+                    blockEntity.CachedUpgrade = null;
+                }
             }
+        }
     }
 
     @Override

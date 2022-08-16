@@ -1,0 +1,9 @@
+{
+    "parent": "block/cube_bottom_top",
+    "textures": {
+        "particle": "ravenstone:block/ram_upgrade_side",
+        "top": "ravenstone:block/ram_upgrade_top_16k",
+        "side": "ravenstone:block/ram_upgrade_side",
+        "bottom": "ravenstone:block/ram_upgrade_side"
+    }
+}

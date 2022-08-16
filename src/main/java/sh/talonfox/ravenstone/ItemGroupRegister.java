@@ -15,6 +15,9 @@ public class ItemGroupRegister {
                 stacks.add(new ItemStack(BlockRegister.RAVEN_TERMINAL_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_FLOPPY_DRIVE_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_RIBBON_CABLE_BLOCK));
+                stacks.add(new ItemStack(BlockRegister.RAVEN_16K_UPGRADE_BLOCK));
+                stacks.add(new ItemStack(BlockRegister.RAVEN_32K_UPGRADE_BLOCK));
+                stacks.add(new ItemStack(BlockRegister.RAVEN_64K_UPGRADE_BLOCK));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_TRANSISTOR));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_FLOPPY_DISK_USER));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_FORTH_FLOPPY_DISK));

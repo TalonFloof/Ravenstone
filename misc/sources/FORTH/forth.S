@@ -1,7 +1,16 @@
-    .org $0400
+    .org $0380
 
-.macro dcode
+dcode .macro
 
 .endmacro
 
-forth_coldboot:
+forth_kickstart:
+    bra forth_kickstart
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+AddressToRun .equ $FE
+Index .equ AddressToRun-2
+
+; Advances to the next Forth Word in a indirect-threaded word
+next:
+    lda (Index)

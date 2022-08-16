@@ -1,4 +1,4 @@
-package sh.talonfox.ravenstone.blocks;
+package sh.talonfox.ravenstone.blocks.peripherals;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -13,11 +13,12 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import sh.talonfox.ravenstone.blocks.BlockRegister;
 import sh.talonfox.ravenstone.client.TerminalScreen;
 
 public class TerminalBlock extends PeripheralBlock {
 
-    protected TerminalBlock(Settings settings) {
+    public TerminalBlock(Settings settings) {
         super(settings);
     }
 

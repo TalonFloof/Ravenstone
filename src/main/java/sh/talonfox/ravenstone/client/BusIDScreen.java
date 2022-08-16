@@ -12,7 +12,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import sh.talonfox.ravenstone.blocks.PeripheralBlockEntity;
+import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlockEntity;
 import sh.talonfox.ravenstone.network.PeripheralPackets;
 
 public class BusIDScreen extends Screen {

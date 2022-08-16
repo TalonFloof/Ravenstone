@@ -10,7 +10,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
-import sh.talonfox.ravenstone.blocks.TerminalBlockEntity;
+import sh.talonfox.ravenstone.blocks.peripherals.TerminalBlockEntity;
 import sh.talonfox.ravenstone.network.TerminalPackets;
 
 public class TerminalScreen extends Screen {

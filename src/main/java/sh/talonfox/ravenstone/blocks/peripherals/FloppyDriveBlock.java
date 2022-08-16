@@ -1,4 +1,4 @@
-package sh.talonfox.ravenstone.blocks;
+package sh.talonfox.ravenstone.blocks.peripherals;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -14,13 +14,14 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import sh.talonfox.ravenstone.blocks.BlockRegister;
 
 import java.util.Objects;
 
 public class FloppyDriveBlock extends PeripheralBlock {
     public static final BooleanProperty HAS_DISK = BooleanProperty.of("has_disk");
     public static final BooleanProperty LIGHT = BooleanProperty.of("light");
-    protected FloppyDriveBlock(Settings settings) {
+    public FloppyDriveBlock(Settings settings) {
         super(settings);
         setDefaultState(this.stateManager.getDefaultState().with(HAS_DISK,false).with(LIGHT,false));
     }

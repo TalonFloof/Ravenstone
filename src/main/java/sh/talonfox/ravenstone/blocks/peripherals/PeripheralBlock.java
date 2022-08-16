@@ -1,4 +1,4 @@
-package sh.talonfox.ravenstone.blocks;
+package sh.talonfox.ravenstone.blocks.peripherals;
 
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;

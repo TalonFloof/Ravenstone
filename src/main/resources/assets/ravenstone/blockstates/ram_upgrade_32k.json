@@ -1,0 +1,5 @@
+{
+    "variants": {
+        "": { "model": "ravenstone:block/ram_upgrade_32k" }
+    }
+}

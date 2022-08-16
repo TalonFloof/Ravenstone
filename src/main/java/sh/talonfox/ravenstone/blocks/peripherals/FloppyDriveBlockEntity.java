@@ -1,4 +1,4 @@
-package sh.talonfox.ravenstone.blocks;
+package sh.talonfox.ravenstone.blocks.peripherals;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.ItemEntity;
@@ -12,6 +12,8 @@ import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import sh.talonfox.ravenstone.Ravenstone;
+import sh.talonfox.ravenstone.blocks.BlockRegister;
 import sh.talonfox.ravenstone.items.FloppyDisk;
 import sh.talonfox.ravenstone.sounds.SoundEventRegister;
 
@@ -96,6 +98,7 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
         if(!state.get(FloppyDriveBlock.LIGHT)) {
             Flags |= 0x10;
             Flags &= ~1;
+            return;
         }
         int distance = Math.abs(CurrentTrack-track);
         switch(distance) {
@@ -265,6 +268,7 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     Flags = 0xfe;
                     Arrays.fill(Buffer, (byte)0);
                 } else if((Flags & 1) == 0) {
+                    //Ravenstone.LOGGER.info("Command: 0x{} Track: 0x{} Sector: 0x{}", Integer.toHexString(Byte.toUnsignedInt(data)), Integer.toHexString(TrackNumber), Integer.toHexString(SectorNumber));
                     Command = Byte.toUnsignedInt(data);
                     Flags = 1;
                 }
