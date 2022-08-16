@@ -2,7 +2,7 @@
 
 mmu .macro val
     .byte $ef
-    .byte \val
+    .byte \1
 .endmacro
 
 BootTrackIndex .equ $281
@@ -41,8 +41,9 @@ bootstrap.memcpy:
     sta (BootIndirectMemory)
     iny
     inc BootIndirectMemory
-    bne *+4
+    bne .skip
     inc BootIndirectMemory+1
+.skip:
     lda BootIndirectMemory+1
     cmp #$FF
     beq .enter

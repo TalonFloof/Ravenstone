@@ -15,6 +15,7 @@ import sh.talonfox.ravenstone.network.TerminalPackets;
 
 public class TerminalScreen extends Screen {
     private static final Identifier CHARSET = new Identifier("ravenstone", "textures/gui/raven_terminal_font.png");
+    private static final Identifier FRAME = new Identifier("ravenstone", "textures/gui/raven_terminal_frame.png");
     private TerminalBlockEntity BlockEntity;
     private long Ticks = 0;
     public TerminalScreen(Text title, TerminalBlockEntity blockEntity) {
@@ -61,6 +62,11 @@ public class TerminalScreen extends Screen {
         matrices.scale(0.5F, 0.5F, 1F);
         matrices.translate(((width * 2) - 640) / 2, ((height * 2) - 400) / 2, 0);
         drawBackground(matrices, mouseX, mouseY, delta);
+        matrices.push();
+        matrices.translate(-24F,-24F,0);
+        RenderSystem.setShaderTexture(0, FRAME);
+        drawTexture(matrices,0,0,640+48,400+48,0F,0F,350,230,350,230);
+        matrices.pop();
         drawScreen(matrices, mouseX, mouseY, delta);
         drawCursor(matrices, mouseX, mouseY, delta);
         matrices.pop();
