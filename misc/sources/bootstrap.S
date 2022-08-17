@@ -18,11 +18,6 @@
 
     .org $FF00
 
-mmu .macro val
-    .byte $ef
-    .byte \val
-.endmacro
-
 cold_boot: ; This function is called when the Raven-8t first starts up
     lda #1
     sta $00
@@ -106,14 +101,14 @@ after:
 floppy_command:
     sta $0280
     pha
-floppy_command.wait:
+wait$:
     pla
     wai
     lda $0280
     pha
     and #1
     cmp #1
-    beq .wait
+    beq wait$
     pla
     rts
 floppy_no_disk:
@@ -131,13 +126,13 @@ print_line:
     pha
     phy
     ldy #0
-print_line.loop:
+loop$:
     lda ($10), y
-    beq .end
+    beq end$
     sta $0210, y
     iny
-    bra .loop
-print_line.end:
+    bra loop$
+end$:
     inc $0202
     inc $0200
     ply
@@ -145,6 +140,12 @@ print_line.end:
     rts
 floppy_no_disk_msg: .asciiz "No disk?"
 floppy_boot_msg: .asciiz "Booting"
+
+mmu .macro val
+    .byte $ef
+    .byte \val
+.endmacro
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
     .org 0xFFFD
     jmp floppy_command

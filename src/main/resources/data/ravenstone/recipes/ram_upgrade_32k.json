@@ -1,0 +1,18 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "DTD",
+        "###",
+        "DRD"
+    ],
+    "key": {
+        "#": {"item": "ravenstone:ram_upgrade_16k"},
+        "D": {"item": "minecraft:diamond"},
+        "R": {"item": "minecraft:redstone"},
+        "T": {"item": "ravenstone:transistor"}
+    },
+    "result": {
+        "item": "ravenstone:ram_upgrade_32k",
+        "count": 1
+    }
+}

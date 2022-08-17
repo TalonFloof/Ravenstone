@@ -21,7 +21,7 @@ bootstrap:
     stz BootIndirectMemory ; Move $1300 to BootIndirectMemory
     lda #$13
     sta BootIndirectMemory+1
-bootstrap.track_loop:
+track_loop$:
     ; Seek to next track
     lda BootTrackIndex
     inc
@@ -32,31 +32,31 @@ bootstrap.track_loop:
     sta BootTrackIndex
     stz BootSectorIndex
     ; Read all of the sectors on the track
-bootstrap.sector_loop:
+sector_loop$:
     lda #$80
     jsr $FFFD
     ldy #0
-bootstrap.memcpy:
+memcpy$:
     lda $200, y
     sta (BootIndirectMemory)
     iny
     inc BootIndirectMemory
-    bne .skip
+    bne skip$
     inc BootIndirectMemory+1
-.skip:
+skip$:
     lda BootIndirectMemory+1
     cmp #$FF
-    beq .enter
+    beq enter$
     cpy #128
-    bne .memcpy
+    bne memcpy$
     ;;;;;
     inc BootSectorIndex
     lda BootSectorIndex
     cmp #32
-    bne .sector_loop
+    bne sector_loop$
     ;;;;;
-    bra .track_loop
-bootstrap.enter:
+    bra track_loop$
+enter$:
     lda #$20 ; Retract Head
     jsr $FFFD
     jmp forth_kickstart

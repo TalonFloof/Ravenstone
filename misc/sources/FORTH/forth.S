@@ -9,39 +9,46 @@ PreviousWord .set header_\2_prev
 header_\2_lenflags:
     .byte \3+\4
 header_\2_name:
-    .text \1
+    .byte \1
 \2:
+.endmacro
+dword .macro name,lname,len,flags
+    dcode \1,\2,\3,\4
+    jmp COLON
 .endmacro
 
 forth_kickstart:
     cld
     ldx #$FF
     txs
-    stz $02
+    ldx #StackTop
     bra *
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-NumberMode .equ $02
-AddressToRun .equ $FE
-Index .equ AddressToRun-2
+StackBottom .equ $10
+StackTop .equ $CF
+General .equ XSave-2
+XSave .equ RunMode-1
+RunMode .equ NumberMode-1
+NumberMode .equ IP-1
+IP .equ W-2
+W .equ $FE
+; X Index Register is the R Stack
 
-next_dex2:
-    dex
-    dex
 ; Advances to the next Forth Word
 next:
-    lda (AddressToRun)
-    sta Index
+    lda (IP)
+    sta W
     ldy #1
-    lda (AddressToRun), y
-    sta Index+1
+    lda (IP), y
+    sta W+1
     clc
-    lda AddressToRun
+    lda IP
     adc #2
-    sta AddressToRun
-    bcc .skip
-    inc AddressToRun+1
-.skip:
-    jmp (AddressToRun)
+    sta IP
+    bcc skip$
+    inc IP+1
+skip$:
+    jmp (IP)
 
-    .include "base.S"
+;;;;;;;;;;;;;;;;;;;;;;;;;;;; WORDS

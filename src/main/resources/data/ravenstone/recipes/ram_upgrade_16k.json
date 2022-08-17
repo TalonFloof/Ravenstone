@@ -1,0 +1,18 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#T#",
+        "ODO",
+        "#T#"
+    ],
+    "key": {
+        "#": {"item": "minecraft:iron_bars"},
+        "D": {"item": "minecraft:diamond"},
+        "O": {"item": "minecraft:redstone_torch"},
+        "T": {"item": "ravenstone:transistor"}
+    },
+    "result": {
+        "item": "ravenstone:ram_upgrade_16k",
+        "count": 1
+    }
+}

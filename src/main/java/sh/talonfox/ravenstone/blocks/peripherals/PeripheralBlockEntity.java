@@ -22,7 +22,6 @@ public abstract class PeripheralBlockEntity extends BlockEntity {
         BusID = defaultBusID;
     }
 
-    public String getIdentifier() {return "\0\0\0\0\0\0\0\0";}
     public byte readData(byte at) {return 0;}
     public void storeData(byte at, byte data) {}
     public int getBusID() {return BusID;}

@@ -1,0 +1,18 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "NTN",
+        "###",
+        "NRN"
+    ],
+    "key": {
+        "#": {"item": "ravenstone:ram_upgrade_32k"},
+        "N": {"item": "minecraft:netherite_ingot"},
+        "R": {"item": "minecraft:redstone"},
+        "T": {"item": "ravenstone:transistor"}
+    },
+    "result": {
+        "item": "ravenstone:ram_upgrade_64k",
+        "count": 1
+    }
+}

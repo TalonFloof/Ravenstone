@@ -1,0 +1,31 @@
+{
+    "display": {
+        "icon": {
+            "item": "ravenstone:ram_upgrade_64k"
+        },
+        "frame": "challenge",
+        "title": {"text": "DEDOTATED WAM"},
+        "description": {"text":"Um, I was wondering, what's the wecomended amount of DEDOTATED WAM I should add to the server? Um, DEDOTATED WAM to the server."},
+        "announce_to_chat": true,
+        "show_toast": true,
+        "hidden": true
+    },
+    "parent": "ravenstone:root",
+    "criteria": {
+        "obtain_64k_upgrade": {
+            "trigger": "minecraft:inventory_changed",
+            "conditions": {
+                "items": [
+                    {
+                        "items": [
+                            "ravenstone:ram_upgrade_64k"
+                        ]
+                    }
+                ]
+            }
+        }
+    },
+    "rewards": {
+        "experience": 100
+    }
+}

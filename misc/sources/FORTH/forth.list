@@ -1,0 +1,367 @@
+Sections:
+00: "seg300" (300-35D)
+01: "seg380" (380-1300)
+
+
+Source: "bootstrap.S"
+                        	     1:     .org $0300
+                        	     2: 
+                        	     3: mmu .macro val
+                        	     4:     .byte $ef
+                        	     5:     .byte \1
+                        	     6: .endmacro
+                        	     7: 
+                        	     8: BootTrackIndex .equ $281
+                        	     9: BootSectorIndex .equ $282
+                        	    10: BootIndirectMemory .equ $04
+                        	    11: 
+                        	    12: bootstrap:
+00:0300 A501            	    13:     lda $01
+                        	    14:     mmu $00
+00:0302 EF              	     1M     .byte $ef
+00:0303 00              	     2M     .byte $00
+00:0304 A921            	    15:     lda #$21 ; Extend Head
+00:0306 20FDFF          	    16:     jsr $FFFD
+00:0309 A901            	    17:     lda #$01 ; Seek to Track 0
+00:030B 20FDFF          	    18:     jsr $FFFD
+                        	    19:     ; Load Tracks 1-15
+00:030E 9C8102          	    20:     stz BootTrackIndex
+00:0311 6404            	    21:     stz BootIndirectMemory ; Move $1300 to BootIndirectMemory
+00:0313 A913            	    22:     lda #$13
+00:0315 8505            	    23:     sta BootIndirectMemory+1
+                        	    24: track_loop$:
+                        	    25:     ; Seek to next track
+00:0317 AD8102          	    26:     lda BootTrackIndex
+00:031A 1A              	    27:     inc
+00:031B 8D8202          	    28:     sta BootSectorIndex
+00:031E A910            	    29:     lda #$10
+00:0320 20FDFF          	    30:     jsr $FFFD
+00:0323 AD8202          	    31:     lda BootSectorIndex
+00:0326 8D8102          	    32:     sta BootTrackIndex
+00:0329 9C8202          	    33:     stz BootSectorIndex
+                        	    34:     ; Read all of the sectors on the track
+                        	    35: sector_loop$:
+00:032C A980            	    36:     lda #$80
+00:032E 20FDFF          	    37:     jsr $FFFD
+00:0331 A000            	    38:     ldy #0
+                        	    39: memcpy$:
+00:0333 B90002          	    40:     lda $200, y
+00:0336 9204            	    41:     sta (BootIndirectMemory)
+00:0338 C8              	    42:     iny
+00:0339 E604            	    43:     inc BootIndirectMemory
+00:033B D002            	    44:     bne skip$
+00:033D E605            	    45:     inc BootIndirectMemory+1
+                        	    46: skip$:
+00:033F A505            	    47:     lda BootIndirectMemory+1
+00:0341 C9FF            	    48:     cmp #$FF
+00:0343 F010            	    49:     beq enter$
+00:0345 C080            	    50:     cpy #128
+00:0347 D0EA            	    51:     bne memcpy$
+                        	    52:     ;;;;;
+00:0349 EE8202          	    53:     inc BootSectorIndex
+00:034C AD8202          	    54:     lda BootSectorIndex
+00:034F C920            	    55:     cmp #32
+00:0351 D0D9            	    56:     bne sector_loop$
+                        	    57:     ;;;;;
+00:0353 80C2            	    58:     bra track_loop$
+                        	    59: enter$:
+00:0355 A920            	    60:     lda #$20 ; Retract Head
+00:0357 20FDFF          	    61:     jsr $FFFD
+00:035A 4C8003          	    62:     jmp forth_kickstart
+                        	    63: 
+                        	    64:     .include "forth.S"
+
+Source: "forth.S"
+                        	     1:     .org $0380
+                        	     2: 
+                        	     3: PreviousWord .set $0000
+                        	     4: 
+                        	     5: dcode .macro name,lname,len,flags
+                        	     6: header_\2_prev:
+                        	     7:     .word PreviousWord
+                        	     8: PreviousWord .set header_\2_prev
+                        	     9: header_\2_lenflags:
+                        	    10:     .byte \3+\4
+                        	    11: header_\2_name:
+                        	    12:     .byte \1
+                        	    13: \2:
+                        	    14: .endmacro
+                        	    15: 
+                        	    16: forth_kickstart:
+01:0380 D8              	    17:     cld
+01:0381 A2FF            	    18:     ldx #$FF
+01:0383 9A              	    19:     txs
+01:0384 A2E0            	    20:     ldx #StackTop
+01:0386 80FE            	    21:     bra *
+                        	    22: 
+                        	    23: ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                        	    24: StackBottom .equ $10
+                        	    25: StackTop .equ $E0
+                        	    26: General .equ XSave-2
+                        	    27: XSave .equ NumberMode-1
+                        	    28: NumberMode .equ Index-1
+                        	    29: IP .equ $FE
+                        	    30: Index .equ IP-2
+                        	    31: ; X Index Register is the R Stack
+                        	    32: 
+                        	    33: next_dex2:
+01:0388 CA              	    34:     dex
+01:0389 CA              	    35:     dex
+                        	    36: ; Advances to the next Forth Word
+                        	    37: next:
+01:038A B2FE            	    38:     lda (IP)
+01:038C 85FC            	    39:     sta Index
+01:038E A001            	    40:     ldy #1
+01:0390 B1FE            	    41:     lda (IP), y
+01:0392 85FD            	    42:     sta Index+1
+01:0394 18              	    43:     clc
+01:0395 A5FE            	    44:     lda IP
+01:0397 6902            	    45:     adc #2
+01:0399 85FE            	    46:     sta IP
+01:039B 9002            	    47:     bcc skip$
+01:039D E6FF            	    48:     inc IP+1
+                        	    49: skip$:
+01:039F 6CFE00          	    50:     jmp (IP)
+                        	    51: 
+                        	    52:     .include "base.S"
+
+Source: "base.S"
+                        	     1:     dcode "LIT",LIT,3,0
+                        	     1M header_LIT_prev:
+01:03A2 0000            	     2M     .word PreviousWord
+                        	     3M PreviousWord .set header_LIT_prev
+                        	     4M header_LIT_lenflags:
+01:03A4 03              	     5M     .byte 3+0
+                        	     6M header_LIT_name:
+01:03A5 4C4954          	     7M     .byte "LIT"
+                        	     8M LIT:
+                        	     2:     ; Push 2-byte Literal word onto Rstack
+01:03A8 B2FE            	     3:     lda (IP)
+01:03AA 9500            	     4:     sta 0,x
+01:03AC A001            	     5:     ldy #1
+01:03AE B1FE            	     6:     lda (IP),y
+01:03B0 9501            	     7:     sta 1,x
+01:03B2 18              	     8:     clc
+01:03B3 A5FE            	     9:     lda IP
+01:03B5 6902            	    10:     adc #2
+01:03B7 85FE            	    11:     sta IP
+01:03B9 9002            	    12:     bcc skip$
+01:03BB E6FF            	    13:     inc IP+1
+                        	    14: skip$:
+01:03BD 4C8803          	    15:     jmp next_dex2
+                        	    16: 
+                        	    17:     dcode "FALSE",FALSE,5,0
+                        	     1M header_FALSE_prev:
+01:03C0 A203            	     2M     .word PreviousWord
+                        	     3M PreviousWord .set header_FALSE_prev
+                        	     4M header_FALSE_lenflags:
+01:03C2 05              	     5M     .byte 5+0
+                        	     6M header_FALSE_name:
+01:03C3 46414C5345      	     7M     .byte "FALSE"
+                        	     8M FALSE:
+01:03C8 A900            	    18:     lda #$00
+01:03CA 8009            	    19:     bra tf_push
+                        	    20: 
+                        	    21:     dcode "TRUE",TRUE,4,0
+                        	     1M header_TRUE_prev:
+01:03CC C003            	     2M     .word PreviousWord
+                        	     3M PreviousWord .set header_TRUE_prev
+                        	     4M header_TRUE_lenflags:
+01:03CE 04              	     5M     .byte 4+0
+                        	     6M header_TRUE_name:
+01:03CF 54525545        	     7M     .byte "TRUE"
+                        	     8M TRUE:
+01:03D3 A9FF            	    22:     lda #$ff
+                        	    23: tf_push:
+01:03D5 9500            	    24:     sta 0, x
+01:03D7 9501            	    25:     sta 1, x
+01:03D9 4C8803          	    26:     jmp next_dex2
+                        	    27: 
+
+Source: "forth.S"
+                        	    53:     .include "math.S"
+
+Source: "math.S"
+                        	     1:     dcode "+",PLUS,1,0
+                        	     1M header_PLUS_prev:
+01:03DC CC03            	     2M     .word PreviousWord
+                        	     3M PreviousWord .set header_PLUS_prev
+                        	     4M header_PLUS_lenflags:
+01:03DE 01              	     5M     .byte 1+0
+                        	     6M header_PLUS_name:
+01:03DF 2B              	     7M     .byte "+"
+                        	     8M PLUS:
+01:03E0 18              	     2:     clc
+01:03E1 B500            	     3:     lda 0, x
+01:03E3 7502            	     4:     adc 2, x
+01:03E5 9502            	     5:     sta 2, x
+01:03E7 B501            	     6:     lda 1, x
+01:03E9 7503            	     7:     adc 3, x
+01:03EB 9503            	     8:     sta 3, x
+01:03ED E8              	     9:     inx
+01:03EE E8              	    10:     inx
+01:03EF 4C8A03          	    11:     jmp next
+                        	    12: 
+                        	    13:     dcode "-",MINUS,1,0
+                        	     1M header_MINUS_prev:
+01:03F2 DC03            	     2M     .word PreviousWord
+                        	     3M PreviousWord .set header_MINUS_prev
+                        	     4M header_MINUS_lenflags:
+01:03F4 01              	     5M     .byte 1+0
+                        	     6M header_MINUS_name:
+01:03F5 2D              	     7M     .byte "-"
+                        	     8M MINUS:
+01:03F6 38              	    14:     sec
+01:03F7 98              	    15:     tya
+01:03F8 F500            	    16:     sbc 0, x
+01:03FA 9500            	    17:     sta 0, x
+01:03FC 98              	    18:     tya
+01:03FD F501            	    19:     sbc 1, x
+01:03FF 9501            	    20:     sta 1, x
+01:0401 4C8A03          	    21:     jmp next
+                        	    22: 
+                        	    23:     dcode "U*",UMUL,2,0
+                        	     1M header_UMUL_prev:
+01:0404 F203            	     2M     .word PreviousWord
+                        	     3M PreviousWord .set header_UMUL_prev
+                        	     4M header_UMUL_lenflags:
+01:0406 02              	     5M     .byte 2+0
+                        	     6M header_UMUL_name:
+01:0407 552A            	     7M     .byte "U*"
+                        	     8M UMUL:
+01:0409 B502            	    24:     lda 2, x
+01:040B 85F8            	    25:     sta General
+01:040D 9402            	    26:     sty 2, x
+01:040F B503            	    27:     lda 3, x
+01:0411 85F9            	    28:     sta General+1
+01:0413 9403            	    29:     sty 3, x
+01:0415 A010            	    30:     ldy #16
+                        	    31: loop$:
+01:0417 1602            	    32:     asl 2, x
+01:0419 3603            	    33:     rol 3, x
+01:041B 3600            	    34:     rol 0, x
+01:041D 3601            	    35:     rol 1, x
+01:041F 9013            	    36:     bcc loop_end$
+01:0421 18              	    37:     clc
+01:0422 A5F8            	    38:     lda General
+01:0424 7502            	    39:     adc 2, x
+01:0426 9502            	    40:     sta 2, x
+01:0428 A5F9            	    41:     lda General+1
+01:042A 7503            	    42:     adc 3, x
+01:042C 9503            	    43:     sta 3, x
+01:042E A900            	    44:     lda #0
+01:0430 7500            	    45:     adc 0, x
+01:0432 9500            	    46:     sta 0, x
+                        	    47: loop_end$:
+01:0434 88              	    48:     dey
+01:0435 D0E0            	    49:     bne loop$
+01:0437 4C8A03          	    50:     jmp next
+                        	    51: 
+                        	    52:     ; Adopted from Garth Wilson's, How to divide a 32-bit dividend by a 16-bit divisor.
+                        	    53:     ; The original page can be found here: http://6502.org/source/integers/ummodfix/ummodfix.htm
+                        	    54:     dcode "U/",UDIV,2,0 ; Not Implemented
+                        	     1M header_UDIV_prev:
+01:043A 0404            	     2M     .word PreviousWord
+                        	     3M PreviousWord .set header_UDIV_prev
+                        	     4M header_UDIV_lenflags:
+01:043C 02              	     5M     .byte 2+0 
+                        	     6M header_UDIV_name:
+01:043D 552F            	     7M     .byte "U/"
+                        	     8M UDIV:
+01:043F 4C8A03          	    55:     jmp next
+                        	    56: 
+
+Source: "bootstrap.S"
+01:0442 00              	    65:     .fill (4096-((*-$0300)%4096)), 0
+01:0443 *
+
+
+Symbols by name:
+BootIndirectMemory               E:0004
+BootSectorIndex                  E:0282
+BootTrackIndex                   E:0281
+FALSE                            A:03C8
+General                          E:00F8
+IP                               E:00FE
+Index                            E:00FC
+LIT                              A:03A8
+MINUS                            A:03F6
+NumberMode                       E:00FB
+PLUS                             A:03E0
+PreviousWord                     S:043A
+StackTop                         E:00E0
+TRUE                             A:03D3
+UDIV                             A:043F
+UMUL                             A:0409
+XSave                            E:00FA
+bootstrap                        A:0300
+forth_kickstart                  A:0380
+header_FALSE_lenflags            A:03C2
+header_FALSE_name                A:03C3
+header_FALSE_prev                A:03C0
+header_LIT_lenflags              A:03A4
+header_LIT_name                  A:03A5
+header_LIT_prev                  A:03A2
+header_MINUS_lenflags            A:03F4
+header_MINUS_name                A:03F5
+header_MINUS_prev                A:03F2
+header_PLUS_lenflags             A:03DE
+header_PLUS_name                 A:03DF
+header_PLUS_prev                 A:03DC
+header_TRUE_lenflags             A:03CE
+header_TRUE_name                 A:03CF
+header_TRUE_prev                 A:03CC
+header_UDIV_lenflags             A:043C
+header_UDIV_name                 A:043D
+header_UDIV_prev                 A:043A
+header_UMUL_lenflags             A:0406
+header_UMUL_name                 A:0407
+header_UMUL_prev                 A:0404
+next                             A:038A
+next_dex2                        A:0388
+tf_push                          A:03D5
+
+Symbols by value:
+0004 BootIndirectMemory
+00E0 StackTop
+00F8 General
+00FA XSave
+00FB NumberMode
+00FC Index
+00FE IP
+0281 BootTrackIndex
+0282 BootSectorIndex
+0300 bootstrap
+0380 forth_kickstart
+0388 next_dex2
+038A next
+03A2 header_LIT_prev
+03A4 header_LIT_lenflags
+03A5 header_LIT_name
+03A8 LIT
+03C0 header_FALSE_prev
+03C2 header_FALSE_lenflags
+03C3 header_FALSE_name
+03C8 FALSE
+03CC header_TRUE_prev
+03CE header_TRUE_lenflags
+03CF header_TRUE_name
+03D3 TRUE
+03D5 tf_push
+03DC header_PLUS_prev
+03DE header_PLUS_lenflags
+03DF header_PLUS_name
+03E0 PLUS
+03F2 header_MINUS_prev
+03F4 header_MINUS_lenflags
+03F5 header_MINUS_name
+03F6 MINUS
+0404 header_UMUL_prev
+0406 header_UMUL_lenflags
+0407 header_UMUL_name
+0409 UMUL
+043A PreviousWord
+043A header_UDIV_prev
+043C header_UDIV_lenflags
+043D header_UDIV_name
+043F UDIV

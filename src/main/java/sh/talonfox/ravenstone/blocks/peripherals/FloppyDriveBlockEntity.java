@@ -233,9 +233,6 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
             blockEntity.Command = 0;
         }
     }
-
-    @Override
-    public String getIdentifier() {return "FlpyDriv";}
     @Override
     public byte readData(byte at) {
         switch(Byte.toUnsignedInt(at)) {
@@ -251,9 +248,6 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
             default -> {
                 if(Byte.toUnsignedInt(at) < 0x80) {
                     return Buffer[Byte.toUnsignedInt(at)];
-                }
-                if(Byte.toUnsignedInt(at) >= 0xF8) {
-                    return (getIdentifier().getBytes(StandardCharsets.US_ASCII)[Byte.toUnsignedInt(at)-0xF8]);
                 }
                 return 0;
             }

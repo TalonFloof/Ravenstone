@@ -6,6 +6,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import sh.talonfox.ravenstone.blocks.BlockRegister;
 import sh.talonfox.ravenstone.items.ItemRegister;
+import vazkii.patchouli.api.PatchouliAPI;
+import vazkii.patchouli.common.item.PatchouliItems;
 
 public class ItemGroupRegister {
     public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.create(

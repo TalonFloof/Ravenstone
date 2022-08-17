@@ -26,9 +26,6 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
         super(BlockRegister.RAVEN_TERMINAL_ENTITY, pos, state, 1);
         Arrays.fill(ScreenBuffer,(byte)0x20);
     }
-
-    @Override
-    public String getIdentifier() {return "MonoTTY\0";}
     @Override
     public byte readData(byte at) {
         switch(at) {
@@ -75,8 +72,6 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
             default -> {
                 if(at >= 0x10 && at <= 0x5F) {
                     return ScreenBuffer[((Row*80)+(at-0x10))];
-                } else if(Byte.toUnsignedInt(at) >= 0xF8) {
-                    return (getIdentifier().getBytes(StandardCharsets.US_ASCII)[Byte.toUnsignedInt(at)-0xF8]);
                 }
                 return 0;
             }

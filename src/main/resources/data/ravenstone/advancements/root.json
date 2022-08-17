@@ -1,0 +1,23 @@
+{
+    "display": {
+        "icon": {
+            "item": "ravenstone:ravenstone"
+        },
+        "frame": "task",
+        "background": "ravenstone:textures/block/ram_upgrade_side.png",
+        "title": {"text": "Ravenstone"},
+        "description": {"text":"A revolution is coming..."},
+        "announce_to_chat": false,
+        "show_toast": false
+    },
+    "criteria": {
+        "first_join": {
+            "trigger": "minecraft:tick"
+        }
+    },
+    "rewards": {
+        "loot": [
+            "ravenstone:items/ravenstone_guide_on_join"
+        ]
+    }
+}

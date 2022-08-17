@@ -1,0 +1,23 @@
+{
+    "name": "Memory Upgrades",
+    "icon": "ravenstone:ram_upgrade_64k",
+    "category": "ravenstone:blocks",
+    "pages": [
+        {
+            "type": "patchouli:text",
+            "title": "Memory Upgrades",
+            "text": "By default, the $(l:b_computer)Raven-8t Computer$() only comes with a mere 8 KiBs of Memory. Memory Upgrades allow you to expand the amount of memory that your computer has. These upgrades are attached to the back of the computer and cannot be placed anywhere else."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "ravenstone:ram_upgrade_16k",
+            "recipe2": "ravenstone:ram_upgrade_32k",
+            "title": "Recipes"
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "ravenstone:ram_upgrade_64k",
+            "title": "Recipes (cont.)"
+        }
+    ]
+}

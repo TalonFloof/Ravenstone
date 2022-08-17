@@ -99,14 +99,11 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
                 if (!upgradeState.isAir()) {
                     boolean isUpgrade = upgradeState.getBlock() instanceof RAMUpgradeBlock;
                     if (isUpgrade && blockEntity.CachedUpgrade == null) {
-                        Ravenstone.LOGGER.info("RAM Upgrade Attached!");
                         blockEntity.CachedUpgrade = (RAMUpgradeBlockEntity)world.getBlockEntity(upgradePos);
                     } else if(!isUpgrade && blockEntity.CachedUpgrade != null) {
-                        Ravenstone.LOGGER.info("RAM Upgrade Removed!");
                         blockEntity.CachedUpgrade = null;
                     }
                 } else if(blockEntity.CachedUpgrade != null){
-                    Ravenstone.LOGGER.info("RAM Upgrade Removed!");
                     blockEntity.CachedUpgrade = null;
                 }
             }
