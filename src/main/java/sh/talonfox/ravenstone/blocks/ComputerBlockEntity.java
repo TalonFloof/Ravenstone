@@ -37,12 +37,12 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
         if(Short.toUnsignedInt(at) >= 0xff00) {
             return Processor.ROM[(Short.toUnsignedInt(at) - 0xff00)];
         } else if(Short.toUnsignedInt(at) < 8192) {
-            if(at >= 0x200 && at <= 0x2FF) { // Bus Read
+            if(at >= 0x300 && at <= 0x3FF) { // Bus Read
                 var peripheral = CachedPeripheral==null?PeripheralBlockEntity.findPeripheral(this.getWorld(),this.getPos(),CPU.BusOffset):CachedPeripheral;
                 if(peripheral != null) {
                     if(CachedPeripheral == null)
                         CachedPeripheral = peripheral;
-                    return peripheral.readData((byte) (at - 0x200));
+                    return peripheral.readData((byte) (Short.toUnsignedInt(at) - 0x300));
                 }
             } else {
                 return RAM[Short.toUnsignedInt(at)];
@@ -57,12 +57,12 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     @Override
     public void memStore(short at, byte data) {
         if(Short.toUnsignedInt(at) < 8192) {
-            if(at >= 0x200 && at <= 0x2FF) { // Bus Page
+            if(at >= 0x300 && at <= 0x3FF) { // Bus Page
                 var peripheral = CachedPeripheral==null?PeripheralBlockEntity.findPeripheral(this.getWorld(),this.getPos(),CPU.BusOffset):CachedPeripheral;
                 if(peripheral != null) {
                     if(CachedPeripheral == null)
                         CachedPeripheral = peripheral;
-                    peripheral.storeData((byte) (at - 0x200), data);
+                    peripheral.storeData((byte)(Short.toUnsignedInt(at) - 0x300), data);
                 }
             } else if(Short.toUnsignedInt(at) < 0xFF00) {
                 RAM[Short.toUnsignedInt(at)] = data;
@@ -114,23 +114,12 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     public void writeNbt(NbtCompound tag) {
         super.writeNbt(tag);
         var processor = new NbtCompound();
-        processor.putByte("A",CPU.A);
-        processor.putByte("X",CPU.X);
-        processor.putByte("Y",CPU.Y);
         processor.putShort("PC",CPU.PC);
-        processor.putShort("SP",CPU.SP);
-        processor.putShort("BrkAddr",CPU.BrkAddr);
-        processor.putShort("ResetAddr",CPU.ResetAddr);
+        processor.putShort("DSP",CPU.DSP);
+        processor.putShort("RSP",CPU.RSP);
         processor.putInt("BusOffset",CPU.BusOffset);
-        processor.putBoolean("Error",CPU.Error);
         processor.putBoolean("Stop",CPU.Stop);
         processor.putBoolean("Wait",CPU.Wait);
-        processor.putBoolean("FlagC",CPU.FlagC);
-        processor.putBoolean("FlagZ",CPU.FlagZ);
-        processor.putBoolean("FlagI",CPU.FlagI);
-        processor.putBoolean("FlagD",CPU.FlagD);
-        processor.putBoolean("FlagV",CPU.FlagV);
-        processor.putBoolean("FlagN",CPU.FlagN);
 
         tag.put("Processor",processor);
         tag.putByteArray("RAM", RAM);
@@ -140,23 +129,12 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     public void readNbt(NbtCompound tag) {
         super.readNbt(tag);
         var processor = tag.getCompound("Processor");
-        CPU.A = processor.getByte("A");
-        CPU.X = processor.getByte("X");
-        CPU.Y = processor.getByte("Y");
         CPU.PC = processor.getShort("PC");
-        CPU.SP = processor.getShort("SP");
-        CPU.BrkAddr = processor.getShort("BrkAddr");
-        CPU.ResetAddr = processor.getShort("ResetAddr");
+        CPU.DSP = processor.getShort("DSP");
+        CPU.RSP = processor.getShort("RSP");
         CPU.BusOffset = processor.getInt("BusOffset");
-        CPU.Error = processor.getBoolean("Error");
         CPU.Stop = processor.getBoolean("Stop");
         CPU.Wait = processor.getBoolean("Wait");
-        CPU.FlagC = processor.getBoolean("FlagC");
-        CPU.FlagZ = processor.getBoolean("FlagZ");
-        CPU.FlagI = processor.getBoolean("FlagI");
-        CPU.FlagD = processor.getBoolean("FlagD");
-        CPU.FlagV = processor.getBoolean("FlagV");
-        CPU.FlagN = processor.getBoolean("FlagN");
         if(tag.getByteArray("RAM").length == RAM.length) {
             RAM = tag.getByteArray("RAM");
         }
