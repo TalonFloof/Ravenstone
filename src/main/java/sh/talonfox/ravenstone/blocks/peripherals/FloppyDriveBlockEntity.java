@@ -163,7 +163,7 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                         blockEntity.Flags &= ~1;
                     }
                 } else if (blockEntity.Command == 0x10) { // Seek
-                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                    if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.TrackNumber < 64) {
                         if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
                             blockEntity.Flags |= 0x10;
                             blockEntity.Flags &= ~1;
@@ -191,7 +191,7 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     blockEntity.Flags &= ~0x20;
                     blockEntity.Flags |= (state.get(FloppyDriveBlock.LIGHT) ? 0x20 : 0);
                 } else if(blockEntity.Command == 0x80) { // Read
-                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                    if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.SectorNumber < 32) {
                         if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
                             blockEntity.Flags |= 0x10;
                         } else {
@@ -201,7 +201,7 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     }
                     blockEntity.Flags &= ~1;
                 } else if(blockEntity.Command == 0xA0) { // Write
-                    if (state.get(FloppyDriveBlock.LIGHT)) {
+                    if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.SectorNumber < 32) {
                         if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
                             blockEntity.Flags |= 0x10;
                         } else {
@@ -227,6 +227,9 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                         var label = new String(blockEntity.Buffer, 0, length, StandardCharsets.US_ASCII);
                         ((FloppyDisk) blockEntity.stack.getItem()).setLabel(blockEntity.stack, label);
                     }
+                    blockEntity.Flags &= ~1;
+                } else {
+                    blockEntity.Flags |= 80;
                     blockEntity.Flags &= ~1;
                 }
             }

@@ -10,10 +10,10 @@ import sh.talonfox.ravenstone.Ravenstone;
     0x04: ROT
     0x05: DUP
     0x06: OVR
-    0x07: EQ
-    0x08: NE
-    0x09: GT
-    0x0a: LT
+    0x07: EQU
+    0x08: NEQ
+    0x09: GRT
+    0x0a: LTN
     0x0b: JMP
     0x0c: JSR
     0x0d: JNZ
@@ -31,8 +31,8 @@ import sh.talonfox.ravenstone.Ravenstone;
     0x19: AND
     0x1a: ORA
     0x1b: EOR
-    0x1c: SHL
-    0x1d: SHR
+    0x1c: SFT
+    0x1d: INC
     0x1e: WAI
     0x1f: MMU
  */
@@ -56,8 +56,8 @@ public class Processor {
     }
 
     public void reset() {
-        DSP = 0x1ff;
-        RSP = 0x2ff;
+        DSP = 0x100;
+        RSP = 0x200;
         KSP = 0;
         PC = (short)0xff00;
         Wait = false;
@@ -73,7 +73,7 @@ public class Processor {
         Is16Bit = (insn & 0x80) != 0;
         Retain = (insn & 0x40) != 0;
         UsingRStack = (insn & 0x20) != 0;
-        KSP = UsingRStack?RSP:DSP;
+        KSP = UsingRStack?Short.valueOf(RSP):Short.valueOf(DSP);
         //Ravenstone.LOGGER.info("0x{}: 0x{}", Integer.toHexString(Short.toUnsignedInt(PC)-1), Integer.toHexString(insn));
         switch (insn & 0x1f) {
             case 0x00 -> { // ldi
@@ -124,28 +124,28 @@ public class Processor {
                 var a = pop();
                 var b = pop();
                 Is16Bit = false;
-                push(a==b?1:0);
+                push(b==a?1:0);
                 Is16Bit = (insn & 0x80) != 0;
             }
             case 0x08 -> { // ne
                 var a = pop();
                 var b = pop();
                 Is16Bit = false;
-                push(a!=b?1:0);
+                push(b!=a?1:0);
                 Is16Bit = (insn & 0x80) != 0;
             }
             case 0x09 -> { // gt
                 var a = pop();
                 var b = pop();
                 Is16Bit = false;
-                push(a>b?1:0);
+                push(b>a?1:0);
                 Is16Bit = (insn & 0x80) != 0;
             }
             case 0x0a -> { // lt
                 var a = pop();
                 var b = pop();
                 Is16Bit = false;
-                push(a<b?1:0);
+                push(b<a?1:0);
                 Is16Bit = (insn & 0x80) != 0;
             }
             case 0x0b -> { // jmp
@@ -159,9 +159,10 @@ public class Processor {
                     dpush2(Short.toUnsignedInt(PC));
                 else
                     rpush2(Short.toUnsignedInt(PC));
-                if(Is16Bit)
-                    PC = (short)pop();
-                else
+                if(Is16Bit) {
+                    var val = pop();
+                    PC = (short)val;
+                } else
                     PC = (short)(Short.toUnsignedInt(PC)+((byte)pop()));
             }
             case 0x0d -> { // jnz
@@ -176,7 +177,7 @@ public class Processor {
                         PC = (short)(Short.toUnsignedInt(PC)+((byte)a));
             }
             case 0x0e -> { // sth
-                int a = (short)(UsingRStack?rpop():dpop());
+                int a = pop();
                 if(UsingRStack)
                     dpush(a);
                 else
@@ -186,7 +187,10 @@ public class Processor {
                 Is16Bit = false;
                 var a = pop();
                 Is16Bit = (insn & 0x80) != 0;
-                push(peek1(a));
+                if(Is16Bit)
+                    push(peek2(a));
+                else
+                    push(peek1(a));
             }
             case 0x10 -> { // stz
                 Is16Bit = false;
@@ -200,7 +204,7 @@ public class Processor {
             }
             case 0x11 -> { // ldr
                 Is16Bit = false;
-                var a = pop();
+                var a = Short.toUnsignedInt(PC)+((byte)pop());
                 Is16Bit = (insn & 0x80) != 0;
                 if(Is16Bit)
                     push(peek2(a));
@@ -275,15 +279,14 @@ public class Processor {
                 var b = pop();
                 push(b ^ a);
             }
-            case 0x1c -> { // shl
+            case 0x1c -> { // sft
                 var a = pop();
                 var b = pop();
-                push(b << a);
+                push(b >>> (a & 0x0f) << ((a & 0xf0) >>> 4));
             }
-            case 0x1d -> { // shl
+            case 0x1d -> { // inc
                 var a = pop();
-                var b = pop();
-                push(b >>> a);
+                push(a+1);
             }
             case 0x1e -> { // wai
                 Wait = true;
@@ -317,10 +320,10 @@ public class Processor {
     private void poke2(int addr, int s) {poke1(addr, s); poke1(addr + 1, s >>> 8);}
 
     private void dpush1(int b) {poke1(DSP, b); DSP += 1;}
-    private void dpush2(int s) {dpush1(s); dpush1(s >> 8);}
+    private void dpush2(int s) {dpush1(s); dpush1(s >>> 8);}
     private void dpush(int s) {if(Is16Bit) {dpush2(s);} else {dpush1(s);}}
     private int dpop1() {
-        if(Retain) {
+        if(Retain && !UsingRStack) {
             KSP -= 1;
             return peek1(KSP);
         } else {
@@ -331,7 +334,7 @@ public class Processor {
     private int dpop2() {return (dpop1() << 8) | dpop1();}
     private int dpop() {if(Is16Bit) {return dpop2();} else {return dpop1();}}
     private void rpush1(int b) {poke1(RSP, b); RSP += 1;}
-    private void rpush2(int s) {rpush1(s); rpush1(s >> 8);}
+    private void rpush2(int s) {rpush1(s); rpush1(s >>> 8);}
     private void rpush(int s) {if(Is16Bit) {rpush2(s);} else {rpush1(s);}}
     private int rpop1() {
         if(Retain && UsingRStack) {

@@ -45,7 +45,7 @@ static char ops[][4] = {
 	"ldi", "pop", "nip", "swp", "rot", "dup", "ovr", "equ",
 	"neq", "grt", "ltn", "jmp", "jsr", "jnz", "sth", "ldz",
 	"stz", "ldr", "str", "lda", "sta", "add", "sub", "mul",
-	"div", "and", "or", "eor", "shl", "shr", "wai", "mmu"
+	"div", "and", "or", "eor", "sft", "inc", "wai", "mmu"
 };
 
 static int   scmp(char *a, char *b, int len) { int i = 0; while(a[i] == b[i]) if(!a[i] || ++i >= len) return 1; return 0; } /* string compare */
@@ -376,15 +376,15 @@ resolve(void)
 		case ';':
 			if(!(l = findlabel(r->name)))
 				return error("Unknown absolute reference", r->name);
-			p.data[r->addr + 1] = l->addr >> 0x8;
-			p.data[r->addr + 2] = l->addr & 0xff;
+			p.data[r->addr + 2] = l->addr >> 0x8;
+			p.data[r->addr + 1] = l->addr & 0xff;
 			l->refs++;
 			break;
 		case ':':
 			if(!(l = findlabel(r->name)))
 				return error("Unknown absolute reference", r->name);
-			p.data[r->addr + 0] = l->addr >> 0x8;
-			p.data[r->addr + 1] = l->addr & 0xff;
+			p.data[r->addr + 1] = l->addr >> 0x8;
+			p.data[r->addr + 0] = l->addr & 0xff;
 			l->refs++;
 			break;
 		default:
