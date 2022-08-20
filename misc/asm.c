@@ -31,9 +31,9 @@ typedef struct {
 	Uint8 data[LENGTH];
 	unsigned int ptr, length, origin;
 	Uint16 llen, mlen, rlen;
-	Label labels[0x400];
+	Label labels[0x4000];
 	Macro macros[0x100];
-	Reference refs[0x800];
+	Reference refs[0x8000];
 	char scope[0x40];
 } Program;
 
@@ -45,7 +45,7 @@ static char ops[][4] = {
 	"ldi", "pop", "nip", "swp", "rot", "dup", "ovr", "equ",
 	"neq", "grt", "ltn", "jmp", "jsr", "jnz", "sth", "ldz",
 	"stz", "ldr", "str", "lda", "sta", "add", "sub", "mul",
-	"div", "and", "or", "eor", "sft", "inc", "wai", "mmu"
+	"div", "and", "ora", "eor", "sft", "inc", "wai", "mmu"
 };
 
 static int   scmp(char *a, char *b, int len) { int i = 0; while(a[i] == b[i]) if(!a[i] || ++i >= len) return 1; return 0; } /* string compare */
@@ -155,7 +155,7 @@ makelabel(char *name)
 		return error("Label name is hex number", name);
 	if(findopcode(name) || !slen(name))
 		return error("Label name is invalid", name);
-	if(p.llen == 0x400)
+	if(p.llen == 0x4000)
 		return error("Labels limit exceeded", name);
 	l = &p.labels[p.llen++];
 	l->addr = p.ptr;
@@ -169,7 +169,7 @@ makereference(char *scope, char *label, Uint16 addr)
 {
 	char subw[0x40], parent[0x40];
 	Reference *r;
-	if(p.rlen == 0x800)
+	if(p.rlen == 0x8000)
 		return error("References limit exceeded", label);
 	r = &p.refs[p.rlen++];
 	if(label[1] == '&')

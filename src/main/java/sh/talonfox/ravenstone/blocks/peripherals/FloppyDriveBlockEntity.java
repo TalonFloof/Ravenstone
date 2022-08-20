@@ -122,6 +122,8 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                 if(distance >= 5) {
                     world.playSound(null, getPos(), SoundEventRegister.DISKETTE_SEEK_LARGE_EVENT, SoundCategory.BLOCKS, 1f, 1f);
                     FinishDelay = 9;
+                } else {
+                    Flags &= ~1;
                 }
             }
         }
@@ -264,17 +266,17 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     Command = 0;
                     Flags = 0xfe;
                     Arrays.fill(Buffer, (byte)0);
-                } else if((Flags & 1) == 0) {
+                } else if((Flags & 1) == 0 && data != 0) {
                     //Ravenstone.LOGGER.info("Command: 0x{} Track: 0x{} Sector: 0x{}", Integer.toHexString(Byte.toUnsignedInt(data)), Integer.toHexString(TrackNumber), Integer.toHexString(SectorNumber));
                     Command = Byte.toUnsignedInt(data);
                     Flags = 1;
                 }
             }
             case 0x81 -> { // Track Number
-                TrackNumber = Byte.toUnsignedInt(data);
+                TrackNumber = Byte.toUnsignedInt(data) % 64;
             }
             case 0x82 -> { // Sector Number
-                SectorNumber = Byte.toUnsignedInt(data);
+                SectorNumber = Byte.toUnsignedInt(data) % 64;
             }
             default -> {
                 if(Byte.toUnsignedInt(at) < 0x80) {

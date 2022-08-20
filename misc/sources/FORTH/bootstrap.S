@@ -2,6 +2,8 @@
 )
 
 `0400
+|0000
+~kernvars.S
 |0400
 @bootstrap
     #02 mmu
@@ -29,4 +31,4 @@
     #0480 jmp2
 |047f 00
 ~kernel.S
-|13ff 00
+|1bff 00
