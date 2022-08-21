@@ -12,16 +12,16 @@ public class RAM16KBlockEntity extends RAMUpgradeBlockEntity {
         super(RAVEN_16K_UPGRADE_ENTITY, pos, state);
     }
     @Override
-    public byte readData(short at) {
-        if(Short.toUnsignedInt(at) < RAM.length) {
-            return RAM[Short.toUnsignedInt(at)];
+    public byte readData(int at) {
+        if(at < RAM.length) {
+            return RAM[at];
         }
         return (byte)0xFF;
     }
     @Override
-    public void storeData(short at, byte data) {
-        if(Short.toUnsignedInt(at) < RAM.length) {
-            RAM[Short.toUnsignedInt(at)] = data;
+    public void storeData(int at, byte data) {
+        if(at < RAM.length) {
+            RAM[at] = data;
         }
     }
     @Override

@@ -11,6 +11,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -18,16 +19,18 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlock;
+import sh.talonfox.ravenstone.processor.Processor;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
 
 public class ComputerBlock extends PeripheralBlock implements BlockEntityProvider {
     public static final BooleanProperty RUNNING = BooleanProperty.of("running");
+    public static final BooleanProperty HAS_CPU = BooleanProperty.of("has_cpu");
 
     public ComputerBlock(Settings settings) {
         super(settings);
-        setDefaultState(this.stateManager.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.NORTH));
-        setDefaultState(this.stateManager.getDefaultState().with(RUNNING,false));
+        setDefaultState(this.stateManager.getDefaultState().with(Properties.HORIZONTAL_FACING, Direction.NORTH).with(RUNNING,false).with(HAS_CPU,false));
     }
 
     @Override
@@ -39,6 +42,7 @@ public class ComputerBlock extends PeripheralBlock implements BlockEntityProvide
     protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager) {
         stateManager.add(Properties.HORIZONTAL_FACING);
         stateManager.add(RUNNING);
+        stateManager.add(HAS_CPU);
     }
 
     @Override
@@ -48,7 +52,7 @@ public class ComputerBlock extends PeripheralBlock implements BlockEntityProvide
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite());
+        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite()).with(RUNNING,false).with(HAS_CPU,false);
     }
 
     @Override
@@ -58,19 +62,43 @@ public class ComputerBlock extends PeripheralBlock implements BlockEntityProvide
     }
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        var result = super.onUse(state,world,pos,player,hand,hit);
-        if(result != ActionResult.PASS)
-            return result;
-        ComputerBlockEntity blockEntity = (ComputerBlockEntity)world.getBlockEntity(pos);
-        if(!world.isClient()) {
+        if(hit.getSide() == state.get(Properties.HORIZONTAL_FACING).getOpposite()) {
+            ComputerBlockEntity blockEntity = (ComputerBlockEntity) world.getBlockEntity(pos);
             assert blockEntity != null;
-            world.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK, SoundCategory.BLOCKS, 0.5F, 2.0F);
-            // Run Code
-            blockEntity.CPU.reset();
-            world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
-            blockEntity.CPU.Stop = state.get(RUNNING);
-            blockEntity.markDirty();
+            if(!state.get(HAS_CPU)) {
+                return blockEntity.insertCPU(player.getStackInHand(hand))?ActionResult.SUCCESS:ActionResult.PASS;
+            } else {
+                return blockEntity.ejectCPU(false)?ActionResult.SUCCESS:ActionResult.PASS;
+            }
+        } else {
+            var result = super.onUse(state, world, pos, player, hand, hit);
+            if (result != ActionResult.PASS)
+                return result;
+            ComputerBlockEntity blockEntity = (ComputerBlockEntity) world.getBlockEntity(pos);
+            if (!world.isClient()) {
+                assert blockEntity != null;
+                if(!blockEntity.CPUStack.isEmpty()) {
+                    world.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK, SoundCategory.BLOCKS, 0.5F, 2.0F);
+                    // Run Code
+                    Processor CPU = (Processor)blockEntity.CPUStack.getItem();
+                    CPU.reset();
+                    world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
+                    CPU.setStop(state.get(RUNNING));
+                    blockEntity.markDirty();
+                } else {
+                    player.sendMessage(Text.of("You need to insert a Processor first!"),true);
+                }
+            }
+            return ActionResult.SUCCESS;
         }
-        return ActionResult.SUCCESS;
+    }
+
+    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean a) {
+        if (state.getBlock() != newState.getBlock()) {
+            if(world != null) {
+                ((ComputerBlockEntity) Objects.requireNonNull(world.getBlockEntity(pos))).ejectCPU(true);
+            }
+        }
+        super.onStateReplaced(state, world, pos, newState, a);
     }
 }

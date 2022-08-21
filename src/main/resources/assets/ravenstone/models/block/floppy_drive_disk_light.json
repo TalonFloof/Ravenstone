@@ -5,7 +5,7 @@
         "top": "ravenstone:block/raven_floppydrive_top",
         "bottom": "ravenstone:block/raven_computer_bottom",
         "front": "ravenstone:block/raven_floppydrive_front_disk_light",
-        "back": "ravenstone:block/raven_computer_side",
+        "back": "ravenstone:block/generic",
         "side": "ravenstone:block/raven_floppydrive_side"
     }
 }

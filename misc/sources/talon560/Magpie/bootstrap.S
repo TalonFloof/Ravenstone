@@ -2,8 +2,6 @@
 )
 
 `0400
-|0000
-~kernvars.S
 |0400
 @bootstrap
     #02 mmu

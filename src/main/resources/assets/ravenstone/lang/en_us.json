@@ -1,5 +1,5 @@
 {
-    "itemGroup.ravenstone.item_group": "§r§k!!!!!§r§lRavenstone§r§k!!!!!§r",
+    "itemGroup.ravenstone.item_group": "§r§lRavenstone§r",
     "item.ravenstone.ravenstone": "It's a secret to everybody.",
     "block.ravenstone.computer": "Raven-8t Computer",
     "block.ravenstone.terminal": "Terminal",
@@ -9,6 +9,7 @@
     "block.ravenstone.ram_upgrade_32k": "32KiB Memory Upgrade",
     "block.ravenstone.ram_upgrade_64k": "64KiB Memory Upgrade",
     "item.ravenstone.transistor": "Transistor",
+    "item.ravenstone.talon560_processor": "Talon560 Processor",
     "item.ravenstone.floppy_disk": "Floppy Disk",
     "item.ravenstone.floppy_disk_forth": "Floppy Disk",
     "item.ravenstone.floppy_disk_magpie": "Floppy Disk"

@@ -1,0 +1,18 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "#T#",
+        "GQG",
+        "#T#"
+    ],
+    "key": {
+        "#": {"item": "minecraft:iron_ingot"},
+        "Q": {"item": "minecraft:quartz"},
+        "G": {"item": "minecraft:gold_nugget"},
+        "T": {"item": "ravenstone:transistor"}
+    },
+    "result": {
+        "item": "ravenstone:talon560_processor",
+        "count": 1
+    }
+}

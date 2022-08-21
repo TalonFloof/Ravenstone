@@ -6,8 +6,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import sh.talonfox.ravenstone.blocks.BlockRegister;
 import sh.talonfox.ravenstone.items.ItemRegister;
-import vazkii.patchouli.api.PatchouliAPI;
-import vazkii.patchouli.common.item.PatchouliItems;
 
 public class ItemGroupRegister {
     public static final ItemGroup ITEM_GROUP = FabricItemGroupBuilder.create(
@@ -21,6 +19,7 @@ public class ItemGroupRegister {
                 stacks.add(new ItemStack(BlockRegister.RAVEN_32K_UPGRADE_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_64K_UPGRADE_BLOCK));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_TRANSISTOR));
+                stacks.add(new ItemStack(ItemRegister.RAVENSTONE_TALON560_PROCESSOR));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_FLOPPY_DISK_USER));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_FORTH_FLOPPY_DISK));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_MAGPIE_FLOPPY_DISK));

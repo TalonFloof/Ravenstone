@@ -14,8 +14,8 @@ public abstract class RAMUpgradeBlockEntity extends BlockEntity {
     public RAMUpgradeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
-    public byte readData(short at) {return 0;}
-    public void storeData(short at, byte data) {}
+    public byte readData(int at) {return 0;}
+    public void storeData(int at, byte data) {}
     @Nullable
     @Override
     public Packet<ClientPlayPacketListener> toUpdatePacket() {

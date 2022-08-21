@@ -21,7 +21,7 @@
 @tick :false 04 "TICK &body wai jmp2r
 @ticks :tick 05 "TICKS &body jnz ,&loop jmp2r &loop wai #0001 sub2 ,&loop jnz jmp2r
 
-@cold :ticks 04 "COLD &body ,quit/body jmp ( Temporary )
+@cold :ticks 04 "COLD &body #01 mmu #003e ;emit/body jsr2 ,quit/body jmp ( Temporary )
 @abort :cold 05 "ABORT &body ,quit/body jmp ( Temporary )
 @quit :abort 04 "QUIT &body ,&body jmp ( Temporary )
 
@@ -137,7 +137,7 @@ jmp2r
     )
     ;abort/body jsr2
 @memcpy :allocate 06 "MEMCPY &body #fff8 jsr2 jmp2r
-@memcmp :memcpy 06 "MEMCMP &body
+@strcmp :memcpy 06 "STRCMP &body
     ;twodup/body jsr2
     neq ,&equaddr jnz
     #0000
@@ -164,12 +164,81 @@ jmp2r
     #ffff
 jmp2r
 ( ======================== DICTIONARY ======================== )
-@dictionary_ptr :dictionary_top
+@here :strcmp 04 "HERE &body ,dictionary_ptr ldr2 jmp2r
+@dp :here 02 "DP &body ;dictionary_ptr jmp2r @dictionary_ptr :dictionary_top
+@latest :dp 06 "LATEST &body ;dictionary_marker jmp2r @dictionary_marker :marker
+@find :latest 04 "FIND &body
+    ;latest/body jsr2
+    ;peek/body jsr2
+&loop
+    dup2
+    ,&notfound jnz
+    dup2
+    ;incrtwo/body jsr2
+    ;bytepeek/body jsr2
+    #001f #0040
+    ora2 and2 rot2 dup2 rot2 equ2
+    ,&notequal jnz
 
-@here :memcmp 04 "HERE &body ,dictionary_ptr ldr2 jmp2r
-@dp :here 02 "DP &body ;dictionary_ptr jmp2r
-@find :dp 04 "FIND &body
+    ;tor/body jsr2
+    ;twodup/body jsr2
+    #0003
+    add2
+    ;strcmp/body jsr2
+    ;fromr/body jsr2
+    dup2 rot2
+    ltn2
+    ,&notequal jnz
+    pop2
+    nip2
+jmp2r
+&notequal
+    swp2
+    ;peek/body jsr2
+    ,&loop jmp
+jmp2r
+&notfound
+    pop2
+    ;twodrop/body jsr2
+    #0000
+jmp2r
+@words :find 05 "WORDS &body jmp2r
+@forget :words 06 "FORGET &body jmp2r
 ( ======================== IO ======================== )
+( ======================== TERMINAL ======================== )
+@bind_term #01 mmu jmp2r
+@emit :find 04 "EMIT &body
+    pop ( Discard upper 8-bits )
+    dup #0a equ ,&cr jnz
+    [ #0301 lda #00 ] #0310 add2 sta
+    #0301 lda inc #0301 sta
+jmp2r
+&cr pop ,cr/body jmp
+@cr :emit 02 "CR &body
+    #0302 lda dup #50 equ ,&scroll jnz
+    inc #0302 stak pop2 #0300 sta
+jmp2r
+&scroll
 
+@scroll :cr 06 "SCROLL &body
+    #00 #030a stak inc2 stak pop2 #0308 sta
+    #01 #0309 sta
+    #50 #030c sta
+    #31 #030d sta
+    #03 #0307 sta
+    wai
+    #20 #0308 sta
+    #31 #030b sta
+    #50 #030c sta
+    #01 #030d sta
+    #00 #030a sta
+    #01 #0307 sta
+    wai
+jmp2r
+@key :scroll 03 "KEY &body
+    #0304 lda dup ,&after jnz pop ,&body jmp
+&after #00 jmp2r
 ( All memory from this point forward is used for defining new words )
+@marker
+:key 40
 @dictionary_top

@@ -1,13 +1,13 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "DTD",
+        "ITI",
         "###",
-        "DRD"
+        "IRI"
     ],
     "key": {
         "#": {"item": "ravenstone:ram_upgrade_16k"},
-        "D": {"item": "minecraft:diamond"},
+        "I": {"item": "minecraft:iron_ingot"},
         "R": {"item": "minecraft:redstone"},
         "T": {"item": "ravenstone:transistor"}
     },

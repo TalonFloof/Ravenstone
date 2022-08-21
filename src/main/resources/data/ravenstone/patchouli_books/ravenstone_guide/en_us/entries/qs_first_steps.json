@@ -6,7 +6,7 @@
         {
             "type": "patchouli:text",
             "title": "Prerequisites",
-            "text": "First things first, you're going to need to craft the Raven-8t computer, plus some peripherals. If you haven't done that, here a list of things you'll need."
+            "text": "First things first, you're going to need to craft the Raven-8t computer, plus some peripherals. If you haven't done that, here a list of things you'll need.<br>$(li)1x $(l:b_computer)Raven-8t Computer$()$(li)1x $(l:b_terminal)Terminal$()$(li)1x $(l:b_floppy_disk_drive)Floppy Disk Drive$()$(li)1x $(l:i_talon560_processor)Talon560 Processor$() (or any other processor)"
         },
         {
             "type": "patchouli:image",
@@ -14,7 +14,12 @@
                 "ravenstone:textures/book/prerequisites.png"
             ],
             "border": true,
-            "text": "$(li)1x $(l:b_computer)Raven-8t Computer$()$(li)1x $(l:b_terminal)Terminal$()$(li)1x $(l:b_floppy_disk_drive)Floppy Disk Drive$()"
+            "text": ""
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Building",
+            "text": "After you've crafted the needed items, you can then place the computer and its peripherals down. Make sure that the peripherals are right next to each other or else they won't connect!"
         }
     ]
 }

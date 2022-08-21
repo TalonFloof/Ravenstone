@@ -1,13 +1,13 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "NTN",
+        "DTD",
         "###",
-        "NRN"
+        "DRD"
     ],
     "key": {
         "#": {"item": "ravenstone:ram_upgrade_32k"},
-        "N": {"item": "minecraft:netherite_ingot"},
+        "D": {"item": "minecraft:diamond"},
         "R": {"item": "minecraft:redstone"},
         "T": {"item": "ravenstone:transistor"}
     },

@@ -1,0 +1,18 @@
+{
+    "name": "Talon560 Processor",
+    "icon": "ravenstone:talon560_processor",
+    "category": "ravenstone:items",
+    "pages": [
+        {
+            "type": "patchouli:spotlight",
+            "title": "Talon560 Processor",
+            "item": "ravenstone:talon560_processor",
+            "text": "The Talon560 Processor is a 16-bit stack-based Processor. This is the standard processor for the $(l:b_computer)Raven-8t Computer$()."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "ravenstone:talon560_processor",
+            "title": "Recipe"
+        }
+    ]
+}

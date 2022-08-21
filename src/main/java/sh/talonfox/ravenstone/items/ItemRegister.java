@@ -12,6 +12,7 @@ public class ItemRegister {
     public static final Item RAVENSTONE_FLOPPY_DISK_USER = new FloppyDiskUser(new FabricItemSettings().group(ItemGroupRegister.ITEM_GROUP).maxCount(1));
     public static final Item RAVENSTONE_MAGPIE_FLOPPY_DISK = new FloppyDiskSystem("Magpie (WIP)",new FabricItemSettings().group(ItemGroupRegister.ITEM_GROUP).maxCount(1));
     public static final Item RAVENSTONE_FORTH_FLOPPY_DISK = new FloppyDiskSystem("FORTH",new FabricItemSettings().group(ItemGroupRegister.ITEM_GROUP).maxCount(1));
+    public static final Item RAVENSTONE_TALON560_PROCESSOR = new Talon560Processor(new FabricItemSettings().group(ItemGroupRegister.ITEM_GROUP).maxCount(1));
 
     public static void Initialize() {
         Registry.register(Registry.ITEM, new Identifier("ravenstone", "ravenstone"), RAVENSTONE_CUSTOM_ICON);
@@ -19,5 +20,6 @@ public class ItemRegister {
         Registry.register(Registry.ITEM, new Identifier("ravenstone","floppy_disk"), RAVENSTONE_FLOPPY_DISK_USER);
         Registry.register(Registry.ITEM, new Identifier("ravenstone","floppy_disk_magpie"), RAVENSTONE_MAGPIE_FLOPPY_DISK);
         Registry.register(Registry.ITEM, new Identifier("ravenstone","floppy_disk_forth"), RAVENSTONE_FORTH_FLOPPY_DISK);
+        Registry.register(Registry.ITEM, new Identifier("ravenstone","talon560_processor"), RAVENSTONE_TALON560_PROCESSOR);
     }
 }
