@@ -1,5 +1,5 @@
 {
-    "itemGroup.ravenstone.item_group": "§r§lRavenstone§r",
+    "itemGroup.ravenstone.ravenstone_group": "§r§lRavenstone§r",
     "item.ravenstone.ravenstone": "It's a secret to everybody.",
     "block.ravenstone.computer": "Raven-8t Computer",
     "block.ravenstone.terminal": "Terminal",

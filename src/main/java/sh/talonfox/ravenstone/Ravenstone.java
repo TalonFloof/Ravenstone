@@ -32,8 +32,7 @@ public class Ravenstone implements ModInitializer {
         SoundEventRegister.Initialize();
         LOGGER.info("Registering Images...");
         ResourceRegister.RegisterROM("Talon560","talon560.bin");
-        ResourceRegister.RegisterFloppy("FORTH","forth.bin");
-        ResourceRegister.RegisterFloppy("Magpie (WIP)","magpie.bin");
+        ResourceRegister.RegisterFloppy("Magpie","magpie.bin");
         LOGGER.info("Initialization successful!");
     }
 }
