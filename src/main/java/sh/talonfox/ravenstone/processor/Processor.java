@@ -3,8 +3,6 @@ package sh.talonfox.ravenstone.processor;
 import net.minecraft.item.ItemStack;
 
 public interface Processor {
-    boolean isStopped();
-    void setStop(boolean flag);
     boolean isWaiting();
     void setWait(boolean flag);
 

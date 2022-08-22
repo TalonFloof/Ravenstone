@@ -19,7 +19,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlock;
-import sh.talonfox.ravenstone.processor.Processor;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -80,10 +79,8 @@ public class ComputerBlock extends PeripheralBlock implements BlockEntityProvide
                 if(!blockEntity.CPUStack.isEmpty()) {
                     world.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK, SoundCategory.BLOCKS, 0.5F, 2.0F);
                     // Run Code
-                    Processor CPU = (Processor)blockEntity.CPUStack.getItem();
-                    CPU.reset();
+                    blockEntity.CPU.reset();
                     world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
-                    CPU.setStop(state.get(RUNNING));
                     blockEntity.markDirty();
                 } else {
                     player.sendMessage(Text.of("You need to insert a Processor first!"),true);

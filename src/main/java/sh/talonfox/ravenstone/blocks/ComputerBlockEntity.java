@@ -21,11 +21,11 @@ import sh.talonfox.ravenstone.blocks.upgrades.RAMUpgradeBlock;
 import sh.talonfox.ravenstone.blocks.upgrades.RAMUpgradeBlockEntity;
 import sh.talonfox.ravenstone.processor.Processor;
 import sh.talonfox.ravenstone.processor.ProcessorHost;
-
-import static sh.talonfox.ravenstone.blocks.ComputerBlock.RUNNING;
+import sh.talonfox.ravenstone.processor.ProcessorItem;
 
 public class ComputerBlockEntity extends PeripheralBlockEntity implements ProcessorHost {
     public ItemStack CPUStack = Items.AIR.getDefaultStack();
+    public Processor CPU = null;
     public byte[] RAM = new byte[8192]; // Only 8 KiB can be accessed without an upgrade
     private PeripheralBlockEntity CachedPeripheral = null;
     private RAMUpgradeBlockEntity CachedUpgrade = null;
@@ -36,13 +36,13 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
 
     public boolean insertCPU(ItemStack stack) {
         var world = this.getWorld();
-        if(stack.isEmpty() || !(stack.getItem() instanceof Processor))
+        if(stack.isEmpty() || !(stack.getItem() instanceof ProcessorItem))
             return false;
         this.CPUStack = stack.split(1);
+        this.CPU = ((ProcessorItem)this.CPUStack.getItem()).processorClass();
         assert world != null;
         if(!world.isClient()) {
             world.playSound(null, getPos(), SoundEvents.UI_BUTTON_CLICK, SoundCategory.BLOCKS, 0.25f, 2f);
-            ((Processor)this.CPUStack.getItem()).setStop(true);
             world.setBlockState(getPos(),getCachedState().with(ComputerBlock.HAS_CPU, true));
             this.markDirty();
         }
@@ -68,6 +68,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
             ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), this.CPUStack);
         }
         this.CPUStack = Items.AIR.getDefaultStack();
+        this.CPU = null;
         return true;
     }
 
@@ -132,18 +133,14 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     public static void tick(World world, BlockPos pos, BlockState state, ComputerBlockEntity blockEntity) {
         if(!world.isClient()) {
             if (!blockEntity.CPUStack.isEmpty()) {
-                Processor CPU = (Processor)blockEntity.CPUStack.getItem();
                 if (state.get(ComputerBlock.RUNNING)) {
-                    CPU.setWait(false);
-                    for (int i = 0; i < (CPU.insnPerSecond() / 20); i++) {
-                        CPU.next(blockEntity);
-                        if (CPU.isStopped()) {
-                            world.setBlockState(pos, state.with(RUNNING, false));
-                            blockEntity.markDirty();
+                    blockEntity.CPU.setWait(false);
+                    for (int i = 0; i < (blockEntity.CPU.insnPerSecond() / 20); i++) {
+                        blockEntity.CPU.next(blockEntity);
+                        if (!state.get(ComputerBlock.RUNNING))
+                            return;
+                        if (blockEntity.CPU.isWaiting())
                             break;
-                        } else if (CPU.isWaiting()) {
-                            break;
-                        }
                     }
                     return;
                 }
@@ -166,8 +163,8 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     @Override
     public void writeNbt(NbtCompound tag) {
         super.writeNbt(tag);
-        if(!CPUStack.isEmpty())
-            ((Processor)(CPUStack.getItem())).saveNBT(CPUStack);
+        if(CPU != null && !CPUStack.isEmpty())
+            CPU.saveNBT(CPUStack);
         tag.put("CPUItem", CPUStack.writeNbt(new NbtCompound()));
         tag.putByteArray("RAM",RAM);
     }
@@ -176,8 +173,13 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     public void readNbt(NbtCompound tag) {
         super.readNbt(tag);
         CPUStack = ItemStack.fromNbt(tag.getCompound("CPUItem"));
-        if(!CPUStack.isEmpty())
-            ((Processor)(CPUStack.getItem())).loadNBT(CPUStack);
+        if(!CPUStack.isEmpty()) {
+            if(CPU == null) {
+                CPU = ((ProcessorItem)CPUStack.getItem()).processorClass();
+            } else {
+                CPU.loadNBT(CPUStack);
+            }
+        }
         if(tag.getByteArray("RAM").length == RAM.length) {
             RAM = tag.getByteArray("RAM");
         }
