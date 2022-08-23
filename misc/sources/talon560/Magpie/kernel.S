@@ -224,6 +224,23 @@ jmp2r
 @dotquote :udot 02 "." &body jmp2r
 @dotparen :zgreq 82 ".( &body jmp2r
 
+@parse :dotparen 05 "parse &body jmp2r
+@emit :parse 04 "emit &body jmp2r
+@keypoll :emit 04 "key? &body jmp2r
+@key :keypoll 03 "key &body jmp2r
+@page :key 04 "page &body jmp2r
+@cr :page 02 "cr &body jmp2r
+@quote :cr 01 22 &body jmp2r
+@type :quote 04 "type &body jmp2r
+@words :type 05 "words &body jmp2r
 
+@save :words 04 "save &body jmp2r
+@diskname :save 09 "diskname" &body jmp2r
+@flush :diskname 05 "flush &body jmp2r
+@list :flush 04 "list &body jmp2r
+@load :list 04 "load &body jmp2r
+@wipe :load 04 "wipe &body jmp2r
+@pp :wipe 02 "pp &body jmp2r
+@block :pp 05 "block &body jmp2r
 
 @magpie_end
