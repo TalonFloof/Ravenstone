@@ -20,6 +20,39 @@
             "type": "patchouli:text",
             "title": "Building",
             "text": "After you've crafted the needed items, you can then place the computer and its peripherals down. Make sure that the peripherals are right next to each other or else they won't connect!"
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "ravenstone:textures/book/typical_setup.png"
+            ],
+            "border": true,
+            "text": "A typical computer setup"
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Inserting the Processor",
+            "text": "If you try to turn on the computer, you'll notice that the message \"You need to insert a Processor first!\" appears. As mentioned in the message, you need to put a processor into the Raven-8t computer before you can use it. To do this hold a processor and right click while facing the back of the computer."
+        },
+        {
+            "type": "patchouli:image",
+            "images": [
+                "ravenstone:textures/book/computer_back.png",
+                "ravenstone:textures/book/computer_back2.png"
+            ],
+            "border": true,
+            "text": "Inserting the Processor into the back of the computer."
+        },
+        {
+            "type": "patchouli:crafting",
+            "recipe": "ravenstone:floppy_disk_magpie",
+            "title": "Making a bootable disk",
+            "text": "Before you boot your Raven-8t computer, make sure to craft a MagpieFORTH Boot Disk. You won't be able to use your computer without it. You can insert it into a floppy disk drive by right clicking the drive while holding the floppy disk."
+        },
+        {
+            "type": "patchouli:text",
+            "title": "Final Steps",
+            "text": "After you insert the MagpieFORTH Boot Disk, all that you need to do is turn on your computer. After waiting a little bit for it to boot, you will be granted by a prompt from MagpieFORTH."
         }
     ]
 }
