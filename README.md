@@ -1,10 +1,10 @@
 <img src="doc/Ravenstone (Full Logo).svg" width="384">
 
 Ravenstone is a Minecraft mod that adds programmable computers, identical to the computers found in Redpower 2.    
-The computers in Ravenstone are powered by a 16-bit stack-based architecture.
+The computers in Ravenstone are powered by a 16-bit stack-based architecture, though it's possible to create mods that add other architectures.
 
 ## Blocks and Items found in this mod
-- Raven-8t Computer: The powerful 16-bit computer that is the heart of all computer setups in the Ravenstone mod.
+- Raven-8t Computer: The powerful computer that is the heart of all computer setups in the Ravenstone mod.
 - Terminal: Allows the Raven-8t Computer to output information and to let the user input information to the computer.
 - Floppy Disk Drive: Allows the computer to store/retrieve data from Floppy Disks.
 - Memory Upgrades: At default, the Raven-8t Computer only comes with a mere 8 KiB of RAM, you can add more RAM by attaching a 16 KiB, 32 KiB, or a 64 KiB upgrade to the back of the computer.
