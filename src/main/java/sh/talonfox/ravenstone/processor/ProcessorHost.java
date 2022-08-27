@@ -6,4 +6,6 @@ public interface ProcessorHost {
     byte memRead(int at);
     void memStore(int at, byte data);
     void invalidatePeripheral();
+
+    void stop();
 }

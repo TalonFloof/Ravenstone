@@ -130,6 +130,10 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     public void invalidatePeripheral() {
         CachedPeripheral = null;
     }
+    public void stop() {
+        world.setBlockState(pos, this.getCachedState().with(ComputerBlock.RUNNING, false));
+        markDirty();
+    }
     public static void tick(World world, BlockPos pos, BlockState state, ComputerBlockEntity blockEntity) {
         if(!world.isClient()) {
             if (!blockEntity.CPUStack.isEmpty()) {

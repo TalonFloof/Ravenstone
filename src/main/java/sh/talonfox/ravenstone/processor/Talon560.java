@@ -68,6 +68,7 @@ public class Talon560 implements Processor {
         switch (insn & 0x1f) {
             case 0x00 -> { // ldi
                 if(Retain) {
+                    Host.stop();
                     return;
                 }
                 if(Is16Bit)

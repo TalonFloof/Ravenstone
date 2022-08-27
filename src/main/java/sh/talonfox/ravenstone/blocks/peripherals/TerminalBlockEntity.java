@@ -159,6 +159,7 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
         super.writeNbt(tag);
         tag.putByteArray("ScreenBuffer", ScreenBuffer);
         tag.putByteArray("KeyboardBuffer", KeyboardBuffer);
+        tag.putInt("Row", Row);
         tag.putInt("CursorX", CursorX);
         tag.putInt("CursorY", CursorY);
     }
@@ -167,6 +168,7 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
         super.readNbt(tag);
         ScreenBuffer = tag.getByteArray("ScreenBuffer");
         KeyboardBuffer = tag.getByteArray("KeyboardBuffer");
+        Row = tag.getInt("Row");
         CursorX = tag.getInt("CursorX");
         CursorY = tag.getInt("CursorY");
     }

@@ -2,6 +2,7 @@
 )
 
 `0400
+|0000 @Mode
 |0400
 @bootstrap
     #02 mmu
@@ -26,7 +27,7 @@
     ,&track_loop jmp
 &enter
     pop2 #20 #fffc jsr2
-    #0480 jmp2
+    ;coldboot jmp2
 |047f 00
 ~kernel.S
 |1bff 00

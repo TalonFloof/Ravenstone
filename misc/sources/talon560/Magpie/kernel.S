@@ -121,8 +121,18 @@ BLOCK
     +---------------+-------------------+--------+-------+
 )
 
-@forth_prompta 01 ">
-@forth_promptb 09 "compile: 20
+@coldboot
+    #01 mmu
+    ;forth_colda #0010 ;type/body jsr2
+    ;cr/body jsr2
+    ;interpret/body jmp2
+
+( 16 bytes )
+@forth_colda "MagpieFORTH 20 "v0.1
+( 1 byte )
+@forth_prompta ">
+( 9 bytes )
+@forth_promptb "compile: 20
 
 @find 0000 04 "find &body jmp2r
 @forget :find 06 "forget &body jmp2r
@@ -133,7 +143,14 @@ BLOCK
 @immediate :here 09 "immediate &body jmp2r
 @word :immediate 04 "word &body jmp2r
 @interpret :word 09 "interpret &body
-    
+    #01 mmu
+    ;Mode lda ,&comp_msg jnz
+    ;forth_prompta #0001 ;type/body jsr2
+    ,&after_msg jmp
+&comp_msg
+    ;forth_promptb #0009 ;type/body jsr2
+&after_msg
+    ,&after_msg jmp
 jmp2r
 @abort :interpret 05 "abort &body ,quit/body jmp jmp2r
 @quit :abort 04 "quit &body pop2r jmp2r
@@ -230,10 +247,10 @@ jmp2r
 @dotparen :zgreq 82 ".( &body jmp2r
 
 @parse :dotparen 05 "parse &body jmp2r
-@emit :find 04 "emit &body
+@emit :parse 04 "emit &body
     pop ( Discard upper 8-bits )
     dup #0a equ ,&cr jnz
-    [ #0301 lda #00 ] #0310 add2 sta
+    #0301 lda #00 #0310 add2 sta
     #0301 lda inc #0301 sta
 jmp2r
 &cr pop ,cr/body jmp
@@ -242,8 +259,9 @@ jmp2r
     #0304 lda dup ,&after jnz pop ,&body jmp
 &after #00 jmp2r
 @page :key 04 "page &body jmp2r
-@cr :page 02 "CR &body
-    #0302 lda dup #50 equ ,&scroll jnz
+@cr :page 02 "cr &body
+    #00 #0301 sta
+    #0302 lda dup #32 equ ,&scroll jnz
     inc #0302 stak pop2 #0300 sta
 jmp2r
 &scroll
@@ -260,8 +278,15 @@ jmp2r
     #00 #030a sta
     #01 #0307 sta
     wai
+jmp2r
 @quote :cr 01 22 &body jmp2r
-@type :quote 04 "type &body jmp2r
+@type :quote 04 "type &body ( c-addr u -- )
+    sth2
+&loop
+    dup2 lda #00 ;emit/body jsr2
+    inc2 ldi2r 0001 sub2r ovrr ldi2r :&loop jnz2r
+    pop2 pop2r
+jmp2r
 @words :type 05 "words &body jmp2r
 
 @save :words 04 "save &body jmp2r
