@@ -150,6 +150,7 @@ BLOCK
 &comp_msg
     ;forth_promptb #0009 ;type/body jsr2
 &after_msg
+    ;key/body jsr2 ;emit/body jsr2
     ,&after_msg jmp
 jmp2r
 @abort :interpret 05 "abort &body ,quit/body jmp jmp2r
