@@ -255,7 +255,7 @@ jmp2r
     #0301 lda inc #0301 sta
 jmp2r
 &cr pop ,cr/body jmp
-@keypoll :emit 04 "key? &body#0304 lda #00 jmp2r
+@keypoll :emit 04 "key? &body #0304 lda #00 jmp2r
 @key :keypoll 03 "key &body
     #0304 lda dup ,&after jnz pop ,&body jmp
 &after #00 jmp2r
