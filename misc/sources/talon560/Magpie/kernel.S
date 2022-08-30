@@ -150,8 +150,16 @@ BLOCK
 &comp_msg
     ;forth_promptb #0009 ;type/body jsr2
 &after_msg
-    ;key/body jsr2 ;emit/body jsr2
+    ;key/body jsr2 dup2 #000a equ2 ,&interp jnz
+    dup2 #0008 equ2 ,&backsp jnz
+    ;emit/body jsr2
     ,&after_msg jmp
+&backsp
+    pop2
+    #0301 lda #01 sub #0301 sta
+    ,&after_msg jmp
+&interp
+    pop2
 jmp2r
 @abort :interpret 05 "abort &body ,quit/body jmp jmp2r
 @quit :abort 04 "quit &body pop2r jmp2r

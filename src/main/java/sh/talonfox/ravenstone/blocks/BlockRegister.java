@@ -35,8 +35,8 @@ public class BlockRegister {
     public static void Initialize() {
         Registry.register(Registry.BLOCK, new Identifier("ravenstone", "computer"), RAVEN_COMPUTER_BLOCK);
         Registry.register(Registry.BLOCK, new Identifier("ravenstone", "terminal"), RAVEN_TERMINAL_BLOCK);
-        //Registry.register(Registry.BLOCK, new Identifier("ravenstone", "modem"), RAVEN_MODEM_BLOCK);
-        //Registry.register(Registry.BLOCK, new Identifier("ravenstone", "hard_drive"), RAVEN_HARDDRIVE_BLOCK);
+        Registry.register(Registry.BLOCK, new Identifier("ravenstone", "modem"), RAVEN_MODEM_BLOCK);
+        Registry.register(Registry.BLOCK, new Identifier("ravenstone", "hard_drive"), RAVEN_HARDDRIVE_BLOCK);
         Registry.register(Registry.BLOCK, new Identifier("ravenstone", "floppy_drive"), RAVEN_FLOPPY_DRIVE_BLOCK);
         Registry.register(Registry.BLOCK, new Identifier("ravenstone", "ribbon_cable"), RAVEN_RIBBON_CABLE_BLOCK);
         Registry.register(Registry.BLOCK, new Identifier("ravenstone", "ram_upgrade_16k"), RAVEN_16K_UPGRADE_BLOCK);
@@ -53,8 +53,8 @@ public class BlockRegister {
         Registry.register(Registry.ITEM, new Identifier("ravenstone", "ram_upgrade_64k"), new BlockItem(RAVEN_64K_UPGRADE_BLOCK, new Item.Settings().group(ItemGroupRegister.ITEM_GROUP)));
         RAVEN_COMPUTER_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "ravenstone:computer", FabricBlockEntityTypeBuilder.create(ComputerBlockEntity::new, RAVEN_COMPUTER_BLOCK).build(null));
         RAVEN_TERMINAL_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "ravenstone:terminal", FabricBlockEntityTypeBuilder.create(TerminalBlockEntity::new, RAVEN_TERMINAL_BLOCK).build(null));
-        //RAVEN_MODEM_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "ravenstone:modem", FabricBlockEntityTypeBuilder.create(ModemBlockEntity::new, RAVEN_MODEM_BLOCK).build(null));
-        //RAVEN_HARDDRIVE_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "ravenstone:hard_drive", FabricBlockEntityTypeBuilder.create(HarddriveEntity::new, RAVEN_HARDDRIVE_BLOCK).build(null));
+        RAVEN_MODEM_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "ravenstone:modem", FabricBlockEntityTypeBuilder.create(ModemBlockEntity::new, RAVEN_MODEM_BLOCK).build(null));
+        RAVEN_HARDDRIVE_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "ravenstone:hard_drive", FabricBlockEntityTypeBuilder.create(HarddriveBlockEntity::new, RAVEN_HARDDRIVE_BLOCK).build(null));
         RAVEN_FLOPPY_DRIVE_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "ravenstone:floppy_drive", FabricBlockEntityTypeBuilder.create(FloppyDriveBlockEntity::new, RAVEN_FLOPPY_DRIVE_BLOCK).build(null));
         RAVEN_16K_UPGRADE_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "ravenstone:ram_upgrade_16k", FabricBlockEntityTypeBuilder.create(RAM16KBlockEntity::new, RAVEN_16K_UPGRADE_BLOCK).build(null));
         RAVEN_32K_UPGRADE_ENTITY = Registry.register(Registry.BLOCK_ENTITY_TYPE, "ravenstone:ram_upgrade_32k", FabricBlockEntityTypeBuilder.create(RAM32KBlockEntity::new, RAVEN_32K_UPGRADE_BLOCK).build(null));
