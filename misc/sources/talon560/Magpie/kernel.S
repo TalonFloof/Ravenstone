@@ -143,24 +143,33 @@ BLOCK
 @immediate :here 09 "immediate &body jmp2r
 @word :immediate 04 "word &body jmp2r
 @interpret :word 09 "interpret &body
+    pop2r
     #01 mmu
+    #7f00 stz ( Set Input Size to Zero )
+    #7e00 stz ( Set Parse Ptr to Zero )
     ;Mode lda ,&comp_msg jnz
     ;forth_prompta #0001 ;type/body jsr2
     ,&after_msg jmp
 &comp_msg
     ;forth_promptb #0009 ;type/body jsr2
 &after_msg
-    ;key/body jsr2 dup2 #000a equ2 ,&interp jnz
+    ;key/body jsr2 dup2 #000d equ2 ,&interp jnz
     dup2 #0008 equ2 ,&backsp jnz
+    #7f ldzk swp grt ,&max jnz ( Refuse if buffer length is 128 characters )
+    pop #7f ldz #80 add stzk #7f sub #7f stz #00 ( Add Character to Buffer and Increment )
     ;emit/body jsr2
     ,&after_msg jmp
+&max
+    pop2 ,&after_msg jmp
 &backsp
+    #7f ldz #00 equ ,&max jnz ( Refuse if buffer is empty )
     pop2
-    #0301 lda #01 sub #0301 sta
+    #7f ldzk #01 sub swp stz ( Decrement buffer size )
+    #0301 lda #01 sub sthk #0301 sta #0020 ;emit/body jsr2 sthr #0301 sta ( Move cursor back and put a space )
     ,&after_msg jmp
 &interp
     pop2
-jmp2r
+    ldik
 @abort :interpret 05 "abort &body ,quit/body jmp jmp2r
 @quit :abort 04 "quit &body pop2r jmp2r
 
@@ -255,7 +264,14 @@ jmp2r
 @dotquote :udot 02 "." &body jmp2r
 @dotparen :zgreq 82 ".( &body jmp2r
 
-@parse :dotparen 05 "parse &body jmp2r
+@parse :dotparen 05 "parse &body ( char "ccc<char>" -- c-addr u )
+    pop
+    ldir 7f ldzr ldir 80 addr ( Load Length into R-Stack )
+    ldir 7e ldzr ldir 80 addr ( Load Parse Index into R-Stack )
+&loop
+    sthrk
+    incr ,&loop jmp
+&end pop jmp2r
 @emit :parse 04 "emit &body
     pop ( Discard upper 8-bits )
     dup #0a equ ,&cr jnz
