@@ -28,9 +28,9 @@ public class BlockRegister {
     public static BlockEntityType<ModemBlockEntity> RAVEN_MODEM_ENTITY;
     public static BlockEntityType<HarddriveBlockEntity> RAVEN_HARDDRIVE_ENTITY;
     public static BlockEntityType<FloppyDriveBlockEntity> RAVEN_FLOPPY_DRIVE_ENTITY;
-    /*public static BlockEntityType<RAM16KBlockEntity> RAVEN_16K_UPGRADE_ENTITY;
+    public static BlockEntityType<RAM16KBlockEntity> RAVEN_16K_UPGRADE_ENTITY;
     public static BlockEntityType<RAM32KBlockEntity> RAVEN_32K_UPGRADE_ENTITY;
-    public static BlockEntityType<RAM64KBlockEntity> RAVEN_64K_UPGRADE_ENTITY;*/
+    public static BlockEntityType<RAM64KBlockEntity> RAVEN_64K_UPGRADE_ENTITY;
 
     public static void Initialize() {
         Registry.register(Registries.BLOCK, new Identifier("ravenstone", "computer"), RAVEN_COMPUTER_BLOCK);
