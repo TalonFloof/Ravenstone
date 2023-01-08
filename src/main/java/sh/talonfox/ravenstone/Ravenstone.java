@@ -19,7 +19,7 @@ public class Ravenstone implements ModInitializer {
         LOGGER.info(" |    |   \\/ __ \\_\\   /\\  ___/_   |  \\\\___ \\ |  | (  \\_\\ )   |  \\  ___/_");
         LOGGER.info(" |____|_  /____  / \\_/  \\___  /___|  /____  \\|__|  \\____/|___|  /\\___  /");
         LOGGER.info("        \\/     \\/           \\/     \\/     \\/                  \\/     \\/ ");
-        LOGGER.info("Copyright (C) 2022 TalonFox (Sorry for the bad ASCII logo...)");
+        LOGGER.info("Copyright (C) 2022-2023 TalonFox (Sorry for the bad ASCII logo...)");
         LOGGER.info("Registering Blocks...");
         BlockRegister.Initialize();
         LOGGER.info("Registering Items...");

@@ -24,7 +24,7 @@ public class RAM16KBlockEntity extends RAMUpgradeBlockEntity {
             RAM[at] = data;
         }
     }
-    @Override
+    /*@Override
     public void readNbt(NbtCompound tag) {
         super.readNbt(tag);
         RAM = tag.getByteArray("RAM");
@@ -33,5 +33,5 @@ public class RAM16KBlockEntity extends RAMUpgradeBlockEntity {
     public void writeNbt(NbtCompound tag) {
         super.writeNbt(tag);
         tag.putByteArray("RAM", RAM);
-    }
+    }*/
 }

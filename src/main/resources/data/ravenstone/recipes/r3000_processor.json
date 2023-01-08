@@ -12,7 +12,7 @@
         "T": {"item": "ravenstone:transistor"}
     },
     "result": {
-        "item": "ravenstone:talon560_processor",
+        "item": "ravenstone:r3000_processor",
         "count": 1
     }
 }

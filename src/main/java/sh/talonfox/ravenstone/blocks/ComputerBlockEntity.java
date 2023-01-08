@@ -26,9 +26,9 @@ import sh.talonfox.ravenstone.processor.ProcessorItem;
 public class ComputerBlockEntity extends PeripheralBlockEntity implements ProcessorHost {
     public ItemStack CPUStack = Items.AIR.getDefaultStack();
     public Processor CPU = null;
-    public byte[] RAM = new byte[8192]; // Only 8 KiB can be accessed without an upgrade
+    public byte[] RAM = new byte[1024*1024];
     private PeripheralBlockEntity CachedPeripheral = null;
-    private RAMUpgradeBlockEntity CachedUpgrade = null;
+    //private RAMUpgradeBlockEntity CachedUpgrade = null;
 
     public ComputerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockRegister.RAVEN_COMPUTER_ENTITY, pos, state, 0);
@@ -42,7 +42,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
         this.CPU = ((ProcessorItem)this.CPUStack.getItem()).processorClass();
         assert world != null;
         if(!world.isClient()) {
-            world.playSound(null, getPos(), SoundEvents.UI_BUTTON_CLICK, SoundCategory.BLOCKS, 0.25f, 2f);
+            world.playSound(null, getPos(), SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.BLOCKS, 0.25f, 2f);
             world.setBlockState(getPos(),getCachedState().with(ComputerBlock.HAS_CPU, true));
             this.markDirty();
         }
@@ -61,7 +61,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
             var item = new ItemEntity(world, block_position.x, block_position.y, block_position.z, this.CPUStack);
             item.setVelocity(block_direction.multiply(0.1));
             world.spawnEntity(item);
-            world.playSound(null, getPos(), SoundEvents.UI_BUTTON_CLICK, SoundCategory.BLOCKS, 0.25f, 1.9f);
+            world.playSound(null, getPos(), SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.BLOCKS, 0.25f, 1.9f);
             world.setBlockState(getPos(),getCachedState().with(ComputerBlock.HAS_CPU, false).with(ComputerBlock.RUNNING,false));
             this.markDirty();
         } else {
@@ -108,24 +108,13 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     }
 
     @Override
-    public byte memRead(int at) {
-        if(Integer.toUnsignedLong(at) < 8192) {
-            return RAM[at];
-        } else {
-            if(CachedUpgrade != null)
-                return CachedUpgrade.readData(at-8192);
-        }
-        return (byte)0xFF;
+    public byte memRead(long at) {
+        return RAM[(int)at];
     }
 
     @Override
-    public void memStore(int at, byte data) {
-        if(Integer.toUnsignedLong(at) < 8192) {
-            RAM[at] = data;
-        } else {
-            if(CachedUpgrade != null)
-                CachedUpgrade.storeData(at-8192,data);
-        }
+    public void memStore(long at, byte data) {
+        RAM[(int)at] = data;
     }
     public void invalidatePeripheral() {
         CachedPeripheral = null;
@@ -149,7 +138,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
                     return;
                 }
             }
-            BlockPos upgradePos = pos.add(state.get(Properties.HORIZONTAL_FACING).getOpposite().getVector());
+            /*BlockPos upgradePos = pos.add(state.get(Properties.HORIZONTAL_FACING).getOpposite().getVector());
             BlockState upgradeState = world.getBlockState(upgradePos);
             if (!upgradeState.isAir()) {
                 boolean isUpgrade = upgradeState.getBlock() instanceof RAMUpgradeBlock;
@@ -160,7 +149,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
                 }
             } else if(blockEntity.CachedUpgrade != null){
                 blockEntity.CachedUpgrade = null;
-            }
+            }*/
         }
     }
 
@@ -170,7 +159,6 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
         if(CPU != null && !CPUStack.isEmpty())
             CPU.saveNBT(CPUStack);
         tag.put("CPUItem", CPUStack.writeNbt(new NbtCompound()));
-        tag.putByteArray("RAM",RAM);
     }
 
     @Override
@@ -183,9 +171,6 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
             } else {
                 CPU.loadNBT(CPUStack);
             }
-        }
-        if(tag.getByteArray("RAM").length == RAM.length) {
-            RAM = tag.getByteArray("RAM");
         }
     }
 

@@ -20,7 +20,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlock;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 public class ComputerBlock extends PeripheralBlock implements BlockEntityProvider {
@@ -55,7 +54,6 @@ public class ComputerBlock extends PeripheralBlock implements BlockEntityProvide
     }
 
     @Override
-    @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         return world.isClient() ? null : checkType(type, BlockRegister.RAVEN_COMPUTER_ENTITY, ComputerBlockEntity::tick);
     }
@@ -77,7 +75,7 @@ public class ComputerBlock extends PeripheralBlock implements BlockEntityProvide
             if (!world.isClient()) {
                 assert blockEntity != null;
                 if(!blockEntity.CPUStack.isEmpty()) {
-                    world.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK, SoundCategory.BLOCKS, 0.5F, 2.0F);
+                    world.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.BLOCKS, 0.5F, 2.0F);
                     // Run Code
                     blockEntity.CPU.reset();
                     world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));

@@ -24,7 +24,7 @@ public class BusIDScreen extends Screen {
     }
     public void drawBackground(MatrixStack matrices) {
         int busID = BlockEntity.getBusID();
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.setShaderTexture(0, TEXTURE);
         int x = (width-138)/2;
@@ -60,7 +60,7 @@ public class BusIDScreen extends Screen {
                 buf.writeInt(busID);
                 ClientPlayNetworking.send(PeripheralPackets.SET_BUS_ID, buf);
                 assert MinecraftClient.getInstance().player != null;
-                MinecraftClient.getInstance().player.playSound(SoundEvents.UI_BUTTON_CLICK, SoundCategory.MASTER, 0.25F, 2.0F);
+                MinecraftClient.getInstance().player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.MASTER, 0.25F, 2.0F);
             }
         }
         return true;
