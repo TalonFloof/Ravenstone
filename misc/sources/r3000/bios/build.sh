@@ -1,0 +1,1 @@
+mipsel-elf-gcc -c -Os -mips1 -march=r3000 *.S

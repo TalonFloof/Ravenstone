@@ -16,6 +16,10 @@ public class ItemGroupRegister {
         RAVENSTONE_GUIDE = stack;*/
     }
 
+    public static void Initialize() {
+        // This is a stub.
+    }
+
     public static final ItemGroup ITEM_GROUP = FabricItemGroup.builder(
             new Identifier("ravenstone", "ravenstone_group"))
             .icon(() -> new ItemStack(ItemRegister.RAVENSTONE_CUSTOM_ICON))
