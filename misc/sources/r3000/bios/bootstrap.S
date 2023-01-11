@@ -40,4 +40,8 @@ _RvFmInitialize:
     mfc0 $t0, $13 # Save the status register to $t0
     or $v0, $t0, 0x10000 # Isolate the Data Cache
     mtc0 $v0, $13
-    
+
+    # Afterwards jump to the entry code
+    li $sp, 0x80100000
+    .extern main
+    jal main
