@@ -4,6 +4,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.random.Random;
+import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.ResourceRegister;
 
 import java.util.Arrays;
@@ -223,28 +224,25 @@ public class R3000 implements Processor {
                     setRegister(rd, getRegister(rs) ^ getRegister(rt));
                 }
                 default -> {
+                    Host.stop();
                 }
             }
         } else if(opcode == 0x2 || opcode == 0x3) { // J-Type
-            int offset = (((int)((insn & 0x3FFFFFF) << 6)) >> 6);
             if (opcode == 0x3)
                 setRegister(31,PC+4);
             Branch = PC;
             Branch &= ((int)(0xF0000000L));
-            Branch |= offset << 2;
+            Branch |= (((int)(insn & 0x3FFFFFF)) << 2);
         } else { // I-Type
             int rs = (int)((insn >>> 21) & 31);
             int rt = (int)((insn >>> 16) & 31);
             //long rd = (insn >>> 11) & 31;
-            int immed = ((int)(insn << 16)) >> 16;
+            short immed = ((short)(insn & 0xFFFF));
             int immedU = (int)(insn & 0xFFFF);
 
             switch((int)opcode) {
-                case 0b001000 -> { // ADDI
+                case 0b001000, 0b001001 -> { // ADDI, ADDIU
                     setRegister(rt, getRegister(rs) + immed);
-                }
-                case 0b001001 -> { // ADDIU
-                    setRegister(rt, getRegister(rs) + immedU);
                 }
                 case 0b001100 -> { // ANDI
                     setRegister(rt, getRegister(rs) & immedU);
@@ -374,7 +372,7 @@ public class R3000 implements Processor {
                     setRegister(rt, getRegister(rs) ^ immedU);
                 }
                 default -> {
-
+                    Host.stop();
                 }
             }
         }
@@ -401,11 +399,12 @@ public class R3000 implements Processor {
     private int peek1(long addr, boolean useICache) {
         var uaddr = addr & 0xFFFFFFFFL;
         if(uaddr >= 0x80000000L && uaddr <= 0x80ffffffL) {
-            if(useICache) {
+            /*if(useICache) {
                 return peekICache(uaddr & 0x7fffffff);
             } else {
                 return peekDCache(uaddr & 0x7fffffff);
-            }
+            }*/
+            return Byte.toUnsignedInt(Host.memRead(uaddr - 0x80000000L));
         } else if(uaddr >= 0xa0000000L && uaddr <= 0xa0ffffffL) {
             //StallCycles = 1;
             return Byte.toUnsignedInt(Host.memRead(uaddr - 0xa0000000L));
@@ -414,17 +413,10 @@ public class R3000 implements Processor {
         } else if(uaddr >= 0xa2000000L && uaddr <= 0xa200ffffL) {
             return Byte.toUnsignedInt(Host.busRead((byte) BusOffset, (short)(uaddr - 0xa2000000L)));
         } else if(uaddr >= 0xbfc00000L && uaddr <= 0xbfffffffL) {
-            return Byte.toUnsignedInt(ResourceRegister.ROMS.get("R3000")[(int)(uaddr-0xbfc00000L)]);
+            return Byte.toUnsignedInt(ResourceRegister.ROMS.get("r3000")[(int)(uaddr-0xbfc00000L)]);
         } else {
             return 0;
         }
-        /*if(uaddr >= 0x300 && uaddr <= 0x3FF) {
-            return Byte.toUnsignedInt(Host.busRead((byte)BusOffset,(byte)(uaddr-0x300)));
-        } else if(uaddr >= 0xFF00) {
-            return Byte.toUnsignedInt(ResourceRegister.ROMS.get("R3000")[(int)uaddr-0xFF00]);
-        } else {
-            return Byte.toUnsignedInt(Host.memRead(uaddr));
-        }*/
     }
     private int peek2(long addr, boolean useICache) {return peek1(addr, useICache) | (peek1(addr + 1, useICache) << 8);}
     private int peek4(long addr, boolean useICache) {return peek2(addr, useICache) | (peek2(addr + 2, useICache) << 16);}

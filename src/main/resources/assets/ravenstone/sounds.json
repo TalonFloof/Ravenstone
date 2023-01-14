@@ -1,5 +1,6 @@
 {
     "computer_beep": {
+        "subtitle": "Computer Beeps",
         "sounds": [
             "ravenstone:computer_beep"
         ]

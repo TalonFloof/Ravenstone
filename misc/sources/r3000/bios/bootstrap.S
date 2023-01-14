@@ -11,7 +11,6 @@ _ResetVector:
     nop
 .set reorder
 
-.section .text.reset
 _RvFmInitialize:
     # At the current CPU State, there are a few things which are in an invalid state.
     # For Instance:
@@ -42,7 +41,6 @@ _RvFmInitialize:
     mtc0 $v0, $12
 
     # Afterwards jump to the entry code
-    li $sp, 0x80100000
+    li $sp, 0xa00ffffc
     .extern main
-    li $t0, main
-    jalr $t0
+    jal main

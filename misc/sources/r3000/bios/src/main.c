@@ -21,10 +21,12 @@ void *memcpy(void *dest, const void *src, int count) {
     return dest;
 }
 
-int strlen(const char *str) {
-  int i = 0;
-  while (str[i]) i++;
-  return i;
+int strlen(const char* s) {
+    int i = 0;
+    while(s[i] != 0) {
+        i++;
+    }
+    return i;
 }
 
 void BindToDevice(unsigned char busID) {
@@ -55,6 +57,7 @@ void Beep() {
 }
 
 void main() {
+    BindToDevice(1);
     ClearScreen();
     Println("CPU...OK");
     Println("CACHE...ABSENT");

@@ -1,3 +1,6 @@
-mipsel-elf-gcc -G0 -msoft-float -Os -mips1 -march=r3000 *.S src/*.c -Tlink.ld -o BIOS.elf -nostdlib
-mipsel-elf-objcopy BIOS.elf -O binary BIOS
-# rm --force BIOS.elf
+rm --force r3000.elf
+mipsel-elf-gcc -G0 -msoft-float -Os -mips1 -ffreestanding -c *.S src/*.c
+mipsel-elf-ld *.o -G0 -Tlink.ld -o r3000.elf -nostdlib
+rm -r --force *.o
+mipsel-elf-objcopy r3000.elf -O binary r3000.bin
+# rm --force r3000.elf
