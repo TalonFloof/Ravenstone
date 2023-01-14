@@ -27,7 +27,7 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
         Arrays.fill(ScreenBuffer,(byte)0x20);
     }
     @Override
-    public byte readData(byte at) {
+    public byte readData(short at) {
         switch(at) {
             case 0x00 -> { // TTY Row
                 return (byte)Row;
@@ -78,7 +78,7 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
         }
     }
     @Override
-    public void storeData(byte at, byte data) {
+    public void storeData(short at, byte data) {
         switch(at) {
             case 0x00 -> { // TTY Row
                 Row = Byte.toUnsignedInt(data) % 50;

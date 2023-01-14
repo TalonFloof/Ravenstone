@@ -1,5 +1,5 @@
 OUTPUT_FORMAT(elf32-littlemips)
-ENTRY(_RvFmInitialize)
+ENTRY(_ResetVector)
 
 SECTIONS {
     . = 0xbfc00000;
@@ -10,7 +10,7 @@ SECTIONS {
     	__TEXT_RESET_END__ = .;
     }
 
-    . = __TEXT_RESET_END__-0x20000000;
+    /* . = __TEXT_RESET_END__-0x20000000; */
 
     .text ALIGN(16) : AT(__TEXT_RESET_END__) {
     	__TEXT_BEGIN__ = .;

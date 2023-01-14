@@ -6,6 +6,8 @@ import net.minecraft.registry.Registry;
 import net.minecraft.registry.Registries;
 
 public class SoundEventRegister {
+    public static final Identifier COMPUTER_BEEP_ID = new Identifier("ravenstone:computer_beep");
+    public static SoundEvent COMPUTER_BEEP_EVENT = SoundEvent.of(COMPUTER_BEEP_ID);
     public static final Identifier DISKETTE_INSERT_ID = new Identifier("ravenstone:diskette_insert");
     public static SoundEvent DISKETTE_INSERT_SOUND_EVENT = SoundEvent.of(DISKETTE_INSERT_ID);
     public static final Identifier DISKETTE_EJECT_ID = new Identifier("ravenstone:diskette_eject");
@@ -26,6 +28,7 @@ public class SoundEventRegister {
     public static SoundEvent DISKETTE_SEEK_LARGE_EVENT = SoundEvent.of(DISKETTE_SEEK_LARGE_ID);
 
     public static void Initialize() {
+        Registry.register(Registries.SOUND_EVENT, COMPUTER_BEEP_ID, COMPUTER_BEEP_EVENT);
         Registry.register(Registries.SOUND_EVENT, DISKETTE_INSERT_ID, DISKETTE_INSERT_SOUND_EVENT);
         Registry.register(Registries.SOUND_EVENT, DISKETTE_EJECT_ID, DISKETTE_EJECT_SOUND_EVENT);
         Registry.register(Registries.SOUND_EVENT, DISKETTE_SPIN_ID, DISKETTE_SPIN_SOUND_EVENT);

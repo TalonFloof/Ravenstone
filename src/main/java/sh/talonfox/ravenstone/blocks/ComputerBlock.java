@@ -18,13 +18,16 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlock;
 
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class ComputerBlock extends PeripheralBlock implements BlockEntityProvider {
     public static final BooleanProperty RUNNING = BooleanProperty.of("running");
     public static final BooleanProperty HAS_CPU = BooleanProperty.of("has_cpu");
+    public static ArrayList<BlockPos> toReset = new ArrayList<>();
 
     public ComputerBlock(Settings settings) {
         super(settings);
@@ -45,7 +48,8 @@ public class ComputerBlock extends PeripheralBlock implements BlockEntityProvide
 
     @Override
     public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
-        return new ComputerBlockEntity(pos, state);
+        toReset.add(pos);
+        return new ComputerBlockEntity(pos, state.with(RUNNING,false));
     }
 
     @Override

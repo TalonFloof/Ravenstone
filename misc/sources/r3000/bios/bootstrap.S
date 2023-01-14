@@ -3,14 +3,15 @@
 # SEE LICENSE IN THE ROOT OF THIS REPOSITORY FOR MORE INFORMATION
 
 .section .text.reset
+.global _ResetVector
+.type _ResetVector, @function
 .set noreorder
 _ResetVector:
     j _RvFmInitialize # Reset Vector
     nop
 .set reorder
-.global _RvFmInitialize
-.type _RvFmInitialize, @function
 
+.section .text.reset
 _RvFmInitialize:
     # At the current CPU State, there are a few things which are in an invalid state.
     # For Instance:
@@ -36,9 +37,9 @@ _RvFmInitialize:
     # SwC makes it access the Instruction Cache intead of the Data Cache when IsC is set.
     # We can use these to invalidate all of the cache lines, putting the L1 Caches into a safe state.
 
-    mfc0 $t0, $13 # Save the status register to $t0
+    mfc0 $t0, $12 # Save the status register to $t0
     or $v0, $t0, 0x10000 # Isolate the Data Cache
-    mtc0 $v0, $13
+    mtc0 $v0, $12
 
     # Afterwards jump to the entry code
     li $sp, 0x80100000

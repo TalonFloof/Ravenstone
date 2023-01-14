@@ -1,4 +1,9 @@
 {
+    "computer_beep": {
+        "sounds": [
+            "ravenstone:computer_beep"
+        ]
+    },
     "diskette_insert": {
         "sounds": [
             "ravenstone:diskette_insert"

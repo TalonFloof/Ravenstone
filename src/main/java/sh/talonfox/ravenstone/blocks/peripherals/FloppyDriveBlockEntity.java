@@ -239,8 +239,8 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
         }
     }
     @Override
-    public byte readData(byte at) {
-        switch(Byte.toUnsignedInt(at)) {
+    public byte readData(short at) {
+        switch(Short.toUnsignedInt(at)) {
             case 0x80 -> { // Flags
                 return (byte)Flags;
             }
@@ -251,16 +251,16 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                 return (byte)SectorNumber;
             }
             default -> {
-                if(Byte.toUnsignedInt(at) < 0x80) {
-                    return Buffer[Byte.toUnsignedInt(at)];
+                if(Short.toUnsignedInt(at) < 0x80) {
+                    return Buffer[Short.toUnsignedInt(at)];
                 }
                 return 0;
             }
         }
     }
     @Override
-    public void storeData(byte at, byte data) {
-        switch(Byte.toUnsignedInt(at)) {
+    public void storeData(short at, byte data) {
+        switch(Short.toUnsignedInt(at)) {
             case 0x80 -> { // Command
                 if(Byte.toUnsignedInt(data) == 0xF4) {
                     Command = 0;
@@ -279,8 +279,8 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                 SectorNumber = Byte.toUnsignedInt(data) % 64;
             }
             default -> {
-                if(Byte.toUnsignedInt(at) < 0x80) {
-                    Buffer[Byte.toUnsignedInt(at)] = data;
+                if(Short.toUnsignedInt(at) < 0x80) {
+                    Buffer[Short.toUnsignedInt(at)] = data;
                 }
             }
         }
