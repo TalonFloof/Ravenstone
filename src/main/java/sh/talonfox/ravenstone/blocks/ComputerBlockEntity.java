@@ -16,6 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlockEntity;
 import sh.talonfox.ravenstone.blocks.upgrades.RAMUpgradeBlock;
 import sh.talonfox.ravenstone.blocks.upgrades.RAMUpgradeBlockEntity;
@@ -27,11 +28,13 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
     public ItemStack CPUStack = Items.AIR.getDefaultStack();
     public Processor CPU = null;
     public byte[] RAM = new byte[1024*1024];
+    public boolean isRunning = false;
     private PeripheralBlockEntity CachedPeripheral = null;
     //private RAMUpgradeBlockEntity CachedUpgrade = null;
 
     public ComputerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockRegister.RAVEN_COMPUTER_ENTITY, pos, state, 0);
+        Ravenstone.LOGGER.info("Computer Block Entity was Initialized!");
     }
 
     public boolean insertCPU(ItemStack stack) {
@@ -120,6 +123,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
         CachedPeripheral = null;
     }
     public void stop() {
+        isRunning = false;
         world.setBlockState(pos, this.getCachedState().with(ComputerBlock.RUNNING, false));
         markDirty();
     }
@@ -127,6 +131,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
         if(!world.isClient()) {
             if (!blockEntity.CPUStack.isEmpty()) {
                 if (state.get(ComputerBlock.RUNNING)) {
+                    blockEntity.isRunning = true;
                     blockEntity.CPU.setWait(false);
                     for (int i = 0; i < (blockEntity.CPU.insnPerSecond() / 20); i++) {
                         blockEntity.CPU.next(blockEntity);

@@ -8,7 +8,6 @@ _ResetVector:
     j _RvFmInitialize # Reset Vector
     nop
 .set reorder
-.section .text
 .global _RvFmInitialize
 .type _RvFmInitialize, @function
 
@@ -44,4 +43,5 @@ _RvFmInitialize:
     # Afterwards jump to the entry code
     li $sp, 0x80100000
     .extern main
-    jal main
+    li $t0, main
+    jalr $t0
