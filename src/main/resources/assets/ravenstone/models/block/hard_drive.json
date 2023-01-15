@@ -1,0 +1,11 @@
+{
+    "parent": "ravenstone:block/block_directional",
+    "textures": {
+        "particle": "ravenstone:block/ram_upgrade_side",
+        "top": "ravenstone:block/raven_harddrive_top",
+        "bottom": "ravenstone:block/ram_upgrade_side",
+        "front": "ravenstone:block/raven_harddrive_front",
+        "back": "ravenstone:block/raven_harddrive_side",
+        "side": "ravenstone:block/raven_harddrive_side"
+    }
+}

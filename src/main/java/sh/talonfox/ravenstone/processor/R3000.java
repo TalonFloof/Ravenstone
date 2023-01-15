@@ -1,9 +1,6 @@
 package sh.talonfox.ravenstone.processor;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.math.random.Random;
 import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.ResourceRegister;
 
@@ -33,17 +30,11 @@ public class R3000 implements Processor {
     public int Branch = -1; // Used to emulate MIPS delayed branching
     public int BusOffset = 0;
     public int Status = 0;
+    public int Cause = 0;
+    public int EPC = 0;
     public int StallCycles = 0;
 
-    public CacheLine[] ICache = new CacheLine[256];
-    public CacheLine[] DCache = new CacheLine[256];
-
-    public R3000() {
-        for(int i=0; i < 256; i++) {
-            ICache[i] = new CacheLine(true);
-            DCache[i] = new CacheLine(false);
-        }
-    }
+    public R3000() {}
 
     @Override
     public boolean isWaiting() {
@@ -72,9 +63,28 @@ public class R3000 implements Processor {
         HIGH = 0;
         Branch = -1;
         Status = 0x2; // Kernel Mode
-        for(int i=0; i < 256; i++) {
-            ICache[i] = new CacheLine(true);
-            DCache[i] = new CacheLine(false);
+        Cause = 0;
+        EPC = 0;
+    }
+
+    public void triggerTrap(int curPC, int cause) {
+        Ravenstone.LOGGER.warn("Trap (Type 0x{}) @ 0x{}", Integer.toHexString(cause), Integer.toHexString(curPC));
+        if(cause != 256) {
+            Cause = cause << 2;
+        } else {
+            Cause = 0;
+        }
+        if(Branch != -1) {
+            Branch = -1;
+            Cause |= 0x80000000;
+            EPC = curPC-4;
+        } else {
+            EPC = curPC;
+        }
+        if(cause != 256) {
+            PC = ((Status & (1 << 22)) != 0) ? 0xbfc00180 : 0x80000080;
+        } else {
+            PC = ((Status & (1 << 22)) != 0) ? 0xbfc00100 : 0x80000000;
         }
     }
 
@@ -101,15 +111,26 @@ public class R3000 implements Processor {
             StallCycles -= 1;
             return;
         }
+        var insnPC = PC;
         var insn = Integer.toUnsignedLong(pc4());
         if (insn == 0) { // No Operation
             return;
         }
         var opcode = insn >>> 26;
         if(insn == 0xc || opcode == 0x10) { // Exception Related Opcodes
-
+            triggerTrap(insnPC,0);
         } else if((opcode >>> 2) == 0x04) { // Coprocessor Related Opcodes
+            var code = (insn & 0x3E00000) >> 21;
+            var rt = (insn & 0x1F0000) >>> 16;
+            var rd = (insn & 0xF800) >>> 11;
+            var co = (insn >>> 25) & 1;
+            var special = insn & 63;
 
+            if(code == 0x10 && special == 0x10) { // RFE
+                Status = (Status & 0xFFFFFFC0) | ((Status & 64) >>> 4);
+            } else {
+
+            }
         } else if(opcode == 0) { // R-Type
             var func = insn & 0b111111;
             var shamt = (insn >>> 6) & 0b11111;
@@ -132,14 +153,14 @@ public class R3000 implements Processor {
                         LOW = getRegister(rs) / getRegister(rt);
                         HIGH = getRegister(rs) % getRegister(rt);
                     } else {
-                        // Arithmetic Exception
+                        triggerTrap(insnPC,12);
                     }
                 }
                 case 0b011011 -> { // DIVU
                     var m1 = Integer.toUnsignedLong(getRegister(rs));
                     var m2 = Integer.toUnsignedLong(getRegister(rt));
                     if (m2 == 0L) {
-                        // Arithmetic Exception
+                        triggerTrap(insnPC,12);
                     } else {
                         LOW = (int)(m1 / m2);
                         HIGH = (int)(m1 % m2);
@@ -218,13 +239,13 @@ public class R3000 implements Processor {
                     setRegister(rd, getRegister(rs) - getRegister(rt));
                 }
                 case 0b001100 -> { // SYSCALL
-                    // Not Implemented Yet
+                    triggerTrap(insnPC,8);
                 }
                 case 0b100110 -> { // XOR
                     setRegister(rd, getRegister(rs) ^ getRegister(rt));
                 }
                 default -> {
-                    Host.stop();
+                    triggerTrap(insnPC,10);
                 }
             }
         } else if(opcode == 0x2 || opcode == 0x3) { // J-Type
@@ -272,7 +293,7 @@ public class R3000 implements Processor {
                                 Branch = PC + (immed << 2);
                         }
                         default -> {
-
+                            triggerTrap(insnPC,10);
                         }
                     }
                 }
@@ -289,26 +310,26 @@ public class R3000 implements Processor {
                         Branch = PC + (immed << 2);
                 }
                 case 0b100000 -> { // LB
-                    setRegister(rt, (peek1(Integer.toUnsignedLong(getRegister(rs) + immed),false) << 24) >> 24);
+                    setRegister(rt, (peek1(Integer.toUnsignedLong(getRegister(rs) + immed)) << 24) >> 24);
                 }
                 case 0b100100 -> { // LBU
-                    setRegister(rt, peek1(Integer.toUnsignedLong(getRegister(rs) + immed),false));
+                    setRegister(rt, peek1(Integer.toUnsignedLong(getRegister(rs) + immed)));
                 }
                 case 0b100001 -> { // LH
-                    setRegister(rt, (peek2(Integer.toUnsignedLong(getRegister(rs) + immed),false) << 16) >> 16);
+                    setRegister(rt, (peek2(Integer.toUnsignedLong(getRegister(rs) + immed)) << 16) >> 16);
                 }
                 case 0b100101 -> { // LHU
-                    setRegister(rt, peek2(Integer.toUnsignedLong(getRegister(rs) + immed),false));
+                    setRegister(rt, peek2(Integer.toUnsignedLong(getRegister(rs) + immed)));
                 }
                 case 0b001111 -> { // LUI
                     setRegister(rt, immedU << 16);
                 }
                 case 0b100011 -> { // LW
-                    setRegister(rt, peek4(Integer.toUnsignedLong(getRegister(rs) + immed),false));
+                    setRegister(rt, peek4(Integer.toUnsignedLong(getRegister(rs) + immed)));
                 }
                 case 0b100010 -> { // LWL
                     var addr = Integer.toUnsignedLong(getRegister(rs) + immed);
-                    var word = peek4(addr & 0xFFFFFFFCL,false);
+                    var word = peek4(addr & 0xFFFFFFFCL);
                     switch ((int)(addr & 0x3)) {
                         case 0 -> setRegister(rt, ((word & 0x0000_00FF) << 24) | (getRegister(rt) & 0x00FF_FFFF));
                         case 1 -> setRegister(rt, ((word & 0x0000_FFFF) << 16) | (getRegister(rt) & 0x0000_FFFF));
@@ -318,7 +339,7 @@ public class R3000 implements Processor {
                 }
                 case 0b100110 -> { // LWR
                     var addr = Integer.toUnsignedLong(getRegister(rs) + immed);
-                    var word = peek4(addr & 0xFFFFFFFCL,false);
+                    var word = peek4(addr & 0xFFFFFFFCL);
                     switch ((int)(addr & 0x3)) {
                         case 0 -> setRegister(rt, word);
                         case 1 -> setRegister(rt, (word >>> 8) | (getRegister(rt) & 0xFF000000));
@@ -349,7 +370,7 @@ public class R3000 implements Processor {
                 case 0b101010 -> { // SWL
                     long addr = Integer.toUnsignedLong(getRegister(rs) + immed);
                     long alignAddr = addr & 0xFFFFFFFCL;
-                    int word = peek4(alignAddr,false);
+                    int word = peek4(alignAddr);
                     switch((int)(addr & 0x3)) {
                         case 0 -> poke4(alignAddr, (getRegister(rt) >>> 24) | (word & 0xFFFFFF00));
                         case 1 -> poke4(alignAddr, (getRegister(rt) >>> 16) | (word & 0xFFFF0000));
@@ -360,7 +381,7 @@ public class R3000 implements Processor {
                 case 0b101110 -> { // SWR
                     long addr = Integer.toUnsignedLong(getRegister(rs) + immed);
                     long alignAddr = addr & 0xFFFFFFFCL;
-                    int word = peek4(alignAddr,false);
+                    int word = peek4(alignAddr);
                     switch((int)(addr & 0x3)) {
                         case 0 -> poke4(alignAddr, getRegister(rt));
                         case 1 -> poke4(alignAddr, (getRegister(rt) >>> 8) | (word & 0x0000_00FF));
@@ -372,14 +393,14 @@ public class R3000 implements Processor {
                     setRegister(rt, getRegister(rs) ^ immedU);
                 }
                 default -> {
-                    Host.stop();
+                    triggerTrap(insnPC,10);
                 }
             }
         }
     }
 
     private int pc4() {
-        var val = peek4(Integer.toUnsignedLong(PC),true);
+        var val = peek4(Integer.toUnsignedLong(PC));
         if(Branch != -1) {
             PC = Branch;
             Branch = -1;
@@ -389,24 +410,11 @@ public class R3000 implements Processor {
         return val;
     }
 
-    private int peekICache(long addr) {
-        return 0;
-    }
-    private int peekDCache(long addr) {
-        return 0;
-    }
-
-    private int peek1(long addr, boolean useICache) {
+    private int peek1(long addr) {
         var uaddr = addr & 0xFFFFFFFFL;
         if(uaddr >= 0x80000000L && uaddr <= 0x80ffffffL) {
-            /*if(useICache) {
-                return peekICache(uaddr & 0x7fffffff);
-            } else {
-                return peekDCache(uaddr & 0x7fffffff);
-            }*/
             return Byte.toUnsignedInt(Host.memRead(uaddr - 0x80000000L));
         } else if(uaddr >= 0xa0000000L && uaddr <= 0xa0ffffffL) {
-            //StallCycles = 1;
             return Byte.toUnsignedInt(Host.memRead(uaddr - 0xa0000000L));
         } else if(uaddr == 0xa1000000L) {
             return BusOffset;
@@ -420,8 +428,8 @@ public class R3000 implements Processor {
             return 0;
         }
     }
-    private int peek2(long addr, boolean useICache) {return peek1(addr, useICache) | (peek1(addr + 1, useICache) << 8);}
-    private int peek4(long addr, boolean useICache) {return peek2(addr, useICache) | (peek2(addr + 2, useICache) << 16);}
+    private int peek2(long addr) {return peek1(addr) | (peek1(addr + 1) << 8);}
+    private int peek4(long addr) {return peek2(addr) | (peek2(addr + 2) << 16);}
 
     private void poke1(long addr, int b) {
         var uaddr = addr & 0xFFFFFFFFL;
@@ -450,14 +458,10 @@ public class R3000 implements Processor {
         stack.getOrCreateNbt().putInt("HIGH",HIGH);
         stack.getOrCreateNbt().putInt("Branch",Branch);
         stack.getOrCreateNbt().putInt("Status",Status);
+        stack.getOrCreateNbt().putInt("Cause",Cause);
+        stack.getOrCreateNbt().putInt("EPC",EPC);
         stack.getOrCreateNbt().putIntArray("Registers",Registers);
         stack.getOrCreateNbt().putInt("BusOffset",BusOffset);
-        /*NbtList icacheList = new NbtList();
-        NbtList dcacheList = new NbtList();
-        Arrays.stream(ICache).forEach((val) -> icacheList.add(val.serialize()));
-        Arrays.stream(DCache).forEach((val) -> dcacheList.add(val.serialize()));
-        stack.getOrCreateNbt().put("ICache",icacheList);
-        stack.getOrCreateNbt().put("DCache",dcacheList);*/
     }
 
     @Override
@@ -468,54 +472,15 @@ public class R3000 implements Processor {
         HIGH = stack.getOrCreateNbt().getInt("HIGH");
         Branch = stack.getOrCreateNbt().getInt("Branch");
         Status = stack.getOrCreateNbt().getInt("Status");
+        Cause = stack.getOrCreateNbt().getInt("Cause");
+        EPC = stack.getOrCreateNbt().getInt("EPC");
         Registers = stack.getOrCreateNbt().getIntArray("Registers");
         BusOffset = stack.getOrCreateNbt().getInt("BusOffset");
-        /*NbtList icacheList = stack.getOrCreateNbt().getList("ICache",NbtList.COMPOUND_TYPE);
-        NbtList dcacheList = stack.getOrCreateNbt().getList("DCache",NbtList.COMPOUND_TYPE);
-        for(int i=0; i < 256; i++) {
-            ICache[i].deserialize(icacheList.getCompound(i));
-            DCache[i].deserialize(dcacheList.getCompound(i));
-        }*/
     }
 
-    private class CacheLine {
-        public int TagValid;
-        public byte[] Line;
+    public class TLBEntry {
+        public TLBEntry() {
 
-        public CacheLine(boolean icache) {
-            var rng = Random.createLocal();
-            if(icache) {
-                Line = new byte[16];
-            } else {
-                Line = new byte[4];
-            }
-            for(int i=0; i < Line.length; i++) {
-                Line[i] = (byte)(rng.nextInt() % 256);
-            }
-            TagValid = rng.nextInt();
-        }
-
-        public int getTag() {
-            return (this.TagValid & 0xfffff000);
-        }
-        public int getValidIndex() {
-            return (this.TagValid >> 2) & 0x7;
-        }
-
-        public void setTagValid(int val) {
-            this.TagValid = val & 0x7fff_f00c;
-        }
-
-        public NbtCompound serialize() {
-            NbtCompound nbt = new NbtCompound();
-            nbt.putInt("Tag",this.TagValid);
-            nbt.putByteArray("Line",Line);
-            return nbt;
-        }
-
-        public void deserialize(NbtCompound nbt) {
-            this.TagValid = nbt.getInt("Tag");
-            this.Line = nbt.getByteArray("Line");
         }
     }
 }

@@ -1,0 +1,12 @@
+{
+    "variants": {
+        "facing=north,light=false": { "model": "ravenstone:block/hard_drive", "uvlock": false },
+        "facing=east,light=false":  { "model": "ravenstone:block/hard_drive", "y":  90, "uvlock": false },
+        "facing=south,light=false": { "model": "ravenstone:block/hard_drive", "y": 180, "uvlock": false },
+        "facing=west,light=false":  { "model": "ravenstone:block/hard_drive", "y": 270, "uvlock": false },
+        "facing=north,light=true": { "model": "ravenstone:block/hard_drive_light", "uvlock": false },
+        "facing=east,light=true":  { "model": "ravenstone:block/hard_drive_light", "y":  90, "uvlock": false },
+        "facing=south,light=true": { "model": "ravenstone:block/hard_drive_light", "y": 180, "uvlock": false },
+        "facing=west,light=true":  { "model": "ravenstone:block/hard_drive_light", "y": 270, "uvlock": false }
+    }
+}

@@ -26,7 +26,7 @@ public class ItemGroupRegister {
             .entries((enabledFeatures, stacks, operatorEnabled) -> {
                 stacks.add(new ItemStack(BlockRegister.RAVEN_COMPUTER_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_TERMINAL_BLOCK));
-                //stacks.add(new ItemStack(BlockRegister.RAVEN_MODEM_BLOCK));
+                stacks.add(new ItemStack(BlockRegister.RAVEN_HARDDRIVE_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_FLOPPY_DRIVE_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_RIBBON_CABLE_BLOCK));
                 /*stacks.add(new ItemStack(BlockRegister.RAVEN_16K_UPGRADE_BLOCK));

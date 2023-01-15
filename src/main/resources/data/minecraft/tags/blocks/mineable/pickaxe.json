@@ -3,6 +3,7 @@
     "values": [
         "ravenstone:computer",
         "ravenstone:terminal",
+        "ravenstone:hard_drive",
         "ravenstone:floppy_drive",
         "ravenstone:ram_upgrade_16k",
         "ravenstone:ram_upgrade_32k",

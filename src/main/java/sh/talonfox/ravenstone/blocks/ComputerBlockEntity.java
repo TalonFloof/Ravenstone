@@ -196,9 +196,8 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
         if(!CPUStack.isEmpty()) {
             if(CPU == null) {
                 CPU = ((ProcessorItem)CPUStack.getItem()).processorClass();
-            } else {
-                CPU.loadNBT(CPUStack);
             }
+            CPU.loadNBT(CPUStack);
         }
         RAM = tag.getList("Memory",NbtElement.BYTE_ARRAY_TYPE);
     }

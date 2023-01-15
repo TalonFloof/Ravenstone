@@ -6,6 +6,6 @@ import sh.talonfox.ravenstone.blocks.BlockRegister;
 
 public class HarddriveBlockEntity extends PeripheralBlockEntity {
     public HarddriveBlockEntity(BlockPos pos, BlockState state) {
-        super(BlockRegister.RAVEN_HARDDRIVE_ENTITY, pos, state, 2);
+        super(BlockRegister.RAVEN_HARDDRIVE_ENTITY, pos, state, 4);
     }
 }
