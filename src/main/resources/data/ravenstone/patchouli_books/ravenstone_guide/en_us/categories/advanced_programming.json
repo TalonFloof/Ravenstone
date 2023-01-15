@@ -1,6 +1,0 @@
-{
-    "name": "Advanced Programming",
-    "description": "This Section documents technical information relating to the Raven-8t architecture. This section might be confusing for people who have never worked with bare metal programming. You are not required to understand this section in order to use this mod.",
-    "icon": "ravenstone:textures/book/advanced_programming_icon.png",
-    "sortnum": 3
-}

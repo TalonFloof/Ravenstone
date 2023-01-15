@@ -1,0 +1,6 @@
+{
+    "name": "Programming",
+    "description": "This Section Documents how to program the Raven-8t Computer. It also gives a deep-dive into the internals of the CPU and the Computer itself.",
+    "icon": "ravenstone:textures/book/advanced_programming_icon.png",
+    "sortnum": 3
+}

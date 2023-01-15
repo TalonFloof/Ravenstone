@@ -32,7 +32,7 @@ public class Ravenstone implements ModInitializer {
         SoundEventRegister.Initialize();
         LOGGER.info("Registering Images...");
         ResourceRegister.RegisterROM("r3000","r3000.bin");
-        ResourceRegister.RegisterFloppy("Magpie","magpie.bin");
+        ResourceRegister.RegisterFloppy("Vix V1","vix.bin");
         ItemGroupRegister.Initialize();
         LOGGER.info("Initialization successful!");
     }

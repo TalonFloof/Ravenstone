@@ -54,21 +54,93 @@ void Println(const char* c) {
 
 void Beep() {
     *((unsigned int*)0xa1000004) = 0;
+    int i;
+    for(int i=0;i<4;i++) {asm volatile("break");}
+}
+
+int SendDisketteCommand(int cmd) {
+    unsigned char* ptr = (unsigned char*)0xa2000080;
+    *ptr = cmd;
+    asm volatile("break");
+    while(((*ptr) & 0x1) != 0) {asm volatile("break");}
+    return ((int)(*ptr));
+}
+
+void SetDisketteTrack(unsigned char num) {
+    *((unsigned char*)0xa2000081) = num;
+}
+
+void SetDisketteSector(unsigned char num) {
+    *((unsigned char*)0xa2000082) = num;
 }
 
 void main() {
+    int i;
     BindToDevice(1);
     ClearScreen();
     Println("CPU...OK");
-    Println("CACHE...ABSENT");
     /* Copy Writable Data to RAM */
     memcpy(&__DATA_BEGIN__,&__RODATA_END__,(int)(((unsigned int)&__DATA_END__)-((unsigned int)&__DATA_BEGIN__)));
-    for(int i=0; i < 60; i++) {asm volatile("break");}
     Println("RAM...1024K OK");
     Println("SYSTEM IS OK");
     Beep();
     Println("");
-    Println("Loading bootstrapper from Diskette Drive...");
-
-    for(;;) {}
+    for(;;) {
+        for(;;) {
+            Println("Loading bootstrapper from Diskette Drive...");
+            BindToDevice(2);
+            /* Engage Head */
+            SetDisketteTrack(0);
+            SetDisketteSector(0);
+            if((*((unsigned char*)0xa1000001)) & 0x80) {
+                Beep();
+                BindToDevice(1);
+                Println("");
+                Println("Diskette Drive Communication Failure");
+                Println("To reattempt, press any key.");
+                while((*((unsigned char*)0xa2000004)) == 0) {asm volatile("break");}
+                ClearScreen();
+                continue;
+            }
+            if((SendDisketteCommand(0x21) & 0x8) != 0) {
+                Beep();
+                BindToDevice(1);
+                Println("");
+                Println("No Diskette was inserted into the diskette drive.");
+                Println("Insert a bootable disk, then press any key.");
+                while((*((unsigned char*)0xa2000004)) == 0) {asm volatile("break");}
+                ClearScreen();
+            } else {
+                break;
+            }
+        }
+        SetDisketteTrack(0);
+        SetDisketteSector(0);
+        SendDisketteCommand(0x1); /* Seek to Track 0 */
+        SendDisketteCommand(0x80); /* Read Sector 0 on Track 0 */
+        int hasData = 0;
+        for(i=0;i<128;i++) {
+            if(((unsigned char*)0xa2000000)[i] != 0) {
+                hasData = 1;
+                break;
+            }
+        }
+        if(hasData)
+            break;
+        SendDisketteCommand(0x20);
+        Beep();
+        BindToDevice(1);
+        Println("");
+        Println("This diskette contains no bootable data.");
+        Println("Insert a bootable disk, then press any key.");
+        while((*((unsigned char*)0xa2000004)) == 0) {asm volatile("break");}
+        ClearScreen();
+    }
+    for(i=0;i < 32;i++) {
+        SetDisketteSector(i);
+        SendDisketteCommand(0x80);
+        memcpy((void*)(0x100+(128*i)),(void*)0xa2000000,128);
+    }
+    SendDisketteCommand(0x20);
+    BindToDevice(0);
 }

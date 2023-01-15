@@ -57,7 +57,7 @@ public class R3000 implements Processor {
 
     @Override
     public int insnPerSecond() {
-        return 1000000; // 1 MHz
+        return 1000000; // 1 MIPS
     }
 
     @Override
@@ -410,6 +410,8 @@ public class R3000 implements Processor {
             return Byte.toUnsignedInt(Host.memRead(uaddr - 0xa0000000L));
         } else if(uaddr == 0xa1000000L) {
             return BusOffset;
+        } else if(uaddr == 0xa1000001L) {
+            return Host.isPeripheralConnected()?0:0x80;
         } else if(uaddr >= 0xa2000000L && uaddr <= 0xa200ffffL) {
             return Byte.toUnsignedInt(Host.busRead((byte) BusOffset, (short)(uaddr - 0xa2000000L)));
         } else if(uaddr >= 0xbfc00000L && uaddr <= 0xbfffffffL) {
@@ -450,12 +452,12 @@ public class R3000 implements Processor {
         stack.getOrCreateNbt().putInt("Status",Status);
         stack.getOrCreateNbt().putIntArray("Registers",Registers);
         stack.getOrCreateNbt().putInt("BusOffset",BusOffset);
-        NbtList icacheList = new NbtList();
+        /*NbtList icacheList = new NbtList();
         NbtList dcacheList = new NbtList();
         Arrays.stream(ICache).forEach((val) -> icacheList.add(val.serialize()));
         Arrays.stream(DCache).forEach((val) -> dcacheList.add(val.serialize()));
         stack.getOrCreateNbt().put("ICache",icacheList);
-        stack.getOrCreateNbt().put("DCache",dcacheList);
+        stack.getOrCreateNbt().put("DCache",dcacheList);*/
     }
 
     @Override
@@ -468,12 +470,12 @@ public class R3000 implements Processor {
         Status = stack.getOrCreateNbt().getInt("Status");
         Registers = stack.getOrCreateNbt().getIntArray("Registers");
         BusOffset = stack.getOrCreateNbt().getInt("BusOffset");
-        NbtList icacheList = stack.getOrCreateNbt().getList("ICache",NbtList.COMPOUND_TYPE);
+        /*NbtList icacheList = stack.getOrCreateNbt().getList("ICache",NbtList.COMPOUND_TYPE);
         NbtList dcacheList = stack.getOrCreateNbt().getList("DCache",NbtList.COMPOUND_TYPE);
         for(int i=0; i < 256; i++) {
             ICache[i].deserialize(icacheList.getCompound(i));
             DCache[i].deserialize(dcacheList.getCompound(i));
-        }
+        }*/
     }
 
     private class CacheLine {

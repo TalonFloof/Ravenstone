@@ -4,7 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.*;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
@@ -16,22 +16,28 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlockEntity;
 import sh.talonfox.ravenstone.processor.Processor;
 import sh.talonfox.ravenstone.processor.ProcessorHost;
 import sh.talonfox.ravenstone.processor.ProcessorItem;
 import sh.talonfox.ravenstone.sounds.SoundEventRegister;
 
+import java.util.Collections;
+import java.util.HashMap;
+
 public class ComputerBlockEntity extends PeripheralBlockEntity implements ProcessorHost {
     public ItemStack CPUStack = Items.AIR.getDefaultStack();
     public Processor CPU = null;
-    public byte[] RAM = new byte[1024*1024];
+    public NbtList RAM = new NbtList();
     private PeripheralBlockEntity CachedPeripheral = null;
     //private RAMUpgradeBlockEntity CachedUpgrade = null;
 
     public ComputerBlockEntity(BlockPos pos, BlockState state) {
         super(BlockRegister.RAVEN_COMPUTER_ENTITY, pos, state, 0);
+        RAM.clear();
+        for(int i=0;i < 1024;i++) {
+            RAM.add(new NbtByteArray(new byte[0]));
+        }
     }
 
     public boolean insertCPU(ItemStack stack) {
@@ -109,15 +115,31 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
 
     @Override
     public byte memRead(long at) {
-        return RAM[(int)at];
+        if(at >= 1024*1024)
+            return 0;
+        int chunk = ((int)at)/1024;
+        int offset = ((int)at)%1024;
+        byte[] chunkDat = ((NbtByteArray)RAM.get(chunk)).getByteArray();
+        return chunkDat.length > 0 ? chunkDat[offset] : 0;
     }
 
     @Override
     public void memStore(long at, byte data) {
-        RAM[(int)at] = data;
+        if(at >= 1024*1024)
+            return;
+        int chunk = ((int)at)/1024;
+        int offset = ((int)at)%1024;
+        NbtByteArray chunkDat = ((NbtByteArray)RAM.get(chunk));
+        if(chunkDat.size() == 0) {
+            chunkDat.addAll(Collections.nCopies(1024,NbtByte.of((byte)0)));
+        }
+        chunkDat.set(offset,NbtByte.of(data));
     }
     public void invalidatePeripheral() {
         CachedPeripheral = null;
+    }
+    public boolean isPeripheralConnected() {
+        return CachedPeripheral != null;
     }
     public void beep() {
         assert world != null;
@@ -164,6 +186,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
         if(CPU != null && !CPUStack.isEmpty())
             CPU.saveNBT(CPUStack);
         tag.put("CPUItem", CPUStack.writeNbt(new NbtCompound()));
+        tag.put("Memory",RAM);
     }
 
     @Override
@@ -177,6 +200,7 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
                 CPU.loadNBT(CPUStack);
             }
         }
+        RAM = tag.getList("Memory",NbtElement.BYTE_ARRAY_TYPE);
     }
 
     @Nullable

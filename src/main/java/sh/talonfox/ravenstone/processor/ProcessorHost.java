@@ -6,6 +6,7 @@ public interface ProcessorHost {
     byte memRead(long at);
     void memStore(long at, byte data);
     void invalidatePeripheral();
+    boolean isPeripheralConnected();
 
     void beep();
 

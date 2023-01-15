@@ -6,6 +6,7 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.nbt.NbtByteArray;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
@@ -81,6 +82,9 @@ public class ComputerBlock extends PeripheralBlock implements BlockEntityProvide
                 if(!blockEntity.CPUStack.isEmpty()) {
                     world.playSound(null, pos, SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.BLOCKS, 0.5F, 2.0F);
                     // Run Code
+                    for(int i=0;i < 1024;i++) {
+                        blockEntity.RAM.set(i, new NbtByteArray(new byte[0]));
+                    }
                     blockEntity.CPU.reset();
                     world.setBlockState(pos, state.with(RUNNING, !state.get(RUNNING)));
                     blockEntity.markDirty();
