@@ -45,5 +45,5 @@ _RvFmInitialize:
     .extern main
     jal main
     # The BIOS has finished, enter into the code within the first track
-    li $t0, 0xa0000100
+    li $t0, 0x800fe000
     jr $t0

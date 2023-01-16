@@ -27,6 +27,17 @@ public class SoundEventRegister {
     public static final Identifier DISKETTE_SEEK_LARGE_ID = new Identifier("ravenstone:diskette_drive_seek_large");
     public static SoundEvent DISKETTE_SEEK_LARGE_EVENT = SoundEvent.of(DISKETTE_SEEK_LARGE_ID);
 
+    public static final Identifier HARD_DRIVE_IDLE_ID = new Identifier("ravenstone:hard_drive_idle");
+    public static SoundEvent HARD_DRIVE_IDLE_EVENT = SoundEvent.of(HARD_DRIVE_IDLE_ID);
+    public static final Identifier HARD_DRIVE_SEEK_ID = new Identifier("ravenstone:hard_drive_seek");
+    public static SoundEvent HARD_DRIVE_SEEK_EVENT = SoundEvent.of(HARD_DRIVE_SEEK_ID);
+    public static final Identifier HARD_DRIVE_SEEK_SHORT_ID = new Identifier("ravenstone:hard_drive_seek_short");
+    public static SoundEvent HARD_DRIVE_SEEK_SHORT_EVENT = SoundEvent.of(HARD_DRIVE_SEEK_SHORT_ID);
+    public static final Identifier HARD_DRIVE_STARTUP_ID = new Identifier("ravenstone:hard_drive_startup");
+    public static SoundEvent HARD_DRIVE_STARTUP_EVENT = SoundEvent.of(HARD_DRIVE_STARTUP_ID);
+    public static final Identifier HARD_DRIVE_SPINDOWN_ID = new Identifier("ravenstone:hard_drive_spindown");
+    public static SoundEvent HARD_DRIVE_SPINDOWN_EVENT = SoundEvent.of(HARD_DRIVE_SPINDOWN_ID);
+
     public static void Initialize() {
         Registry.register(Registries.SOUND_EVENT, COMPUTER_BEEP_ID, COMPUTER_BEEP_EVENT);
         Registry.register(Registries.SOUND_EVENT, DISKETTE_INSERT_ID, DISKETTE_INSERT_SOUND_EVENT);

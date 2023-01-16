@@ -6,5 +6,6 @@ public class PacketRegister {
     public static void Initalize() {
         ServerPlayNetworking.registerGlobalReceiver(TerminalPackets.TERMINAL_KEY, TerminalPackets::TerminalKeyReceiver);
         ServerPlayNetworking.registerGlobalReceiver(PeripheralPackets.SET_BUS_ID, PeripheralPackets::SetBusReceiver);
+        ServerPlayNetworking.registerGlobalReceiver(HardDrivePackets.SET_HD_FLAG, HardDrivePackets::SetHDFlagReceiver);
     }
 }

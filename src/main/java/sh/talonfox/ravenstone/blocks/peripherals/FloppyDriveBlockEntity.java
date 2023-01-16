@@ -192,25 +192,6 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     }
                     blockEntity.Flags &= ~0x20;
                     blockEntity.Flags |= (state.get(FloppyDriveBlock.LIGHT) ? 0x20 : 0);
-                } else if(blockEntity.Command == 0x80) { // Read
-                    if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.SectorNumber < 32) {
-                        if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
-                            blockEntity.Flags |= 0x10;
-                        } else {
-                            var sec = ((FloppyDisk) blockEntity.stack.getItem()).readSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber * 32) + blockEntity.SectorNumber);
-                            blockEntity.Buffer = Arrays.copyOf(sec, 128);
-                        }
-                    }
-                    blockEntity.Flags &= ~1;
-                } else if(blockEntity.Command == 0xA0) { // Write
-                    if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.SectorNumber < 32) {
-                        if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
-                            blockEntity.Flags |= 0x10;
-                        } else {
-                            ((FloppyDisk) blockEntity.stack.getItem()).writeSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber * 32) + blockEntity.SectorNumber, blockEntity.Buffer);
-                        }
-                    }
-                    blockEntity.Flags &= ~1;
                 } else if(blockEntity.Command == 0xC4) { // Read Label
                     if (state.get(FloppyDriveBlock.LIGHT)) {
                         String name = ((FloppyDisk) blockEntity.stack.getItem()).getLabel(blockEntity.stack);
@@ -268,8 +249,29 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     Arrays.fill(Buffer, (byte)0);
                 } else if((Flags & 1) == 0 && data != 0) {
                     //Ravenstone.LOGGER.info("Command: 0x{} Track: 0x{} Sector: 0x{}", Integer.toHexString(Byte.toUnsignedInt(data)), Integer.toHexString(TrackNumber), Integer.toHexString(SectorNumber));
-                    Command = Byte.toUnsignedInt(data);
-                    Flags = 1;
+                    if(Command == 0x80) { // Read
+                        Flags = 0;
+                        if (this.getCachedState().get(FloppyDriveBlock.LIGHT) && SectorNumber < 32) {
+                            if (TrackNumber != CurrentTrack) {
+                                Flags |= 0x10;
+                            } else {
+                                var sec = ((FloppyDisk)stack.getItem()).readSector(stack, (ServerWorld) world, (TrackNumber * 32) + SectorNumber);
+                                Buffer = Arrays.copyOf(sec, 128);
+                            }
+                        }
+                    } else if(Command == 0xA0) { // Write
+                        Flags = 0;
+                        if (this.getCachedState().get(FloppyDriveBlock.LIGHT) && SectorNumber < 32) {
+                            if (TrackNumber != CurrentTrack) {
+                                Flags |= 0x10;
+                            } else {
+                                ((FloppyDisk)stack.getItem()).writeSector(stack, (ServerWorld) world, (TrackNumber * 32) + SectorNumber, Buffer);
+                            }
+                        }
+                    } else {
+                        Command = Byte.toUnsignedInt(data);
+                        Flags = 1;
+                    }
                 }
             }
             case 0x81 -> { // Track Number

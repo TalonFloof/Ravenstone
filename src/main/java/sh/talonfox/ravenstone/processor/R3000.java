@@ -81,6 +81,7 @@ public class R3000 implements Processor {
         } else {
             EPC = curPC;
         }
+        Status = ((((Status & 63) << 2) & 63) | 0b10) | (Status & 0xffffffc0);
         if(cause != 256) {
             PC = ((Status & (1 << 22)) != 0) ? 0xbfc00180 : 0x80000080;
         } else {
@@ -117,9 +118,7 @@ public class R3000 implements Processor {
             return;
         }
         var opcode = insn >>> 26;
-        if(insn == 0xc || opcode == 0x10) { // Exception Related Opcodes
-            triggerTrap(insnPC,0);
-        } else if((opcode >>> 2) == 0x04) { // Coprocessor Related Opcodes
+        if((opcode >>> 2) == 0x04) { // Coprocessor Related Opcodes
             var code = (insn & 0x3E00000) >> 21;
             var rt = (insn & 0x1F0000) >>> 16;
             var rd = (insn & 0xF800) >>> 11;
@@ -127,9 +126,24 @@ public class R3000 implements Processor {
             var special = insn & 63;
 
             if(code == 0x10 && special == 0x10) { // RFE
-                Status = (Status & 0xFFFFFFC0) | ((Status & 64) >>> 4);
+                Status = (Status & 0xFFFFFFC0) | ((Status & 63) >>> 2);
+            } else if(code == 0x00) { // MFC0
+                var value = 0;
+                switch((int)rd) {
+                    case 12 -> value = Status;
+                    case 13 -> value = Cause;
+                    case 14 -> value = EPC;
+                }
+                setRegister((int)rt, value);
+            } else if(code == 0x04) { // MTC0
+                var value = getRegister((int)rt);
+                switch((int)rd) {
+                    case 12 -> Status = value;
+                    case 13 -> Cause = value;
+                    case 14 -> EPC = value;
+                }
             } else {
-
+                triggerTrap(insnPC,10);
             }
         } else if(opcode == 0) { // R-Type
             var func = insn & 0b111111;

@@ -61,7 +61,7 @@ void Beep() {
 int SendDisketteCommand(int cmd) {
     unsigned char* ptr = (unsigned char*)0xa2000080;
     *ptr = cmd;
-    asm volatile("break");
+    asm volatile("nop");
     while(((*ptr) & 0x1) != 0) {asm volatile("break");}
     return ((int)(*ptr));
 }
@@ -139,7 +139,7 @@ void main() {
     for(i=0;i < 32;i++) {
         SetDisketteSector(i);
         SendDisketteCommand(0x80);
-        memcpy((void*)(0x80000100+(128*i)),(void*)0xa2000000,128);
+        memcpy((void*)(0x800fe000+(128*i)),(void*)0xa2000000,128);
     }
     SendDisketteCommand(0x20);
     BindToDevice(0);
