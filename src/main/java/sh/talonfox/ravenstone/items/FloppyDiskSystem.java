@@ -7,6 +7,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
+import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.ResourceRegister;
 
 import java.util.Arrays;
@@ -39,7 +40,9 @@ public class FloppyDiskSystem extends Item implements FloppyDisk {
     @Override
     public byte[] readSector(ItemStack stack, ServerWorld world, int index) {
         byte[] sectors = ResourceRegister.IMAGES.get(Label);
-        if(sectors == null) return new byte[0];
+        if(sectors == null) {
+            return new byte[0];
+        }
         if((index*128) > sectors.length) return new byte[0];
         else return Arrays.copyOfRange(sectors, (index * 128), (index * 128) + 128);
     }

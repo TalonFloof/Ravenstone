@@ -3,7 +3,7 @@
     "item.ravenstone.ravenstone": "It's a secret to everybody.",
     "block.ravenstone.computer": "Raven-8t Computer",
     "block.ravenstone.terminal": "Terminal",
-    "block.ravenstone.hard_drive": "4 MiB Hard Drive",
+    "block.ravenstone.hard_drive": "10 MiB Hard Drive",
     "block.ravenstone.floppy_drive": "Floppy Disk Drive",
     "block.ravenstone.ribbon_cable": "Ribbon Cable",
     "block.ravenstone.ram_upgrade_16k": "16KiB Memory Upgrade",
@@ -12,5 +12,5 @@
     "item.ravenstone.transistor": "Transistor",
     "item.ravenstone.r3000_processor": "MIPS R3000 Processor",
     "item.ravenstone.floppy_disk": "Floppy Disk",
-    "item.ravenstone.floppy_disk_vix": "Floppy Disk"
+    "item.ravenstone.floppy_disk_vix1": "Floppy Disk"
 }

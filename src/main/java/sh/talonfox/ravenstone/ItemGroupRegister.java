@@ -3,6 +3,7 @@ package sh.talonfox.ravenstone;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import sh.talonfox.ravenstone.blocks.BlockRegister;
 import sh.talonfox.ravenstone.items.ItemRegister;
@@ -20,10 +21,10 @@ public class ItemGroupRegister {
         // This is a stub.
     }
 
-    public static final ItemGroup ITEM_GROUP = FabricItemGroup.builder(
-            new Identifier("ravenstone", "ravenstone_group"))
+    public static final ItemGroup ITEM_GROUP = FabricItemGroup.builder()
             .icon(() -> new ItemStack(ItemRegister.RAVENSTONE_CUSTOM_ICON))
-            .entries((enabledFeatures, stacks, operatorEnabled) -> {
+            .displayName(Text.translatable("itemGroup.ravenstone.ravenstone_group"))
+            .entries((context, stacks) -> {
                 stacks.add(new ItemStack(BlockRegister.RAVEN_COMPUTER_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_TERMINAL_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_HARDDRIVE_BLOCK));
@@ -35,7 +36,7 @@ public class ItemGroupRegister {
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_TRANSISTOR));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_R3000_PROCESSOR));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_FLOPPY_DISK_USER));
-                stacks.add(new ItemStack(ItemRegister.RAVENSTONE_VIX_FLOPPY_DISK));
+                stacks.add(new ItemStack(ItemRegister.RAVENSTONE_VIX1_FLOPPY_DISK));
                 //stacks.add(RAVENSTONE_GUIDE);
             }).build();
 }

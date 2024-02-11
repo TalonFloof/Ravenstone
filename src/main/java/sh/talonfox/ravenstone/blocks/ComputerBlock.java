@@ -55,7 +55,7 @@ public class ComputerBlock extends PeripheralBlock implements BlockEntityProvide
 
     @Override
     public BlockState getPlacementState(ItemPlacementContext ctx) {
-        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getPlayerFacing().getOpposite()).with(RUNNING,false).with(HAS_CPU,false);
+        return this.getDefaultState().with(Properties.HORIZONTAL_FACING, ctx.getHorizontalPlayerFacing().getOpposite()).with(RUNNING,false).with(HAS_CPU,false);
     }
 
     @Override

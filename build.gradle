@@ -13,6 +13,7 @@ repositories {
     // See https://docs.gradle.org/current/userguide/declaring_repositories.html
     // for more information about repositories.
     maven { url 'https://maven.blamejared.com' }
+    maven { url 'https://mvnrepository.com' }
 }
 
 dependencies {
@@ -23,7 +24,8 @@ dependencies {
 
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-    //modImplementation "vazkii.patchouli:Patchouli:1.19-74-FABRIC"
+    //modImplementation "vazkii.patchouli:Patchouli:1.20-74-FABRIC"
+    implementation 'com.codingrodent.microprocessor:Z80Processor:4.2.0'
 }
 
 processResources {

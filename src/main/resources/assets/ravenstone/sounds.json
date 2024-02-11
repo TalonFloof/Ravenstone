@@ -63,14 +63,9 @@
     },
     "hard_drive_seek": {
         "sounds": [
-            "ravenstone:hard_drive_seek1",
             "ravenstone:hard_drive_seek2",
             "ravenstone:hard_drive_seek3",
-            "ravenstone:hard_drive_seek4"
-        ]
-    },
-    "hard_drive_seek_short": {
-        "sounds": [
+            "ravenstone:hard_drive_seek4",
             "ravenstone:hard_drive_seek_short"
         ]
     },

@@ -12,12 +12,16 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
 import sh.talonfox.ravenstone.blocks.BlockRegister;
 import sh.talonfox.ravenstone.client.HardDriveScreen;
+
+import java.io.File;
+import java.util.Objects;
 
 public class HarddriveBlock extends PeripheralBlock {
     public static final BooleanProperty LIGHT = BooleanProperty.of("light");
@@ -43,6 +47,17 @@ public class HarddriveBlock extends PeripheralBlock {
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
         return world.isClient() ? null : checkType(type, BlockRegister.RAVEN_HARDDRIVE_ENTITY, HarddriveBlockEntity::tick);
+    }
+
+    @Override
+    public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean a) {
+        if (state.getBlock() != newState.getBlock()) {
+            if(world != null) {
+                var bent = ((HarddriveBlockEntity)Objects.requireNonNull(world.getBlockEntity(pos)));
+                new File(Objects.requireNonNull(world.getServer()).getSavePath(WorldSavePath.ROOT).toAbsolutePath() + "/disks/" + bent.id.toString() + ".bin").delete();
+            }
+        }
+        super.onStateReplaced(state, world, pos, newState, a);
     }
 
     @Override

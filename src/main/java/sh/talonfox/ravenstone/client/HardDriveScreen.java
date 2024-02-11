@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -23,57 +24,53 @@ public class HardDriveScreen extends Screen {
         BlockEntity = blockEntity;
     }
 
-    public void drawBackground(MatrixStack matrices) {
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, TEXTURE);
+    public void drawBackground(DrawContext d) {
         int x = (width-138)/2;
         int y = (height-89)/2;
-        drawTexture(matrices,x,y,138,89,0F,0F,138,89,256,256);
-        matrices.push();
-        matrices.scale(0.5F,0.5F,1F);
-        textRenderer.draw(matrices,"Hard Drive",(x+4)*2F,(y+4)*2F,0xFFF0F0F0);
-        matrices.pop();
+        d.drawTexture(TEXTURE,x,y,138,89,0F,0F,138,89,256,256);
+        d.getMatrices().push();
+        d.getMatrices().scale(0.5F,0.5F,1F);
+        d.drawText(textRenderer,"Hard Drive",(int)((x+4)*2F),(int)((y+4)*2F),0xFFF0F0F0,false);
+        d.getMatrices().pop();
         RenderSystem.setShaderTexture(0, TEXTURE);
         for(int i=0;i<4;i++) {
             int invI = 3-i;
             int switchX = ((width-64)/2)+(invI*16);
             int switchY = (height+36)/2;
             if(i == 2) {
-                drawTexture(matrices, switchX, switchY, 16, 16, 138F + (BlockEntity.isReady ? 8F : 0F), 0F, 8, 8, 256, 256);
+                d.drawTexture(TEXTURE, switchX, switchY, 16, 16, 138F + (BlockEntity.isReady ? 8F : 0F), 0F, 8, 8, 256, 256);
             } else {
-                drawTexture(matrices, switchX, switchY, 16, 16, 138F + ((BlockEntity.Flags & (1 << i)) != 0 ? 8F : 0F), 0F, 8, 8, 256, 256);
+                d.drawTexture(TEXTURE, switchX, switchY, 16, 16, 138F + ((BlockEntity.Flags & (1 << i)) != 0 ? 8F : 0F), 0F, 8, 8, 256, 256);
             }
             switch(i) {
                 case 0 -> {
-                    matrices.push();
-                    matrices.scale(0.5F,0.5F,1F);
-                    drawCenteredText(matrices,textRenderer,"FAULT",(switchX*2)+16,(switchY*2)-24,0xFFF0F0F0);
-                    drawCenteredText(matrices,textRenderer,"RESET",(switchX*2)+16,(switchY*2)-16,0xFFF0F0F0);
-                    matrices.pop();
+                    d.getMatrices().push();
+                    d.getMatrices().scale(0.5F,0.5F,1F);
+                    d.drawCenteredTextWithShadow(textRenderer,"FAULT",(switchX*2)+16,(switchY*2)-24,0xFFF0F0F0);
+                    d.drawCenteredTextWithShadow(textRenderer,"RESET",(switchX*2)+16,(switchY*2)-16,0xFFF0F0F0);
+                    d.getMatrices().pop();
                 }
                 case 1 -> {
-                    matrices.push();
-                    matrices.scale(0.5F,0.5F,1F);
-                    drawCenteredText(matrices,textRenderer,"WRITE",(switchX*2)+16,(switchY*2)-24,0xFFF0F0F0);
-                    drawCenteredText(matrices,textRenderer,"PROT",(switchX*2)+16,(switchY*2)-16,0xFFF0F0F0);
-                    matrices.pop();
+                    d.getMatrices().push();
+                    d.getMatrices().scale(0.5F,0.5F,1F);
+                    d.drawCenteredTextWithShadow(textRenderer,"WRITE",(switchX*2)+16,(switchY*2)-24,0xFFF0F0F0);
+                    d.drawCenteredTextWithShadow(textRenderer,"PROT",(switchX*2)+16,(switchY*2)-16,0xFFF0F0F0);
+                    d.getMatrices().pop();
                 }
                 case 2 -> {
-                    matrices.push();
-                    matrices.scale(0.5F,0.5F,1F);
-                    drawCenteredText(matrices,textRenderer,"READY",(switchX*2)+16,(switchY*2)-16,0xFFF0F0F0);
-                    matrices.pop();
+                    d.getMatrices().push();
+                    d.getMatrices().scale(0.5F,0.5F,1F);
+                    d.drawCenteredTextWithShadow(textRenderer,"READY",(switchX*2)+16,(switchY*2)-16,0xFFF0F0F0);
+                    d.getMatrices().pop();
                 }
                 case 3 -> {
-                    matrices.push();
-                    matrices.scale(0.5F,0.5F,1F);
-                    drawCenteredText(matrices,textRenderer,"START",(switchX*2)+16,(switchY*2)-24,0xFFF0F0F0);
-                    drawCenteredText(matrices,textRenderer,"STOP",(switchX*2)+16,(switchY*2)-16,0xFFF0F0F0);
-                    matrices.pop();
+                    d.getMatrices().push();
+                    d.getMatrices().scale(0.5F,0.5F,1F);
+                    d.drawCenteredTextWithShadow(textRenderer,"START",(switchX*2)+16,(switchY*2)-24,0xFFF0F0F0);
+                    d.drawCenteredTextWithShadow(textRenderer,"STOP",(switchX*2)+16,(switchY*2)-16,0xFFF0F0F0);
+                    d.getMatrices().pop();
                 }
             }
-            RenderSystem.setShaderTexture(0, TEXTURE);
         }
     }
 
@@ -102,10 +99,10 @@ public class HardDriveScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.render(matrices, mouseX, mouseY, delta);
-        renderBackground(matrices);
-        drawBackground(matrices);
+    public void render(DrawContext d, int mouseX, int mouseY, float delta) {
+        super.render(d, mouseX, mouseY, delta);
+        renderBackground(d);
+        drawBackground(d);
     }
 
     @Override

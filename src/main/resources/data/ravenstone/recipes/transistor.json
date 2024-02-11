@@ -6,13 +6,13 @@
     "I I"
   ],
   "key": {
-    "I": {"item": "minecraft:iron_ingot"},
+    "I": {"item": "minecraft:iron_nugget"},
     "G": {"item": "minecraft:gold_nugget"},
     "R": {"item": "minecraft:redstone"},
     "C": {"item": "minecraft:comparator"}
   },
   "result": {
     "item": "ravenstone:transistor",
-    "count": 8
+    "count": 16
   }
 }

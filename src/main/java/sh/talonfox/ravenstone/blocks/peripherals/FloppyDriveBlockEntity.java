@@ -50,6 +50,7 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
     private int TrackNumber = 0;
     private int CurrentTrack = 63;
     private int FinishDelay = -1;
+    private int readsBeforeWait = 1;
     private byte[] Buffer = new byte[128];
 
     public FloppyDriveBlockEntity(BlockPos pos, BlockState state) {
@@ -192,6 +193,27 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     }
                     blockEntity.Flags &= ~0x20;
                     blockEntity.Flags |= (state.get(FloppyDriveBlock.LIGHT) ? 0x20 : 0);
+                } else if(blockEntity.Command == 0x80 && blockEntity.readsBeforeWait == 0) { // Read
+                    blockEntity.readsBeforeWait = 1;
+                    blockEntity.Flags &= ~1;
+                    if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.SectorNumber < 32) {
+                        if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
+                            blockEntity.Flags |= 0x10;
+                        } else {
+                            var sec = ((FloppyDisk)blockEntity.stack.getItem()).readSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber * 32) + blockEntity.SectorNumber);
+                            blockEntity.Buffer = Arrays.copyOf(sec, 128);
+                        }
+                    }
+                } else if(blockEntity.Command == 0xA0 && blockEntity.readsBeforeWait == 0) { // Write
+                    blockEntity.readsBeforeWait = 1;
+                    blockEntity.Flags &= ~1;
+                    if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.SectorNumber < 32) {
+                        if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
+                            blockEntity.Flags |= 0x10;
+                        } else {
+                            ((FloppyDisk)blockEntity.stack.getItem()).writeSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber * 32) + blockEntity.SectorNumber, blockEntity.Buffer);
+                        }
+                    }
                 } else if(blockEntity.Command == 0xC4) { // Read Label
                     if (state.get(FloppyDriveBlock.LIGHT)) {
                         String name = ((FloppyDisk) blockEntity.stack.getItem()).getLabel(blockEntity.stack);
@@ -249,7 +271,8 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     Arrays.fill(Buffer, (byte)0);
                 } else if((Flags & 1) == 0 && data != 0) {
                     //Ravenstone.LOGGER.info("Command: 0x{} Track: 0x{} Sector: 0x{}", Integer.toHexString(Byte.toUnsignedInt(data)), Integer.toHexString(TrackNumber), Integer.toHexString(SectorNumber));
-                    if(Command == 0x80) { // Read
+                    if(Byte.toUnsignedInt(data) == 0x80 && readsBeforeWait > 0) { // Read
+                        readsBeforeWait--;
                         Flags = 0;
                         if (this.getCachedState().get(FloppyDriveBlock.LIGHT) && SectorNumber < 32) {
                             if (TrackNumber != CurrentTrack) {
@@ -259,7 +282,8 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                                 Buffer = Arrays.copyOf(sec, 128);
                             }
                         }
-                    } else if(Command == 0xA0) { // Write
+                    } else if(Byte.toUnsignedInt(data) == 0xA0 && readsBeforeWait > 0) { // Write
+                        readsBeforeWait--;
                         Flags = 0;
                         if (this.getCachedState().get(FloppyDriveBlock.LIGHT) && SectorNumber < 32) {
                             if (TrackNumber != CurrentTrack) {

@@ -120,7 +120,7 @@ void main() {
         SendDisketteCommand(0x80); /* Read Sector 0 on Track 0 */
         int hasData = 0;
         for(i=0;i<128;i++) {
-            if(((unsigned char*)0xa2000000)[i] != 0) {
+            if(*((unsigned char*)(0xa2000000+i))) {
                 hasData = 1;
                 break;
             }

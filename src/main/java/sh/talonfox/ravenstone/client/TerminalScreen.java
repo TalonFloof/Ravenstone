@@ -3,6 +3,7 @@ package sh.talonfox.ravenstone.client;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -22,54 +23,48 @@ public class TerminalScreen extends Screen {
         super(title);
         BlockEntity = blockEntity;
     }
-    private void drawBackground(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        fill(matrices, 0, 0, 640, 400, 0xFF001B13);
+    private void drawBackground(DrawContext d, int mouseX, int mouseY, float delta) {
+        d.fill(0, 0, 640, 400, 0xFF001B13);
     }
 
-    private void drawScreen(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, CHARSET);
+    private void drawScreen(DrawContext d, int mouseX, int mouseY, float delta) {
         for(int y=0; y < 50; y++) {
             for(int x=0; x < 80; x++) {
                 int val = Byte.toUnsignedInt(BlockEntity.ScreenBuffer[y*80+x]);
                 if(val != 0x20) {
                     int highNibble = (val & 0xF0) >> 4;
                     int lowNibble = val & 0xF;
-                    drawTexture(matrices, x * 8, y * 8, 8, 8, (float) (lowNibble * 8), (float) (highNibble * 8), 8, 8, 128, 128);
+                    d.drawTexture(CHARSET, x * 8, y * 8, 8, 8, (float) (lowNibble * 8), (float) (highNibble * 8), 8, 8, 128, 128);
                 }
             }
         }
     }
 
-    private void drawCursor(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    private void drawCursor(DrawContext d, int mouseX, int mouseY, float delta) {
         if(Ticks%20<10) {
             int alpha = (int)(((float)Math.min(2,Ticks%20) / 2F) * 255) << 24;
-            fill(matrices, BlockEntity.CursorX * 8, BlockEntity.CursorY * 8, (BlockEntity.CursorX * 8) + 7, (BlockEntity.CursorY * 8) + 7, 0x00d187 | alpha);
+            d.fill(BlockEntity.CursorX * 8, BlockEntity.CursorY * 8, (BlockEntity.CursorX * 8) + 7, (BlockEntity.CursorY * 8) + 7, 0x00d187 | alpha);
         } else {
             int alpha = (int)(((float)Math.max(0,(5-((Ticks%20)-10))) / 5F) * 255) << 24;
-            fill(matrices, BlockEntity.CursorX * 8, BlockEntity.CursorY * 8, (BlockEntity.CursorX * 8) + 7, (BlockEntity.CursorY * 8) + 7, 0x00d187 | alpha);
+            d.fill(BlockEntity.CursorX * 8, BlockEntity.CursorY * 8, (BlockEntity.CursorX * 8) + 7, (BlockEntity.CursorY * 8) + 7, 0x00d187 | alpha);
         }
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.render(matrices, mouseX, mouseY, delta);
-        renderBackground(matrices);
-        matrices.push();
-        matrices.scale(0.5F, 0.5F, 1F);
-        matrices.translate(((width * 2) - 640) / 2, ((height * 2) - 400) / 2, 0);
-        drawBackground(matrices, mouseX, mouseY, delta);
-        matrices.push();
-        matrices.translate(-24F,-24F,0);
-        RenderSystem.setShaderTexture(0, FRAME);
-        drawTexture(matrices,0,0,640+48,400+48,0F,0F,350,230,350,230);
-        matrices.pop();
-        drawScreen(matrices, mouseX, mouseY, delta);
-        drawCursor(matrices, mouseX, mouseY, delta);
-        matrices.pop();
+    public void render(DrawContext d, int mouseX, int mouseY, float delta) {
+        super.render(d, mouseX, mouseY, delta);
+        renderBackground(d);
+        d.getMatrices().push();
+        d.getMatrices().scale(0.5F, 0.5F, 1F);
+        d.getMatrices().translate(((width * 2) - 640) / 2, ((height * 2) - 400) / 2, 0);
+        drawBackground(d, mouseX, mouseY, delta);
+        d.getMatrices().push();
+        d.getMatrices().translate(-24F,-24F,0);
+        d.drawTexture(FRAME,0,0,640+48,400+48,0F,0F,350,230,350,230);
+        d.getMatrices().pop();
+        drawScreen(d, mouseX, mouseY, delta);
+        drawCursor(d, mouseX, mouseY, delta);
+        d.getMatrices().pop();
     }
 
     @Override

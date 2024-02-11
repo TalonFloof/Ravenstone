@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
@@ -22,24 +23,20 @@ public class BusIDScreen extends Screen {
         super(title);
         BlockEntity = blockEntity;
     }
-    public void drawBackground(MatrixStack matrices) {
+    public void drawBackground(DrawContext d) {
         int busID = BlockEntity.getBusID();
-        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.setShaderTexture(0, TEXTURE);
         int x = (width-138)/2;
         int y = (height-89)/2;
-        drawTexture(matrices,x,y,138,89,0F,0F,138,89,256,256);
-        drawCenteredText(matrices,textRenderer,Integer.toString(busID),(x+69),(y+89-12),0xFFF0F0F0);
-        matrices.push();
-        matrices.scale(0.5F,0.5F,1F);
-        textRenderer.draw(matrices,"Set Bus ID",(x+4)*2F,(y+4)*2F,0xFFF0F0F0);
-        matrices.pop();
-        RenderSystem.setShaderTexture(0, TEXTURE);
+        d.drawTexture(TEXTURE,x,y,138,89,0F,0F,138,89,256,256);
+        d.drawCenteredTextWithShadow(textRenderer,Integer.toString(busID),(x+69),(y+89-12),0xFFF0F0F0);
+        d.getMatrices().push();
+        d.getMatrices().scale(0.5F,0.5F,1F);
+        d.drawText(textRenderer,"Set Bus ID",(int)((x+4)*2F),(int)((y+4)*2F),0xFFF0F0F0,true);
+        d.getMatrices().pop();
         for(int i=0;i<8;i++) {
             int invI = 7-i;
             int switchX = ((width-128)/2)+(invI*16);
-            drawTexture(matrices,switchX,(height-36)/2,16,36,138F+(i%8<4?0F:8F)+((busID&(1<<i))!=0?16F:0F),0F,8,18,256,256);
+            d.drawTexture(TEXTURE,switchX,(height-36)/2,16,36,138F+(i%8<4?0F:8F)+((busID&(1<<i))!=0?16F:0F),0F,8,18,256,256);
         }
     }
 
@@ -67,10 +64,10 @@ public class BusIDScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        super.render(matrices, mouseX, mouseY, delta);
-        renderBackground(matrices);
-        drawBackground(matrices);
+    public void render(DrawContext d, int mouseX, int mouseY, float delta) {
+        super.render(d, mouseX, mouseY, delta);
+        renderBackground(d);
+        drawBackground(d);
     }
     @Override
     public boolean shouldPause() {return false;}
