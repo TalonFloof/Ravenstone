@@ -9,5 +9,9 @@ static void BindToDevice(unsigned char busID) {
 
 unsigned char TeletypeRawIn(int busID) {
     BindToDevice(devID);
-    *((unsigned char*)0xa2000000)
+    int c = 0;
+    while(c == 0) {
+        c = *((unsigned char*)0xa2000004);
+    }
+    return c;
 }
