@@ -33,6 +33,7 @@ public class R3000 implements Processor {
     public int Cause = 0;
     public int EPC = 0;
     public int StallCycles = 0;
+    public int Timer = 0;
 
     public R3000() {}
 
@@ -103,6 +104,7 @@ public class R3000 implements Processor {
 
     @Override
     public void next(ProcessorHost host) {
+        Timer = (Timer + 1) % 100;
         Host = host;
         if (StallCycles > 0 && Wait) {
             StallCycles = 0;
@@ -433,7 +435,9 @@ public class R3000 implements Processor {
         } else if(uaddr == 0xa1000000L) {
             return BusOffset;
         } else if(uaddr == 0xa1000001L) {
-            return Host.isPeripheralConnected()?0:0x80;
+            return Host.isPeripheralConnected() ? 0 : 0x80;
+        } else if(uaddr == 0xa1000002L) {
+            return Timer;
         } else if(uaddr >= 0xa2000000L && uaddr <= 0xa200ffffL) {
             return Byte.toUnsignedInt(Host.busRead((byte) BusOffset, (short)(uaddr - 0xa2000000L)));
         } else if(uaddr >= 0xbfc00000L && uaddr <= 0xbfffffffL) {

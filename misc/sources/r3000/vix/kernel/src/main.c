@@ -1,3 +1,10 @@
+#include "backend.h"
+
 void kmain() {
-    BackendInitialize();
+    MultiInit();
+    for(;;) {}
+}
+
+void kcall() {
+
 }

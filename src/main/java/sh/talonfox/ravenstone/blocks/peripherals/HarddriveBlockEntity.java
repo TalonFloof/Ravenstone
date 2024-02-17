@@ -41,6 +41,8 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
     public boolean shouldFlush = false;
     public boolean shouldRead = true;
     public int soundTick = 0;
+    private int readsBeforeWait = 1;
+    private boolean readBeforeTick = false;
 
     public HarddriveBlockEntity(BlockPos pos, BlockState state) {
         super(BlockRegister.RAVEN_HARDDRIVE_ENTITY, pos, state, 4);
@@ -78,13 +80,14 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
             return;
         if((blockEntity.Flags & 0x8) != 0) {
             if(blockEntity.spinTicks == 0) {
-                world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_STARTUP_EVENT, SoundCategory.BLOCKS, 0.5f, 1f);
+                world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_STARTUP_EVENT, SoundCategory.BLOCKS, 0.4f, 1f);
             } else if(blockEntity.spinTicks >= 600) {
                 if(blockEntity.command != 0) {
                     if(blockEntity.command == 1) {
+                        blockEntity.readsBeforeWait = 1;
                         world.setBlockState(pos,state.with(LIGHT,true));
                         if(blockEntity.soundTick == 0) {
-                            world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_SEEK_EVENT, SoundCategory.BLOCKS, 0.5f, 1f);
+                            world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_SEEK_EVENT, SoundCategory.BLOCKS, 0.4f, 1f);
                             blockEntity.soundTick = 2;
                         }
                         if(blockEntity.shouldRead) {
@@ -94,9 +97,10 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
                         Arrays.copyOfRange(blockEntity.data, (blockEntity.sector * 128), (blockEntity.sector * 128) + 128);
                         blockEntity.command = 0;
                     } else if(blockEntity.command == 2) {
+                        blockEntity.readsBeforeWait = 1;
                         world.setBlockState(pos,state.with(LIGHT,true));
                         if(blockEntity.soundTick == 0) {
-                            world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_SEEK_EVENT, SoundCategory.BLOCKS, 1f, 1f);
+                            world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_SEEK_EVENT, SoundCategory.BLOCKS, 0.4f, 1f);
                             blockEntity.soundTick = 2;
                         }
                         if(!blockEntity.shouldFlush) {
@@ -106,13 +110,16 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
                         blockEntity.command = 0;
                     }
                 } else if(state.get(LIGHT)) {
-                    world.setBlockState(pos,state.with(LIGHT,false));
+                    if(!blockEntity.readBeforeTick)
+                        world.setBlockState(pos,state.with(LIGHT,false));
+                    else
+                        blockEntity.readBeforeTick = false;
                 }
                 if(blockEntity.soundTick > 0) {
                     blockEntity.soundTick--;
                 }
                 if((blockEntity.spinTicks % 20) == 0) {
-                    world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_IDLE_EVENT, SoundCategory.BLOCKS, 0.5f, 1f);
+                    world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_IDLE_EVENT, SoundCategory.BLOCKS, 0.4f, 1f);
                 }
             }
             if(blockEntity.isReady && blockEntity.spinTicks < 600) {
@@ -131,7 +138,7 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
             if((blockEntity.spinTicks % 20) != 0 && blockEntity.spinTicks >= 600) {
                 blockEntity.spinTicks += 1;
             } else if(blockEntity.spinTicks >= 600) {
-                world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_SPINDOWN_EVENT, SoundCategory.BLOCKS, 0.5f, 1f);
+                world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_SPINDOWN_EVENT, SoundCategory.BLOCKS, 0.4f, 1f);
                 blockEntity.spinTicks = 0;
             } else if(blockEntity.spinTicks > 0) {
                 blockEntity.spinTicks += 1;
@@ -146,7 +153,36 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
     public void storeData(short at, byte data) {
         switch (Short.toUnsignedInt(at)) {
             case 0x80 -> { // Command
-                command = data;
+                if (readsBeforeWait > 0) {
+                    if (data == 1) {
+                        readsBeforeWait--;
+                        readBeforeTick = true;
+                        world.setBlockState(pos, getCachedState().with(LIGHT, true));
+                        if (soundTick == 0) {
+                            world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_SEEK_EVENT, SoundCategory.BLOCKS, 0.4f, 1f);
+                            soundTick = 2;
+                        }
+                        if (shouldRead) {
+                            read(new File(Objects.requireNonNull(world.getServer()).getSavePath(WorldSavePath.ROOT).toAbsolutePath() + "/disks/" + id.toString() + ".bin"));
+                            shouldRead = false;
+                        }
+                        Arrays.copyOfRange(this.data, (sector * 128), (sector * 128) + 128);
+                    } else if (data == 2) {
+                        readsBeforeWait--;
+                        readBeforeTick = true;
+                        world.setBlockState(pos, getCachedState().with(LIGHT, true));
+                        if (soundTick == 0) {
+                            world.playSound(null, pos, SoundEventRegister.HARD_DRIVE_SEEK_EVENT, SoundCategory.BLOCKS, 0.4f, 1f);
+                            soundTick = 2;
+                        }
+                        if (!shouldFlush) {
+                            shouldFlush = true;
+                        }
+                        Arrays.copyOfRange(this.data, (sector * 128), (sector * 128) + 128);
+                    }
+                } else {
+                    command = data;
+                }
             }
             case 0x84 -> {
                 sector &= 0xffffff00;

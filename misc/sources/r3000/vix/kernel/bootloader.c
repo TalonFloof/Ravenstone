@@ -106,7 +106,7 @@ void main() {
     SendDisketteCommand(0x21);
     SendDisketteCommand(0x01);
     int a = 0x80000000;
-    for(int i=1; i < 16; i++) {
+    for(int i=1; i < 8; i++) {
         SetDisketteTrack(i-1);
         SetDisketteSector(i);
         SendDisketteCommand(0x10);
