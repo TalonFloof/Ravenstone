@@ -153,7 +153,7 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
     public void storeData(short at, byte data) {
         switch (Short.toUnsignedInt(at)) {
             case 0x80 -> { // Command
-                if (readsBeforeWait > 0) {
+                if (readsBeforeWait > 0 && spinTicks >= 600) {
                     if (data == 1) {
                         readsBeforeWait--;
                         readBeforeTick = true;
@@ -196,6 +196,11 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
                 sector &= 0xff00ffff;
                 sector |= Byte.toUnsignedInt(data) << 16;
             }
+            default -> {
+                if(Short.toUnsignedInt(at) < 0x80) {
+                    buffer[Short.toUnsignedInt(at)] = data;
+                }
+            }
         }
     }
 
@@ -214,8 +219,14 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
             case 0x86 -> {
                 return (byte)((sector & 0xFF0000) >> 16);
             }
+            default -> {
+                if(Short.toUnsignedInt(at) < 0x80) {
+                    return buffer[Short.toUnsignedInt(at)];
+                } else {
+                    return 0;
+                }
+            }
         }
-        return 0;
     }
 
     @Override
@@ -233,6 +244,7 @@ public class HarddriveBlockEntity extends PeripheralBlockEntity {
         tag.putUuid("UUID", id);
         if(!world.isClient() && shouldFlush) {
             write(new File(Objects.requireNonNull(world.getServer()).getSavePath(WorldSavePath.ROOT).toAbsolutePath() + "/disks/" + id.toString() + ".bin"));
+            shouldFlush = false;
         }
     }
 }

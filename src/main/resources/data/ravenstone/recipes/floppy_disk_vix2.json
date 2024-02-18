@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {"item": "ravenstone:floppy_disk_vix1"},
+    {"item": "minecraft:redstone"}
+  ],
+  "result": {
+    "item": "ravenstone:floppy_disk_vix2",
+    "count": 1
+  }
+}

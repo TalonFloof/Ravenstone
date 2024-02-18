@@ -1,4 +1,5 @@
 #include "string.h"
+#include "fs.h"
 
 static int currentBusID = 0;
 
@@ -20,12 +21,20 @@ void TeletypeRawOut(int busID, unsigned char c) {
         *((unsigned char*)0xa2000001) -= 1;
         *((unsigned char*)0xa2000010+(*((unsigned char*)0xa2000001))) = ' ';
     } else if(c == 0xa) {
-        if((*((unsigned char*)0xa2000002)) < 24) {
+        if((*((unsigned char*)0xa2000002)) < 49) {
             (*((unsigned char*)0xa2000000))++;
             (*((unsigned char*)0xa2000002))++;
         } else {
-            // Scroll
+            *((unsigned char*)0xa200000a) = 0;
+            *((unsigned char*)0xa200000b) = 0;
+            *((unsigned char*)0xa2000008) = 0;
+            *((unsigned char*)0xa2000009) = 1;
+            *((unsigned char*)0xa200000c) = 80;
+            *((unsigned char*)0xa200000d) = 49;
+            *((unsigned char*)0xa2000007) = 3;
+            MultiYield();
 
+            memset((void*)0xa2000010,' ',80);
         }
         *((unsigned char*)0xa2000001) = 0;
     } else {
@@ -41,20 +50,22 @@ void TeletypeStringOut(int busID, const char* s) {
     }
 }
 
-int SendDisketteCommand(int cmd) {
-    unsigned char* ptr = (unsigned char*)0xa2000080;
-    *ptr = cmd;
-    asm volatile("nop");
-    while(((*ptr) & 0x1) != 0) {asm volatile("break");}
-    return ((int)(*ptr));
-}
-
-void SetDisketteTrack(unsigned char num) {
-    *((unsigned char*)0xa2000081) = num;
-}
-
-void SetDisketteSector(unsigned char num) {
-    *((unsigned char*)0xa2000082) = num;
+int SendDisketteCommand(int diskID, int track, int sector, int cmd) {
+    BindToDevice(disks[diskID]);
+    *((unsigned char*)0xa2000081) = track;
+    *((unsigned char*)0xa2000082) = sector;
+    if(diskTimeout[diskID] == 0 && cmd != 0x20) {
+        *((volatile unsigned char*)0xa2000080) = 0x21;
+        while(((*((volatile unsigned char*)0xa2000080)) & 0x1) != 0) {MultiYield();}
+        diskTimeout[diskID] = 20;
+    } else if(cmd != 0x20) {
+        diskTimeout[diskID] = 20;
+    }
+    *((volatile unsigned char*)0xa2000080) = cmd;
+    if(cmd != 0x20) {
+        while(((*((volatile unsigned char*)0xa2000080)) & 0x1) != 0) {MultiYield();}
+    }
+    return ((int)(*((volatile unsigned char*)0xa2000080)));
 }
 
 void WriteHDSector(int busID, int sector, void* data) {

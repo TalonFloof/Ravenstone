@@ -5,6 +5,7 @@
 typedef struct {
     char active;
     unsigned char terminalID;
+    unsigned char curDisk;
     User userInfo;
     unsigned int programStart;
     unsigned int programLength;

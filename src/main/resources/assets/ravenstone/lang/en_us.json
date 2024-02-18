@@ -12,5 +12,6 @@
     "item.ravenstone.transistor": "Transistor",
     "item.ravenstone.r3000_processor": "MIPS R3000 Processor",
     "item.ravenstone.floppy_disk": "Floppy Disk",
-    "item.ravenstone.floppy_disk_vix1": "Floppy Disk"
+    "item.ravenstone.floppy_disk_vix1": "Floppy Disk",
+    "item.ravenstone.floppy_disk_vix2": "Floppy Disk"
 }

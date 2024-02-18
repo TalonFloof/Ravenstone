@@ -20,17 +20,7 @@ void *memcpy(void *dest, const void *src, int count) {
 }
 
 void memset(void *dest, unsigned char c, int count) {
-    unsigned int large = c | (c << 8) | (c << 16) | (c << 24);
-    unsigned char *dp = (unsigned char *)dest;
-    int i;
-    for(i = count; i >= 4; i = count) {
-        *((unsigned int*)dp) = large;
-        count -= 4;
-    }
-    for (i = count; i > 0; i = count) {
-        *(dp++) = c;
-        count--;
-    }
+    while (count--) *(unsigned char*)dest++ = c;
 }
 
 int strlen(const char* s) {
