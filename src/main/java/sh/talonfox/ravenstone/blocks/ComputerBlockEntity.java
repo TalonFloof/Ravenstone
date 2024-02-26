@@ -16,6 +16,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
+import sh.talonfox.ravenstone.Ravenstone;
 import sh.talonfox.ravenstone.blocks.peripherals.PeripheralBlockEntity;
 import sh.talonfox.ravenstone.processor.Processor;
 import sh.talonfox.ravenstone.processor.ProcessorHost;
@@ -119,6 +120,10 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
             return 0;
         int chunk = ((int)at)/1024;
         int offset = ((int)at)%1024;
+        if(chunk < 0) {
+            Ravenstone.LOGGER.warn("UNUSUAL ADDRESS: 0x"+Integer.toHexString((int)at));
+            return 0;
+        }
         byte[] chunkDat = ((NbtByteArray)RAM.get(chunk)).getByteArray();
         return chunkDat.length > 0 ? chunkDat[offset] : 0;
     }
@@ -129,6 +134,10 @@ public class ComputerBlockEntity extends PeripheralBlockEntity implements Proces
             return;
         int chunk = ((int)at)/1024;
         int offset = ((int)at)%1024;
+        if(chunk < 0) {
+            Ravenstone.LOGGER.warn("UNUSUAL ADDRESS: 0x"+Integer.toHexString((int)at));
+            return;
+        }
         NbtByteArray chunkDat = ((NbtByteArray)RAM.get(chunk));
         if(chunkDat.size() == 0) {
             chunkDat.addAll(Collections.nCopies(1024,NbtByte.of((byte)0)));

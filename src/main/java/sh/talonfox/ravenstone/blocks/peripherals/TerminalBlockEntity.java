@@ -69,6 +69,14 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
             case 0x0d -> { // Blit Height
                 return (byte)BlitHeight;
             }
+            case 0x80 -> { // TTY Status
+                for(int i=0;i<16;i++) {
+                    if(KeyboardBuffer[(15-i)] != 0) {
+                        return ((byte)0xff);
+                    }
+                }
+                return 0;
+            }
             default -> {
                 if(at >= 0x10 && at <= 0x5F) {
                     return ScreenBuffer[((Row*80)+(at-0x10))];
@@ -110,13 +118,68 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
             case 0x0d -> { // Blit Height
                 BlitHeight = data;
             }
+            case 0x80 -> { // TTY Write
+                if(data == 8) {
+                    if(CursorX == 0) {
+                        CursorX = 79;
+                        CursorY--;
+                    } else {
+                        CursorX--;
+                    }
+                    ScreenBuffer[(CursorY*80)+CursorX] = ' ';
+                } else if(data == '\n') {
+                    if(CursorY < 49) {
+                        CursorX = 0;
+                        CursorY++;
+                    } else {
+                        for(int y=0; y < 49; y++) {
+                            for(int x=0; x < 80; x++) {
+                                ScreenBuffer[y*80+x] = ScreenBuffer[(y+1)*80+x];
+                            }
+                        }
+                        for(int x=0; x < 80; x++) {
+                            ScreenBuffer[(49*80)+x] = ' ';
+                        }
+                        CursorX = 0;
+                    }
+                } else {
+                    ScreenBuffer[(CursorY*80)+CursorX] = data;
+                    if(CursorX == 79) {
+                        if(CursorY < 49) {
+                            CursorX = 0;
+                            CursorY++;
+                        } else {
+                            for(int y=0; y < 49; y++) {
+                                for(int x=0; x < 80; x++) {
+                                    ScreenBuffer[y*80+x] = ScreenBuffer[(y+1)*80+x];
+                                }
+                            }
+                            for(int x=0; x < 80; x++) {
+                                ScreenBuffer[(49*80)+x] = ' ';
+                            }
+                            CursorX = 0;
+                        }
+                    } else {
+                        CursorX++;
+                    }
+                }
+            }
+            case 0x81 -> { // TTY Reset
+                for(int y=0; y < 50; y++) {
+                    for(int x=0; x < 80; x++) {
+                        ScreenBuffer[y*80+x] = ' ';
+                    }
+                }
+                CursorX = 0;
+                CursorY = 0;
+            }
             default -> {
                 if(at >= 0x10 && at <= 0x5F) {
                     ScreenBuffer[((Row*80)+(at-0x10))] = data;
                 }
             }
         }
-        if((at >= 0 && at <= 3) || (at >= 0x10 && at <= 0x5F)) {
+        if((at >= 0 && at <= 3) || (at >= 0x10 && at <= 0x5F) || (at == 0x80)) {
             // Sync Data to Client(s)
             assert this.world != null;
             this.world.updateListeners(getPos(), this.getCachedState(), this.getCachedState(), 3);

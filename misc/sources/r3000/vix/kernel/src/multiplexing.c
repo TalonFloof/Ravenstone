@@ -3,6 +3,7 @@
 #include "string.h"
 #include "backend.h"
 #include "fs.h"
+#include "user.h"
 
 TaskBlock tasks[16];
 int currentTask;
@@ -13,9 +14,7 @@ __attribute__((noreturn)) void MultiInit() {
     tasks[0].active = 1;
     tasks[0].terminalID = 1;
     tasks[0].curDisk = 0;
-    memcpy(&(tasks[0].userInfo.name),"Admin",6);
-    tasks[0].programStart = 0;
-    tasks[0].programLength = 0;
+    tasks[0].userInfo = (User*)&users[0];
     for(int i=1; i < 16; i++) {
         tasks[i].active = 0;
     }
@@ -119,9 +118,10 @@ void MultiShell() {
                     TeletypeStringOut(terminal, "File Count-> ");
                     MultiTTYPrompt();
                     int files = strtol((char*)&tasks[currentTask].prompt,(void*)0,10);
+                    UserSave();
                     char sector[128];
                     memset(&sector,0,128);
-                    for(int i=0; i < 64; i++) {
+                    for(int i=32; i < (files/4); i++) {
                         WriteHDSector(drive,i,(void*)&sector);
                     }
                     break;
@@ -134,7 +134,7 @@ void MultiShell() {
     TeletypeStringOut(terminal,"S.");
     TeletypeRawOut(terminal,'0'+currentTask);
     TeletypeRawOut(terminal,'/');
-    TeletypeStringOut(terminal,&tasks[currentTask].userInfo.name);
+    TeletypeStringOut(terminal,&tasks[currentTask].userInfo->name);
     TeletypeStringOut(terminal," Ready\n");
     for(;;) {
         if(tasks[currentTask].curDisk == 0)
@@ -156,6 +156,18 @@ void MultiShell() {
                     diskTimeout[a[0]-'A'] = 0;
                 }
             }
+        } else if(strcmp(command,"USERMOD") == 0) {
+            int id = strtol(strsplit((void*)0),(void*)0,10);
+            char* user = strsplit((void*)0);
+            char* pass = strsplit((void*)0);
+            memset(&users[id].name[0],0,8);
+            memcpy(&users[id].name[0],user,strlen(user));
+            memset(&users[id].password[0],0,8);
+            memcpy(&users[id].password[0],pass,strlen(pass));
+        } else if(strcmp(command,"STOP") == 0) {
+            UserSave(drive);
+            TeletypeStringOut(terminal, "It is now safe to turn off your computer.\n");
+            for(;;) { asm volatile ("break"); }
         } else if(strcmp(command,"DIR") == 0 && tasks[currentTask].curDisk > 0) {
             SendDisketteCommand(tasks[currentTask].curDisk-1,0,0,1);
         } else if(strlen(command) == 2 && command[1] == ':') {

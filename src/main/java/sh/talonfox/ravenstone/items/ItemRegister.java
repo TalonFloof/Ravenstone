@@ -13,6 +13,7 @@ public class ItemRegister {
     public static final Item RAVENSTONE_VIX1_FLOPPY_DISK = new FloppyDiskSystem("Vix 1 (Boot)",new FabricItemSettings().maxCount(1));
     public static final Item RAVENSTONE_VIX2_FLOPPY_DISK = new FloppyDiskSystem("Vix 2 (Core Utilities)",new FabricItemSettings().maxCount(1));
     public static final Item RAVENSTONE_R3000_PROCESSOR = new R3000Processor(new FabricItemSettings().maxCount(1));
+    public static final Item RAVENSTONE_Z80_PROCESSOR = new Z80Processor(new FabricItemSettings().maxCount(1));
 
     public static void Initialize() {
         Registry.register(Registries.ITEM, new Identifier("ravenstone", "ravenstone"), RAVENSTONE_CUSTOM_ICON);
@@ -21,5 +22,6 @@ public class ItemRegister {
         Registry.register(Registries.ITEM, new Identifier("ravenstone","floppy_disk_vix1"), RAVENSTONE_VIX1_FLOPPY_DISK);
         Registry.register(Registries.ITEM, new Identifier("ravenstone","floppy_disk_vix2"), RAVENSTONE_VIX2_FLOPPY_DISK);
         Registry.register(Registries.ITEM, new Identifier("ravenstone","r3000_processor"), RAVENSTONE_R3000_PROCESSOR);
+        Registry.register(Registries.ITEM, new Identifier("ravenstone","z80_processor"), RAVENSTONE_Z80_PROCESSOR);
     }
 }

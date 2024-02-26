@@ -17,30 +17,7 @@ unsigned char TeletypeRawIn(int busID) {
 
 void TeletypeRawOut(int busID, unsigned char c) {
     BindToDevice(busID);
-    if(c == 8) {
-        *((unsigned char*)0xa2000001) -= 1;
-        *((unsigned char*)0xa2000010+(*((unsigned char*)0xa2000001))) = ' ';
-    } else if(c == 0xa) {
-        if((*((unsigned char*)0xa2000002)) < 49) {
-            (*((unsigned char*)0xa2000000))++;
-            (*((unsigned char*)0xa2000002))++;
-        } else {
-            *((unsigned char*)0xa200000a) = 0;
-            *((unsigned char*)0xa200000b) = 0;
-            *((unsigned char*)0xa2000008) = 0;
-            *((unsigned char*)0xa2000009) = 1;
-            *((unsigned char*)0xa200000c) = 80;
-            *((unsigned char*)0xa200000d) = 49;
-            *((unsigned char*)0xa2000007) = 3;
-            MultiYield();
-
-            memset((void*)0xa2000010,' ',80);
-        }
-        *((unsigned char*)0xa2000001) = 0;
-    } else {
-        *((unsigned char*)0xa2000010+(*((unsigned char*)0xa2000001))) = c;
-        *((unsigned char*)0xa2000001) += 1;
-    }
+    *((unsigned char*)0xa2000080) = c;
 }
 
 void TeletypeStringOut(int busID, const char* s) {

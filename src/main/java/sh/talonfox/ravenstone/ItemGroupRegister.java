@@ -30,11 +30,12 @@ public class ItemGroupRegister {
                 stacks.add(new ItemStack(BlockRegister.RAVEN_HARDDRIVE_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_FLOPPY_DRIVE_BLOCK));
                 stacks.add(new ItemStack(BlockRegister.RAVEN_RIBBON_CABLE_BLOCK));
-                /*stacks.add(new ItemStack(BlockRegister.RAVEN_16K_UPGRADE_BLOCK));
-                stacks.add(new ItemStack(BlockRegister.RAVEN_32K_UPGRADE_BLOCK));
-                stacks.add(new ItemStack(BlockRegister.RAVEN_64K_UPGRADE_BLOCK));*/
+                /*stacks.add(new ItemStack(BlockRegister.RAVEN_32K_UPGRADE_BLOCK));
+                stacks.add(new ItemStack(BlockRegister.RAVEN_64K_UPGRADE_BLOCK));
+                stacks.add(new ItemStack(BlockRegister.RAVEN_1M_UPGRADE_BLOCK));*/
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_TRANSISTOR));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_R3000_PROCESSOR));
+                stacks.add(new ItemStack(ItemRegister.RAVENSTONE_Z80_PROCESSOR));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_FLOPPY_DISK_USER));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_VIX1_FLOPPY_DISK));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_VIX2_FLOPPY_DISK));

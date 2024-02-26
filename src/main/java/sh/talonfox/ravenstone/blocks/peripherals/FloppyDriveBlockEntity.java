@@ -270,7 +270,7 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     Flags = 0xfe;
                     Arrays.fill(Buffer, (byte)0);
                 } else if((Flags & 1) == 0 && data != 0) {
-                    //Ravenstone.LOGGER.info("Command: 0x{} Track: 0x{} Sector: 0x{}", Integer.toHexString(Byte.toUnsignedInt(data)), Integer.toHexString(TrackNumber), Integer.toHexString(SectorNumber));
+                    Ravenstone.LOGGER.info("Command: 0x{} Track: 0x{} Sector: 0x{}", Integer.toHexString(Byte.toUnsignedInt(data)), Integer.toHexString(TrackNumber), Integer.toHexString(SectorNumber));
                     if(Byte.toUnsignedInt(data) == 0x80 && readsBeforeWait > 0) { // Read
                         readsBeforeWait--;
                         Flags = 0;
