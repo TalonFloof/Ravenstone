@@ -37,8 +37,7 @@ public class ItemGroupRegister {
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_R3000_PROCESSOR));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_Z80_PROCESSOR));
                 stacks.add(new ItemStack(ItemRegister.RAVENSTONE_FLOPPY_DISK_USER));
-                stacks.add(new ItemStack(ItemRegister.RAVENSTONE_VIX1_FLOPPY_DISK));
-                stacks.add(new ItemStack(ItemRegister.RAVENSTONE_VIX2_FLOPPY_DISK));
+                stacks.add(new ItemStack(ItemRegister.RAVENSTONE_CPM_FLOPPY_DISK));
                 //stacks.add(RAVENSTONE_GUIDE);
             }).build();
 }

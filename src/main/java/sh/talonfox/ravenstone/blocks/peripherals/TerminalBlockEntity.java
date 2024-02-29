@@ -119,6 +119,8 @@ public class TerminalBlockEntity extends PeripheralBlockEntity {
                 BlitHeight = data;
             }
             case 0x80 -> { // TTY Write
+                if(data == 0xd)
+                    return;
                 if(data == 8) {
                     if(CursorX == 0) {
                         CursorX = 79;

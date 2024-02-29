@@ -50,6 +50,8 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
     private int TrackNumber = 0;
     private int CurrentTrack = 63;
     private int FinishDelay = -1;
+    private int LightTimeout = 0;
+    private int EngageDelay = -1;
     private int readsBeforeWait = 1;
     private byte[] Buffer = new byte[128];
 
@@ -131,6 +133,20 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
         CurrentTrack = track;
     }
 
+    public boolean EngageHead() {
+        if(this.getCachedState().get(FloppyDriveBlock.HAS_DISK)) {
+            world.setBlockState(pos, this.getCachedState().with(FloppyDriveBlock.LIGHT, true));
+            this.EngageDelay = 2;
+            this.LightTimeout = 10;
+            return true;
+        } else {
+            Flags &= ~9;
+            Flags |= 8;
+            Command = 0;
+            return false;
+        }
+    }
+
     public static void tick(World world, BlockPos pos, BlockState state, FloppyDriveBlockEntity blockEntity) {
         if(world.isClient())
             return;
@@ -145,6 +161,8 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
             blockEntity.spinTicks += 1;
         } else {
             blockEntity.spinTicks = 0;
+            blockEntity.LightTimeout = -1;
+            blockEntity.EngageDelay = -1;
         }
         if(blockEntity.FinishDelay != -1) {
             blockEntity.FinishDelay -= 1;
@@ -152,30 +170,49 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                 blockEntity.Flags &= ~1;
             }
         }
-        if(blockEntity.Command != 0) {
+        if(blockEntity.LightTimeout != -1) {
+            blockEntity.LightTimeout -= 1;
+            if(blockEntity.LightTimeout == -1) {
+                world.setBlockState(pos, state.with(FloppyDriveBlock.LIGHT, false));
+            }
+        }
+        if(blockEntity.EngageDelay != -1) {
+            blockEntity.EngageDelay -= 1;
+        } else if(blockEntity.Command != 0) {
             if(blockEntity.stack.isEmpty()) {
                 blockEntity.Flags &= ~9;
                 blockEntity.Flags |= 8;
             } else {
                 if (blockEntity.Command == 0x01) { // Seek to Track 0
                     if (state.get(FloppyDriveBlock.LIGHT)) {
+                        blockEntity.LightTimeout = 10;
                         blockEntity.Seek(0, state);
                         blockEntity.FinishDelay = 9;
-                    } else {
-                        blockEntity.Flags |= 0x10;
-                        blockEntity.Flags &= ~1;
+                    } else if(!state.get(FloppyDriveBlock.LIGHT)) {
+                        if(blockEntity.EngageHead()) {
+                            return;
+                        }
                     }
                 } else if (blockEntity.Command == 0x10) { // Seek
                     if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.TrackNumber < 64) {
+                        blockEntity.LightTimeout = 10;
                         if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
                             blockEntity.Flags |= 0x10;
                             blockEntity.Flags &= ~1;
                         } else {
                             blockEntity.Seek(blockEntity.SectorNumber, state);
                         }
-                    } else {
+                    } else if(blockEntity.TrackNumber < 64){
+                        blockEntity.LightTimeout = 10;
                         blockEntity.Flags |= 0x10;
                         blockEntity.Flags &= ~1;
+                    } else if(!state.get(FloppyDriveBlock.LIGHT)) {
+                        if(blockEntity.EngageHead()) {
+                            blockEntity.Flags |= 0x1;
+                            return;
+                        } else {
+                            blockEntity.Flags &= ~1;
+                        }
                     }
                 } else if (blockEntity.Command == 0x20) { // Retract Head
                     if (state.get(FloppyDriveBlock.LIGHT)) {
@@ -193,35 +230,55 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                     }
                     blockEntity.Flags &= ~0x20;
                     blockEntity.Flags |= (state.get(FloppyDriveBlock.LIGHT) ? 0x20 : 0);
+                    blockEntity.LightTimeout = 10;
                 } else if(blockEntity.Command == 0x80 && blockEntity.readsBeforeWait == 0) { // Read
                     blockEntity.readsBeforeWait = 1;
                     blockEntity.Flags &= ~1;
                     if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.SectorNumber < 32) {
+                        blockEntity.LightTimeout = 10;
                         if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
                             blockEntity.Flags |= 0x10;
                         } else {
                             var sec = ((FloppyDisk)blockEntity.stack.getItem()).readSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber * 32) + blockEntity.SectorNumber);
                             blockEntity.Buffer = Arrays.copyOf(sec, 128);
                         }
+                    } else if(!state.get(FloppyDriveBlock.LIGHT)) {
+                        if(blockEntity.EngageHead()) {
+                            blockEntity.Flags |= 0x1;
+                            return;
+                        }
                     }
                 } else if(blockEntity.Command == 0xA0 && blockEntity.readsBeforeWait == 0) { // Write
                     blockEntity.readsBeforeWait = 1;
                     blockEntity.Flags &= ~1;
                     if (state.get(FloppyDriveBlock.LIGHT) && blockEntity.SectorNumber < 32) {
+                        blockEntity.LightTimeout = 10;
                         if (blockEntity.TrackNumber != blockEntity.CurrentTrack) {
                             blockEntity.Flags |= 0x10;
                         } else {
                             ((FloppyDisk)blockEntity.stack.getItem()).writeSector(blockEntity.stack, (ServerWorld) world, (blockEntity.TrackNumber * 32) + blockEntity.SectorNumber, blockEntity.Buffer);
                         }
+                    } else if(!state.get(FloppyDriveBlock.LIGHT)) {
+                        if(blockEntity.EngageHead()) {
+                            blockEntity.Flags |= 0x1;
+                            return;
+                        }
                     }
                 } else if(blockEntity.Command == 0xC4) { // Read Label
                     if (state.get(FloppyDriveBlock.LIGHT)) {
+                        blockEntity.LightTimeout = 10;
                         String name = ((FloppyDisk) blockEntity.stack.getItem()).getLabel(blockEntity.stack);
                         blockEntity.Buffer = Arrays.copyOf(name.getBytes(StandardCharsets.US_ASCII), 128);
+                    } else if(!state.get(FloppyDriveBlock.LIGHT)) {
+                        if(blockEntity.EngageHead()) {
+                            blockEntity.Flags |= 0x1;
+                            return;
+                        }
                     }
                     blockEntity.Flags &= ~1;
                 } else if(blockEntity.Command == 0xE4) { // Write Label
                     if (state.get(FloppyDriveBlock.LIGHT)) {
+                        blockEntity.LightTimeout = 10;
                         var length = 128;
                         for (int i = 0; i < 128; i++) {
                             if (blockEntity.Buffer[i] == 0) {
@@ -275,22 +332,32 @@ public class FloppyDriveBlockEntity extends PeripheralBlockEntity {
                         readsBeforeWait--;
                         Flags = 0;
                         if (this.getCachedState().get(FloppyDriveBlock.LIGHT) && SectorNumber < 32) {
+                            LightTimeout = 10;
                             if (TrackNumber != CurrentTrack) {
                                 Flags |= 0x10;
                             } else {
                                 var sec = ((FloppyDisk)stack.getItem()).readSector(stack, (ServerWorld) world, (TrackNumber * 32) + SectorNumber);
                                 Buffer = Arrays.copyOf(sec, 128);
                             }
+                        } else if(!this.getCachedState().get(FloppyDriveBlock.LIGHT)) {
+                            EngageHead();
+                            Command = 0x80;
+                            Flags |= 0x1;
                         }
                     } else if(Byte.toUnsignedInt(data) == 0xA0 && readsBeforeWait > 0) { // Write
                         readsBeforeWait--;
                         Flags = 0;
                         if (this.getCachedState().get(FloppyDriveBlock.LIGHT) && SectorNumber < 32) {
+                            LightTimeout = 10;
                             if (TrackNumber != CurrentTrack) {
                                 Flags |= 0x10;
                             } else {
                                 ((FloppyDisk)stack.getItem()).writeSector(stack, (ServerWorld) world, (TrackNumber * 32) + SectorNumber, Buffer);
                             }
+                        } else if(!this.getCachedState().get(FloppyDriveBlock.LIGHT)) {
+                            EngageHead();
+                            Command = 0x80;
+                            Flags |= 0x1;
                         }
                     } else {
                         Command = Byte.toUnsignedInt(data);

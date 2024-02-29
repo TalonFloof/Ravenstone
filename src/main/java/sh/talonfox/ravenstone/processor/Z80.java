@@ -56,9 +56,10 @@ public class Z80 implements Processor {
         public void IOWrite(int address, int data) {
             int a = address & 0xff;
             if(a == 0) {
-                Ravenstone.LOGGER.info("Bus Switch: 0x"+Integer.toHexString(data));
-                Z80.this.busOffset = data;
-                Z80.this.host.invalidatePeripheral();
+                if(Z80.this.busOffset != data) {
+                    Z80.this.busOffset = data;
+                    Z80.this.host.invalidatePeripheral();
+                }
             } else if(a == 2) {
                 Z80.this.host.beep();
             } else if(a == 3) {

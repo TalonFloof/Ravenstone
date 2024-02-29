@@ -39,8 +39,7 @@ public class Ravenstone implements ModInitializer {
         LOGGER.info("Registering Images...");
         ResourceRegister.RegisterROM("r3000","r3000.bin");
         ResourceRegister.RegisterROM("z80","z80.bin");
-        ResourceRegister.RegisterFloppy("Vix 1 (Boot)","vix1.bin");
-        ResourceRegister.RegisterFloppy("Vix 2 (Core Utilities)","vix2.bin");
+        ResourceRegister.RegisterFloppy("CP/M","cpm.bin");
         ItemGroupRegister.Initialize();
         LOGGER.info("Initialization successful!");
     }

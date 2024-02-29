@@ -6,7 +6,6 @@ bootstrap:
     ld (0xff81), a
     ld hl, booting ; Print "Booting..."
     call print_string
-    call beep      ; Beep
     ;;;; Diskette Boot Procedure ;;;;
     ld a, 0x02
     out (0x00), a
@@ -21,7 +20,7 @@ bootstrap:
     call beep
     jr yield
 commok:
-    ld a, 0x21 ; Engage Head
+    ld a, 0x21
     call floppy_command
     and 0x8
     jr z, diskok
@@ -59,9 +58,12 @@ diskread_next:
     ld (0xff81), a
     jr diskread_loop
 diskread_finish:
-    ld a, 0x20
+    xor a
+    ld (0xff81), a
+    ld (0xff82), a
+    ld a, 0x01
     call floppy_command
-    jp 0xd400
+    jp 0xea00
 yield:
     out (0x03), a
     jr yield
